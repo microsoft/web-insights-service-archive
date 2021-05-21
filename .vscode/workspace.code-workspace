@@ -1,0 +1,91 @@
+{
+    "folders": [
+        {
+            "name": "service-library",
+            "path": "../packages/service-library"
+        },
+        {
+            "name": "azure-services",
+            "path": "../packages/azure-services"
+        },
+        {
+            "name": "storage-documents",
+            "path": "../packages/storage-documents"
+        },
+        {
+            "name": "resource-deployment",
+            "path": "../packages/resource-deployment"
+        },
+        {
+            "name": "api-contracts",
+            "path": "../packages/api-contracts"
+        },
+        {
+            "name": "logger",
+            "path": "../packages/logger"
+        },
+        {
+            "name": "common",
+            "path": "../packages/common"
+        },
+        {
+            "name": "root",
+            "path": "../"
+        }
+    ],
+    "settings": {
+        "editor.formatOnSave": true,
+        "files.eol": "\n",
+        "files.insertFinalNewline": true,
+        "prettier.requireConfig": true,
+        "eslint.validate": ["typescript", "javascript"],
+        "eslint.enable": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": true
+        },
+        "shellformat.effectLanguages": [
+            "shellscript"
+        ],
+        "files.exclude": {
+            "**/node_modules/": true,
+            "**/packages/": true,
+            "**/.git": true,
+            "**/dist": true,
+            "**/out": true,
+            "**/test-results": true
+        },
+        "cSpell.words": [
+            "Configurator",
+            "Finalizer",
+            "Newable",
+            "Rescan",
+            "SARIF",
+            "apify",
+            "backlink",
+            "cout",
+            "coutd",
+            "etag",
+            "filenamify",
+            "injectable",
+            "inversify",
+            "leveldown",
+            "serializable",
+            "typemoq",
+            "unscannable",
+            "upsert"
+        ],
+        "csharp.suppressDotnetRestoreNotification": true
+    },
+    "extensions": {
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "ms-dotnettools.csharp",
+            "esbenp.prettier-vscode",
+            "rbbit.typescript-hero",
+            "foxundermoon.shell-format",
+            "rogalmic.bash-debug",
+            "streetsidesoftware.code-spell-checker",
+            "ms-azuretools.vscode-azurefunctions"
+        ]
+    },
+}
