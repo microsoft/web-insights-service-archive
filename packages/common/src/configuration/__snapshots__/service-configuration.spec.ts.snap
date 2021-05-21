@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ServiceConfiguration verifies custom config 1`] = `
+Object {
+  "logConfig": Object {
+    "logInConsole": Object {
+      "default": true,
+      "doc": "Property to decide if console logging is enabled",
+      "format": "Boolean",
+    },
+  },
+  "queueConfig": Object {
+    "maxQueueSize": Object {
+      "default": 10,
+      "doc": "Maximum message count in scan request queue.",
+      "format": "int",
+    },
+    "messageVisibilityTimeoutInSeconds": Object {
+      "default": 2700,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
+      "format": "int",
+    },
+  },
+}
+`;
+
+exports[`ServiceConfiguration verifies dev config 1`] = `
+Object {
+  "logConfig": Object {
+    "logInConsole": Object {
+      "default": true,
+      "doc": "Property to decide if console logging is enabled",
+      "format": "Boolean",
+    },
+  },
+  "queueConfig": Object {
+    "maxQueueSize": Object {
+      "default": 10,
+      "doc": "Maximum message count in scan request queue.",
+      "format": "int",
+    },
+    "messageVisibilityTimeoutInSeconds": Object {
+      "default": 2700,
+      "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
+      "format": "int",
+    },
+  },
+}
+`;
