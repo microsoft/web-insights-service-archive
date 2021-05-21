@@ -1,0 +1,15 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+node_modules/
+dist/
+test-results/
+
+**/.secrets
+**/.env
+**/*.generated.template.json
+**/*.DS_Store
+**/bin
+**/obj
+
+yarn-error.log
