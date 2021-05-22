@@ -19,6 +19,7 @@ module.exports = {
         '@typescript-eslint/tslint',
         'jest',
         'security',
+        'header',
     ],
     ignorePatterns: ['**/dist/*', '**/node_modules/*'],
     extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:security/recommended'],
@@ -186,6 +187,14 @@ module.exports = {
                     whitespace: [true, 'check-branch', 'check-decl', 'check-operator', 'check-separator', 'check-type'],
                 },
             },
+        ],
+        'header/header': [
+            2,
+            'line',
+            [' Copyright (c) Microsoft Corporation. All rights reserved.', ' Licensed under the MIT License.'],
+            2,
+            ,
+            { lineEndings: 'unix' },
         ],
     },
     overrides: [

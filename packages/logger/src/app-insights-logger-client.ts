@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as appInsights from 'applicationinsights';
 import { inject, injectable } from 'inversify';
 import { isNil, omitBy } from 'lodash';
@@ -27,7 +28,7 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         // this should be set after calling setup
 
         this.appInsightsObject.defaultClient.commonProperties = {
-            ...this.getBatchProperties(),
+            ...this.getDefaultProperties(),
             ...baseProperties,
         };
 
@@ -38,15 +39,12 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         this.initialized = true;
     }
 
-    private getBatchProperties(): { [key: string]: string } {
-        const batchProperties = {
-            batchAccountName: this.currentProcess.env.AZ_BATCH_ACCOUNT_NAME,
-            batchPoolId: this.currentProcess.env.AZ_BATCH_POOL_ID,
-            batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
-            batchTaskId: this.currentProcess.env.AZ_BATCH_TASK_ID,
-            batchNodeId: this.currentProcess.env.AZ_BATCH_NODE_ID,
+    private getDefaultProperties(): { [key: string]: string } {
+        // add common default property from host environment here
+        const properties = {
+            prop: this.currentProcess.env.VAR,
         };
 
-        return omitBy(batchProperties, isNil);
+        return omitBy(properties, isNil);
     }
 }
