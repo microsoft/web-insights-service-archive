@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
@@ -39,16 +40,10 @@ describe(AppInsightsLoggerClient, () => {
         );
 
         envVariables = {
-            AZ_BATCH_POOL_ID: 'pool 1',
-            AZ_BATCH_JOB_ID: 'job 1',
-            AZ_BATCH_TASK_ID: 'task 1',
-            AZ_BATCH_NODE_ID: 'node 1',
+            VAR: 'value',
         };
         commonProperties = {
-            batchPoolId: 'pool 1',
-            batchJobId: 'job 1',
-            batchTaskId: 'task 1',
-            batchNodeId: 'node 1',
+            prop: 'value',
         };
 
         processStub = {} as typeof process;
@@ -91,7 +86,7 @@ describe(AppInsightsLoggerClient, () => {
             expect(testSubject.isInitialized()).toBe(true);
         });
 
-        it('setup without batch properties', async () => {
+        it('setup without common properties', async () => {
             commonProperties = {};
             envVariables = {};
             processStub.env = envVariables;
