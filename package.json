@@ -11,7 +11,6 @@
         "clean": "npx lerna run clean --stream && rimraf dist test-results",
         "cbuild": "npx syncpack fix-mismatches format --indent '    ' && yarn install && npx lerna run cbuild --stream",
         "build": "npx lerna run build --stream",
-        "pack": "npx lerna run pack --stream",
         "test": "npx jest",
         "publish-code-coverage": "npx codecov",
         "lint:check": "npx lerna run lint --stream",
