@@ -10,6 +10,7 @@ describe('listMonorepoPackageNames', () => {
               "azure-services",
               "common",
               "logger",
+              "resource-deployment",
             ]
         `);
     });
