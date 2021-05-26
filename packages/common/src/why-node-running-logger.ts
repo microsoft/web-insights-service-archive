@@ -4,8 +4,6 @@
 import { dump } from 'wtfnode';
 
 export class WhyNodeRunningLogger {
-    constructor(private readonly globalObj = global) {}
-
     private static logHandles(): void {
         WhyNodeRunningLogger.logMessage('Start logging node open handles.');
         dump();
@@ -15,6 +13,8 @@ export class WhyNodeRunningLogger {
     private static logMessage(message: string): void {
         console.log(`[TraceNodeOpenHandles] [${new Date().toUTCString()}] ${message}`);
     }
+
+    constructor(private readonly globalObj = global) {}
 
     public log(): void {
         WhyNodeRunningLogger.logHandles();

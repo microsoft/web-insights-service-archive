@@ -17,6 +17,7 @@ module.exports = {
         'eslint-plugin-prefer-arrow',
         '@typescript-eslint',
         '@typescript-eslint/tslint',
+        'sort-class-members',
         'jest',
         'security',
         'header',
@@ -116,6 +117,7 @@ module.exports = {
         'jsdoc/check-indentation': 'error',
         'jsdoc/no-types': 'error',
         'linebreak-style': 'error',
+        'lines-between-class-members': 'error',
         'max-len': ['error', { code: 140, ignoreTemplateLiterals: true, ignoreStrings: true }],
         'new-parens': 'error',
         'newline-per-chained-call': 'off',
@@ -195,6 +197,21 @@ module.exports = {
             2,
             ,
             { lineEndings: 'unix' },
+        ],
+        'sort-class-members/sort-class-members': [
+            2,
+            {
+                order: [
+                    '[static-properties]',
+                    '[static-methods]',
+                    '[properties]',
+                    '[conventional-private-properties]',
+                    'constructor',
+                    '[methods]',
+                    '[conventional-private-methods]',
+                ],
+                accessorPairPositioning: 'getThenSet',
+            },
         ],
     },
     overrides: [

@@ -15,6 +15,7 @@ import { LoggerProperties } from './logger-properties';
 @injectable()
 export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     public initialized: boolean = false;
+
     protected telemetryClient: TelemetryClient;
 
     public abstract setup(baseProperties?: BaseTelemetryProperties): Promise<void>;

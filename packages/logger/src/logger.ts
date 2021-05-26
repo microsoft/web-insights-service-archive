@@ -18,6 +18,7 @@ export enum LogLevel {
 
 export abstract class Logger {
     protected initialized: boolean = false;
+
     protected isDebugEnabled: boolean = false;
 
     constructor(

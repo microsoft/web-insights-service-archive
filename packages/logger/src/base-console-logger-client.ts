@@ -18,7 +18,9 @@ import { loggerTypes } from './logger-types';
 @injectable()
 export abstract class BaseConsoleLoggerClient implements LoggerClient {
     public initialized: boolean = false;
+
     private isConsoleLogEnabled: boolean;
+
     private baseProperties?: BaseTelemetryProperties;
 
     constructor(
