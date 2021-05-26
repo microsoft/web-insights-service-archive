@@ -15,14 +15,12 @@ export templatesFolder="${0%/*}/../templates/"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>
+Usage: $0 -e <environment> -l <Azure region> -r <resource group> -s <subscription name or id>
 where:
 
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
 Environment - The environment in which the set up is running (dev, ci, ppe, or prod)
-Organisation name - The name of organisation.
-Publisher email - The email for notifications.
 Azure region - Azure region where the instances will be deployed. Available Azure regions:
     centralus
     eastasia
@@ -78,19 +76,17 @@ function onExit() {
 trap "onExit" EXIT
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:" option; do
+while getopts ":r:s:l:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     l) location=${OPTARG} ;;
     e) environment=${OPTARG} ;;
-    o) orgName=${OPTARG} ;;
-    p) publisherEmail=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 
