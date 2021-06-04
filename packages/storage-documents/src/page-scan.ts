@@ -1,27 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { ReportData } from './report-data';
 import { ScanStatus } from './scan-types';
 import { StorageDocument } from './storage-document';
 
-export type PageReportFormat = 'sarif' | 'html';
-
-export type ReportData = {
-    reportId: string;
-    format: PageReportFormat;
-    href: string;
-};
-
-// Each doc corresponds to one url/scan type combination
-// must have a unique combination of websiteScanId and url (use both for the id)
+/*
+ * Represents a scan/crawl of a single URL for one scan type.
+ * Must have a unique combination of pageId and websiteScanId.
+ */
 export interface PageScan extends StorageDocument {
-    websiteScanId: string; // maps to a WebsiteScan
-    url: string;
+    websiteScanId: string; // maps to a WebsiteScan document
+    pageId: string; // maps to a Page document
     priority: number;
     scanStatus: ScanStatus;
-    lastScanDate?: Date;
-    // nextScanDate: Date;
-    frequency: number;
+    startDate: Date;
+    completedDate?: Date;
     resultsBlobId?: string;
     reports?: ReportData[];
     retryCount: number;
