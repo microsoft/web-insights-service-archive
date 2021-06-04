@@ -10,6 +10,7 @@ updates:
     day: wednesday
     time: "11:00"
     timezone: "America/Los_Angeles" # Pacific Time
+  open-pull-requests-limit: 20
   labels:
   - "category: engineering"
   - dependencies
