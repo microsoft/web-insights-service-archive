@@ -9,7 +9,7 @@ export interface Website extends StorageDocument {
     baseUrl: string;
     priority: number;
     discoveryPatterns: string[];
-    knownPages: string[];
+    knownPages: string[]; // URLs provided by the user, not full crawled list
     scanners: ScanType[];
     scanFrequency: number;
 }
