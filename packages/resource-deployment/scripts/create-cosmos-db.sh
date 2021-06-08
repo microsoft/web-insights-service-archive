@@ -33,10 +33,6 @@ createCosmosCollection() {
     local ttl=$3
     local throughput=$4
 
-    if [[ -z $ttl ]]; then
-        ttl=-1
-    fi
-
     echo "Checking if collection '$collectionName' exists in database '$dbName' of account '$cosmosAccountName' in resource group '$resourceGroupName'"
 
     if az cosmosdb sql container show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
@@ -49,7 +45,7 @@ createCosmosCollection() {
             --name "$collectionName" \
             --resource-group "$resourceGroupName" \
             --max-throughput "$throughput" 1>/dev/null
-        echo "Updating ttl for collection '$collectionname'"
+        echo "Updating ttl for collection '$collectionName'"
         az cosmosdb sql container update \
             --account-name "$cosmosAccountName" \
             --database-name "$dbName" \
