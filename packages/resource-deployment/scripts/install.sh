@@ -104,6 +104,7 @@ function install() {
     # Set of scripts that can be run in parallel without external dependencies
     parallelProcesses=(
         "${0%/*}/create-container-registry.sh"
+        "${0%/*}/create-cosmos-db.sh"
     )
     runCommandsWithoutSecretsInParallel parallelProcesses
 
