@@ -103,13 +103,13 @@ function setupCosmos() {
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
     if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
         cosmosSetupProcesses=(
-            "createCosmosCollection \"websiteData\"  \"$WebInsightsDbName\" \"-1\" \"40000\""      # never expire
-            "createCosmosCollection \"scanMetadata\" \"$WebInsightsDbName\" \"7776000\" \"40000\"" # 90 days
+            "createCosmosCollection \"websiteData\"  \"$WebInsightsDbName\" \"-1\" \"40000\""# never expire
+            "createCosmosCollection \"scanMetadata\" \"$WebInsightsDbName\" \"-1\" \"40000\""# never expire
         )
     else
         cosmosSetupProcesses=(
-            "createCosmosCollection \"websiteData\"  \"$WebInsightsDbName\" \"-1\" \"4000\""      # never expire
-            "createCosmosCollection \"scanMetadata\" \"$WebInsightsDbName\" \"7776000\" \"4000\"" # 90 days
+            "createCosmosCollection \"websiteData\"  \"$WebInsightsDbName\" \"-1\" \"4000\"" # never expire
+            "createCosmosCollection \"scanMetadata\" \"$WebInsightsDbName\" \"-1\" \"4000\"" # never expire
         )
     fi
 
