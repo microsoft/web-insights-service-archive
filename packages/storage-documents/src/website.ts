@@ -19,7 +19,7 @@ export interface Website extends StorageDocument {
     enableCrawler: boolean;
     deleted: boolean;
     divisionId?: number;
-    siteStateId?: number;
+    stateId?: number;
     noBanner: boolean;
     noBannerReasonId?: number;
     serviceTreeId: string;
@@ -27,8 +27,8 @@ export interface Website extends StorageDocument {
     alias?: string;
     organizationId?: number;
     celaAccessibilityContacts?: string[];
-    privagyEGRCExceptionId?: string;
-    AIEGRCExceptionId?: boolean;
+    privacyEGRCExceptionId?: string;
+    A11yEGRCExceptionId?: string;
     optOutSecurityReason?: string;
     isCustomBanner: boolean;
     isMicrosoftOwned: boolean;
