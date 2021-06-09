@@ -15,13 +15,13 @@ export templatesFolder="${0%/*}/../templates/"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -r <resource group> -s <subscription name or id>
+Usage: $0 -e <environment> -l <location> -r <resource group> -s <subscription name or id>
 where:
 
-Resource group - The name of the resource group that everything will be deployed in.
-Subscription - The subscription for the resource group.
-Environment - The environment in which the set up is running (dev, ci, ppe, or prod)
-Azure region - Azure region where the instances will be deployed. Available Azure regions:
+resource group - The name of the resource group that everything will be deployed in.
+subscription - The subscription for the resource group.
+environment - The environment in which the set up is running (dev, ci, ppe, or prod)
+location - Azure region where the instances will be deployed. Available Azure regions:
     centralus
     eastasia
     southeastasia
@@ -62,10 +62,8 @@ function onExit() {
 
     if [[ $exitCode != 0 ]]; then
         echo "Installation failed with exit code $exitCode"
-        echo "Killing all descendant processes"
         killDescendantProcesses $$
-        echo "Killed all descendant processes"
-        echo "WARN: ARM deployments already triggered could still still be running. To kill them, you may need to goto the azure portal & cancel them."
+        echo "WARN: Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
     else
         echo "Installation completed with exit code $exitCode"
     fi
@@ -100,7 +98,16 @@ function install() {
 
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
+    . "${0%/*}/create-app-insights.sh"
+    . "${0%/*}/get-resource-names.sh"
+
+    # Set of scripts that can be run in parallel without external dependencies
+    parallelProcesses=(
+        "${0%/*}/create-container-registry.sh"
+    )
+    runCommandsWithoutSecretsInParallel parallelProcesses
+
+    . "${0%/*}/create-kubernetes-service.sh"
 }
 
 install
-echo "Installation complete"

@@ -70,28 +70,10 @@ deleteResourceGroup() {
         echo "Resource group $resourceGroupName exists."
 
         echo "Deleting resources from resource group $resourceGroupName"
-        deleteResources
-
-        # if [[ "$purgeKeyVault" == true ]]; then
-        #     purgeKeyVaultIfSoftDeleted
-        # else
-        #     echo "Keyvault $keyVault was not purged and will be recoverable for 90 days."
-        # fi
     else
         echo "Resource group $resourceGroupName does not exist."
     fi
 }
-
-# purgeKeyVaultIfSoftDeleted() {
-#     . "${0%/*}/get-resource-names.sh"
-#     local response
-
-#     response=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
-#     if [[ -n "$response" ]]; then
-#         echo "Purging keyvault $keyVault"
-#         az keyvault purge --name "$keyVault" || true
-#     fi
-# }
 
 # Read script arguments
 while getopts ":r:p:" option; do
