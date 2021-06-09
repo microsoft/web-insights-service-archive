@@ -35,47 +35,46 @@ function runCommandsWithoutSecretsInParallel {
     done
 
     waitForProcesses parallelizableProcesses
-} 
+}
 
 function sendSignalToProcessIfExists {
-    local currentPid=$1	
+    local currentPid=$1
     local signal=$2
 
-    if [[ -z $currentPid ]]; then	
-        return	
-    fi	
+    if [[ -z $currentPid ]]; then
+        return
+    fi
 
-    if kill -0 $currentPid > /dev/null 2>&1; then	
+    if kill -0 $currentPid >/dev/null 2>&1; then
         kill $signal $currentPid
     fi
 }
 
-function killWithDescendantsIfProcessExists ()	
-{	
-    local currentPid=$1	
+function killWithDescendantsIfProcessExists() {
+    local currentPid=$1
 
-    if [[ -z $currentPid ]]; then	
-        return	
-    fi	
+    if [[ -z $currentPid ]]; then
+        return
+    fi
 
-    if kill -0 $currentPid > /dev/null 2>&1; then	
-        echo "stopping process $currentPid"	
+    if kill -0 $currentPid >/dev/null 2>&1; then
+        echo "Stopping process $currentPid"
         sendSignalToProcessIfExists $currentPid -SIGSTOP
-       
-        killDescendantProcesses  $currentPid
+
+        killDescendantProcesses $currentPid
         echo "Killed descendant processes of $currentPid"
 
         sendSignalToProcessIfExists $currentPid -SIGKILL
-        echo "killed process $currentPid"	
-    fi	
-}	
+        echo "Killed process $currentPid"
+    fi
+}
 
 function killDescendantProcesses() {
     local processId=$1
-    
-    local children=$(pgrep -P $processId)	
-    
-    for childPid in $children; do	
-        killWithDescendantsIfProcessExists "$childPid"	
-    done	
+
+    local children=$(pgrep -P $processId)
+
+    for childPid in $children; do
+        killWithDescendantsIfProcessExists "$childPid"
+    done
 }
