@@ -224,17 +224,16 @@
     events "^3.0.0"
     tslib "^2.0.0"
 
-"@azure/storage-queue@^12.4.0":
-  version "12.4.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.4.0.tgz#49ef9c27ec90ae458c21b865c64ee0c1da7e520a"
-  integrity sha512-QG5yxb+O0nMoNEbWWkOSijF3uIlStmGKqEpwL+OKCj1oqIh8Aa//M96+id2+u6TYs345kMd77APhtf2Ab7YELA==
+"@azure/storage-queue@^12.5.0":
+  version "12.5.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.5.0.tgz#9af56d2cd1a03feebb8201bc3c6ab73609d0a999"
+  integrity sha512-e6/wncYKfhlwm+oS1M0Uqtujot9/zCTBSBfHoWum/Nj0pA1aGUrE0KCy5WwLpC0xWwzW1OPmaRJwoB/QI9033Q==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
     "@azure/core-http" "^1.2.0"
     "@azure/core-paging" "^1.1.1"
-    "@azure/core-tracing" "1.0.0-preview.10"
+    "@azure/core-tracing" "1.0.0-preview.11"
     "@azure/logger" "^1.0.0"
-    "@opentelemetry/api" "^0.10.2"
     tslib "^2.0.0"
 
 "@babel/code-frame@7.12.11":
@@ -11759,7 +11758,7 @@ uuid@3.1.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
   integrity sha512-DIWtzUkw04M4k3bf1IcpS2tngXEL26YUD2M0tMDUpnUrz2hgzUBlD55a4FjdLGPvfHxS6uluGWvaVEqgBcVa+g==
 
-uuid@^3.1.0, uuid@^3.3.2:
+uuid@^3.1.0, uuid@^3.3.2, uuid@^3.3.3:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
