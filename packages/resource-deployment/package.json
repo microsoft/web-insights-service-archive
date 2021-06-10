@@ -10,9 +10,9 @@
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+        "url": "https://github.com/Microsoft/web-insights-service/issues"
     },
-    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "homepage": "https://github.com/Microsoft/web-insights-service#readme",
     "devDependencies": {
         "cpy-cli": "^3.1.1",
         "rimraf": "^3.0.2"
