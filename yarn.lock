@@ -2802,12 +2802,12 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@typescript-eslint/eslint-plugin-tslint@^4.26.0":
-  version "4.26.0"
-  resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin-tslint/-/eslint-plugin-tslint-4.26.0.tgz#73a5e5c557423b11fb28aafd19dacd0b305671c0"
-  integrity sha512-U79z4FrQuiIedfgH+O+RRtzqDeGoYTl/pQ0W9Pu9Q15IZV/Lma3JeIjhnMSJLmI4IJnuZOH3Qcji1VnreL+l2g==
+"@typescript-eslint/eslint-plugin-tslint@^4.26.1":
+  version "4.26.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin-tslint/-/eslint-plugin-tslint-4.26.1.tgz#6188bf9b967abed153da4ad96b55edbd00fc30b2"
+  integrity sha512-hkfDEEQRZxFs0lSdOEvzErWCZgFfPY3vjhPCG4yCrYR5mvqLho9IbL8pTqLZh6oC+WX8PNeeNVfp5oRVdOSTTA==
   dependencies:
-    "@typescript-eslint/experimental-utils" "4.26.0"
+    "@typescript-eslint/experimental-utils" "4.26.1"
     lodash "^4.17.21"
 
 "@typescript-eslint/eslint-plugin@^4.26.0":
@@ -2824,7 +2824,7 @@
     semver "^7.3.5"
     tsutils "^3.21.0"
 
-"@typescript-eslint/experimental-utils@4.26.0", "@typescript-eslint/experimental-utils@^4.0.1":
+"@typescript-eslint/experimental-utils@4.26.0":
   version "4.26.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/experimental-utils/-/experimental-utils-4.26.0.tgz#ba7848b3f088659cdf71bce22454795fc55be99a"
   integrity sha512-TH2FO2rdDm7AWfAVRB5RSlbUhWxGVuxPNzGT7W65zVfl8H/WeXTk1e69IrcEVsBslrQSTDKQSaJD89hwKrhdkw==
@@ -2833,6 +2833,18 @@
     "@typescript-eslint/scope-manager" "4.26.0"
     "@typescript-eslint/types" "4.26.0"
     "@typescript-eslint/typescript-estree" "4.26.0"
+    eslint-scope "^5.1.1"
+    eslint-utils "^3.0.0"
+
+"@typescript-eslint/experimental-utils@4.26.1", "@typescript-eslint/experimental-utils@^4.0.1":
+  version "4.26.1"
+  resolved "https://registry.yarnpkg.com/@typescript-eslint/experimental-utils/-/experimental-utils-4.26.1.tgz#a35980a2390da9232aa206b27f620eab66e94142"
+  integrity sha512-sQHBugRhrXzRCs9PaGg6rowie4i8s/iD/DpTB+EXte8OMDfdCG5TvO73XlO9Wc/zi0uyN4qOmX9hIjQEyhnbmQ==
+  dependencies:
+    "@types/json-schema" "^7.0.7"
+    "@typescript-eslint/scope-manager" "4.26.1"
+    "@typescript-eslint/types" "4.26.1"
+    "@typescript-eslint/typescript-estree" "4.26.1"
     eslint-scope "^5.1.1"
     eslint-utils "^3.0.0"
 
