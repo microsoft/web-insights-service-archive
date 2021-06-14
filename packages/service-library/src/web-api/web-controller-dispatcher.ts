@@ -5,8 +5,10 @@ import { Context } from '@azure/functions';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties, ContextAwareLogger, loggerTypes } from 'logger';
 import { ProcessEntryPointBase } from '../process-entry-point-base';
-import { Newable } from './web-api-ioc-types';
 import { WebController } from './web-controller';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Newable<T> = new (...args: any[]) => T;
 
 export class WebControllerDispatcher extends ProcessEntryPointBase {
     constructor(private readonly processLifeCycleContainer: Container) {
