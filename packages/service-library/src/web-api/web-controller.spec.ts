@@ -1,0 +1,152 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+import 'reflect-metadata';
+
+import { Context } from '@azure/functions';
+import { System } from 'common';
+import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../test-utilities/mockable-logger';
+import { WebController } from './web-controller';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+export class TestableWebController extends WebController {
+    public static readonly handleRequestResponse = 'handle-request-response';
+
+    public readonly apiVersion = '1.0';
+
+    public readonly apiName = 'controller-mock-api';
+
+    public validateRequestInvoked = false;
+
+    public handleRequestInvoked = false;
+
+    public requestArgs: any[];
+
+    public getBaseTelemetryProperties(): { [name: string]: string } {
+        return super.getBaseTelemetryProperties();
+    }
+
+    protected validateRequest(...args: any[]): boolean {
+        this.validateRequestInvoked = true;
+
+        return args[0] === 'valid';
+    }
+
+    protected async handleRequest(...args: any[]): Promise<unknown> {
+        this.handleRequestInvoked = true;
+        if (args[0] === undefined) {
+            throw new Error('At least one parameter is expected');
+        }
+
+        return TestableWebController.handleRequestResponse;
+    }
+}
+
+describe(WebController, () => {
+    let context: Context;
+    let testSubject: TestableWebController;
+    const invocationId = 'test-invocation-id';
+    let loggerMock: IMock<MockableLogger>;
+
+    beforeEach(() => {
+        context = <Context>(<unknown>{ bindingDefinitions: {}, res: {}, invocationId: invocationId });
+        loggerMock = Mock.ofType(MockableLogger);
+
+        testSubject = new TestableWebController(loggerMock.object);
+
+        loggerMock.setup((l) => l.setCommonProperties(It.isAny())).returns(() => Promise.resolve(undefined));
+    });
+
+    it('should setup context aware logger', async () => {
+        loggerMock.reset();
+        loggerMock
+            .setup((l) =>
+                l.setCommonProperties(
+                    It.isValue({
+                        apiName: testSubject.apiName,
+                        apiVersion: testSubject.apiVersion,
+                        controller: 'TestableWebController',
+                        invocationId,
+                    }),
+                ),
+            )
+            .verifiable(Times.once());
+
+        await testSubject.invoke(context, 'valid');
+        loggerMock.verifyAll();
+    });
+
+    it('should handle request if request is valid', async () => {
+        await testSubject.invoke(context, 'valid');
+        expect(testSubject.validateRequestInvoked).toEqual(true);
+        expect(testSubject.handleRequestInvoked).toEqual(true);
+    });
+
+    it('should not handle request if request is invalid', async () => {
+        await testSubject.invoke(context, 'invalid');
+        expect(testSubject.validateRequestInvoked).toEqual(true);
+        expect(testSubject.handleRequestInvoked).toEqual(false);
+    });
+
+    it('should add content-type response header if no any', async () => {
+        await testSubject.invoke(context, 'valid');
+        expect(testSubject.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
+        expect(testSubject.context.res.headers['X-Content-Type-Options']).toEqual('nosniff');
+    });
+
+    it('should add content-type response header if if other', async () => {
+        context.res.headers = {
+            'content-length': 100,
+        };
+        await testSubject.invoke(context, 'valid');
+        expect(testSubject.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
+        expect(testSubject.context.res.headers['X-Content-Type-Options']).toEqual('nosniff');
+    });
+
+    it('should skip adding content-type response header if any', async () => {
+        context.res.headers = {
+            'content-type': 'text/plain',
+        };
+        await testSubject.invoke(context, 'valid');
+        expect(testSubject.context.res.headers['content-type']).toEqual('text/plain');
+    });
+
+    it('verifies base telemetry properties', async () => {
+        context.res.headers = {
+            'content-type': 'text/plain',
+        };
+        await testSubject.invoke(context, 'valid');
+
+        expect(testSubject.getBaseTelemetryProperties()).toEqual({
+            apiName: testSubject.apiName,
+            apiVersion: testSubject.apiVersion,
+            controller: 'TestableWebController',
+            invocationId,
+        });
+    });
+
+    it('returns handleRequest result', async () => {
+        await expect(testSubject.invoke(context, 'valid')).resolves.toBe(TestableWebController.handleRequestResponse);
+    });
+
+    it('log exception', async () => {
+        const error = new Error('Logger.setCommonProperties() exception.');
+        loggerMock.reset();
+        loggerMock
+            .setup((o) => {
+                o.setCommonProperties(It.isAny());
+            })
+            .throws(error)
+            .verifiable();
+
+        loggerMock
+            .setup((o) => {
+                o.logError('Encountered an error while processing HTTP web request.', { error: System.serializeError(error) });
+            })
+            .verifiable();
+
+        await expect(testSubject.invoke(context, 'valid')).rejects.toEqual(error);
+    });
+});

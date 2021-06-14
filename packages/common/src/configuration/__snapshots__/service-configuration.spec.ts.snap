@@ -21,6 +21,18 @@ Object {
       "format": "int",
     },
   },
+  "restApiConfig": Object {
+    "maxScanPriorityValue": Object {
+      "default": 1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "minScanPriorityValue": Object {
+      "default": -1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+  },
 }
 `;
 
@@ -42,6 +54,18 @@ Object {
     "messageVisibilityTimeoutInSeconds": Object {
       "default": 2700,
       "doc": "Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.",
+      "format": "int",
+    },
+  },
+  "restApiConfig": Object {
+    "maxScanPriorityValue": Object {
+      "default": 1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "minScanPriorityValue": Object {
+      "default": -1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
       "format": "int",
     },
   },
