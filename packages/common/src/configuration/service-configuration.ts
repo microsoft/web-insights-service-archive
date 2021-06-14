@@ -15,9 +15,15 @@ export interface LogRuntimeConfig {
     logInConsole: boolean;
 }
 
+export interface RestApiConfig {
+    minScanPriorityValue: number;
+    maxScanPriorityValue: number;
+}
+
 export interface RuntimeConfig {
     logConfig: LogRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
+    restApiConfig: RestApiConfig;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -90,6 +96,20 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 30 * 1.5 * 60, // maxWallClockTimeInMinutes * delta termination wait time
                     doc: 'Message visibility timeout in seconds. Must correlate with jobManagerConfig.maxWallClockTimeInMinutes config value.',
+                },
+            },
+            restApiConfig: {
+                minScanPriorityValue: {
+                    format: 'int',
+                    default: -1000,
+                    doc: 'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                        This range correlates with Azure Batch pool task priority range.',
+                },
+                maxScanPriorityValue: {
+                    format: 'int',
+                    default: 1000,
+                    doc: 'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                        This range correlates with Azure Batch pool task priority range.',
                 },
             },
         };

@@ -11,6 +11,7 @@ describe('listMonorepoPackageNames', () => {
               "common",
               "logger",
               "resource-deployment",
+              "service-library",
               "storage-documents",
             ]
         `);
