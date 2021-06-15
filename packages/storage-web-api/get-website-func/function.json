@@ -1,0 +1,18 @@
+{
+    "bindings": [
+        {
+            "authLevel": "anonymous",
+            "name": "request",
+            "type": "httpTrigger",
+            "direction": "in",
+            "route": "websites/{websiteId}",
+            "methods": ["get"]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "response"
+        }
+    ],
+    "scriptFile": "../get-website-func/index.js"
+}
