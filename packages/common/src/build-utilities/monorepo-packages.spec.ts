@@ -6,14 +6,15 @@ import { listMonorepoPackageNames } from './monorepo-packages';
 describe('listMonorepoPackageNames', () => {
     it('returns the pinned set of package names', () => {
         expect(listMonorepoPackageNames()).toMatchInlineSnapshot(`
-            Array [
-              "azure-services",
-              "common",
-              "logger",
-              "resource-deployment",
-              "service-library",
-              "storage-documents",
-            ]
-        `);
+Array [
+  "azure-services",
+  "common",
+  "logger",
+  "resource-deployment",
+  "service-library",
+  "storage-documents",
+  "storage-web-api",
+]
+`);
     });
 });

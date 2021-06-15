@@ -13,6 +13,10 @@
             "path": "../packages/storage-documents"
         },
         {
+            "name": "storage-web-api",
+            "path": "../packages/storage-web-api"
+        },
+        {
             "name": "resource-deployment",
             "path": "../packages/resource-deployment"
         },
@@ -38,7 +42,10 @@
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,
-        "eslint.validate": ["typescript", "javascript"],
+        "eslint.validate": [
+            "typescript",
+            "javascript"
+        ],
         "eslint.enable": true,
         "editor.codeActionsOnSave": {
             "source.fixAll.eslint": true

@@ -10,7 +10,6 @@ export { BaseTelemetryProperties } from './base-telemetry-properties';
 export {
     BaseTelemetryMeasurements,
     ScanRequestReceivedMeasurements,
-    BatchPoolMeasurements,
     ScanTaskStartedMeasurements,
     ScanTaskCompletedMeasurements,
     TelemetryMeasurements,
