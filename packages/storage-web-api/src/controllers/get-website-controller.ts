@@ -8,7 +8,7 @@ import { ContextAwareLogger } from 'logger';
 import { HttpResponse, WebApiErrorCodes, ApiController } from 'service-library';
 
 @injectable()
-export class ScanResultController extends ApiController {
+export class GetWebsiteController extends ApiController {
     public readonly apiVersion = '1.0';
 
     public readonly apiName = 'storage-web-api-get-website';

@@ -16,15 +16,9 @@ describe(getProcessLifeCycleContainer, () => {
 
     beforeEach(() => {
         testSubject = getProcessLifeCycleContainer();
-        process.env.APPINSIGHTS_APPID = 'app insights app id';
-
         secretProviderMock = Mock.ofType<SecretProvider>();
         testSubject.unbind(SecretProvider);
         testSubject.bind(SecretProvider).toConstantValue(secretProviderMock.object);
-    });
-
-    afterEach(() => {
-        delete process.env.APPINSIGHTS_APPID;
     });
 
     it('verifies dependencies resolution', () => {
