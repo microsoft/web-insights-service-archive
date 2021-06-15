@@ -9,6 +9,7 @@ import { StorageDocument } from './storage-document';
  * Represents a scan/crawl of a full website for one scan type
  */
 export interface WebsiteScan extends StorageDocument {
+    itemType: 'websiteScan';
     websiteId: string; // Maps to a Website
     scanType: ScanType;
     scanFrequency: number;

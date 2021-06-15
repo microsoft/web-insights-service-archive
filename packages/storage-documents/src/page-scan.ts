@@ -10,6 +10,7 @@ import { StorageDocument } from './storage-document';
  * Must have a unique combination of pageId and websiteScanId.
  */
 export interface PageScan extends StorageDocument {
+    itemType: 'pageScan';
     websiteScanId: string; // maps to a WebsiteScan document
     pageId: string; // maps to a Page document
     priority: number;

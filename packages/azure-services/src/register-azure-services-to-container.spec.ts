@@ -64,30 +64,12 @@ describe(registerAzureServicesToContainer, () => {
     it('resolves CosmosContainerClient', () => {
         registerAzureServicesToContainer(container);
 
+        verifyCosmosContainerClient(container, cosmosContainerClientTypes.websiteRepoContainerClient, 'onDemandScanner', 'scanRequests');
         verifyCosmosContainerClient(
             container,
-            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
-            'onDemandScanner',
-            'scanRequests',
-        );
-        verifyCosmosContainerClient(
-            container,
-            cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient,
+            cosmosContainerClientTypes.scanMetadataRepoContainerClient,
             'onDemandScanner',
             'scanBatchRequests',
-        );
-        verifyCosmosContainerClient(
-            container,
-            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
-            'onDemandScanner',
-            'scanRequests',
-        );
-
-        verifyCosmosContainerClient(
-            container,
-            cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient,
-            'onDemandScanner',
-            'scanRuns',
         );
     });
 

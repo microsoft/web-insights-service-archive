@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { ItemType } from './item-type';
+
+export type DocumentDataOnly<T> = Omit<T, keyof StorageDocument> & Partial<StorageDocument>;
+
 export interface StorageDocument {
     /** Required.
      * Unique name that identifies the item, that is, no two items share the same ID within a database.
@@ -11,7 +15,7 @@ export interface StorageDocument {
     /** Required.
      * Name that identifies the item type.
      */
-    itemType: string;
+    itemType: ItemType;
 
     /**
      * Partition key used to store the document.

@@ -6,6 +6,7 @@ import { StorageDocument } from './storage-document';
 
 export interface Website extends StorageDocument {
     name: string;
+    itemType: 'website';
     baseUrl: string;
     priority: number;
     discoveryPatterns: string[];
