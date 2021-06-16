@@ -39,5 +39,5 @@ fi
 
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group $resourceGroupName"
-az aks create --resource-group "$resourceGroupName" --name "$kubernetesServiceName" --location "$location" 1>/dev/null
+az aks create --resource-group "$resourceGroupName" --name "$kubernetesServiceName" --location "$location" --no-ssh-key 1>/dev/null
 attachContainerRegistry
