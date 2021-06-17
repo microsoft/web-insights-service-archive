@@ -64,13 +64,8 @@ describe(registerAzureServicesToContainer, () => {
     it('resolves CosmosContainerClient', () => {
         registerAzureServicesToContainer(container);
 
-        verifyCosmosContainerClient(container, cosmosContainerClientTypes.websiteRepoContainerClient, 'onDemandScanner', 'scanRequests');
-        verifyCosmosContainerClient(
-            container,
-            cosmosContainerClientTypes.scanMetadataRepoContainerClient,
-            'onDemandScanner',
-            'scanBatchRequests',
-        );
+        verifyCosmosContainerClient(container, cosmosContainerClientTypes.websiteRepoContainerClient, 'WebInsights', 'websiteData');
+        verifyCosmosContainerClient(container, cosmosContainerClientTypes.scanMetadataRepoContainerClient, 'WebInsights', 'scanMetadata');
     });
 
     describe('BlobServiceClientProvider', () => {

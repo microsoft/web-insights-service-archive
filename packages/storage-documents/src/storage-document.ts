@@ -3,7 +3,7 @@
 
 import { ItemType } from './item-type';
 
-export type DocumentDataOnly<T> = Omit<T, keyof StorageDocument> & Partial<StorageDocument>;
+export type DocumentDataOnly<T> = Omit<T, keyof StorageDocument> & Partial<StorageDocument> & Partial<T>;
 
 export interface StorageDocument {
     /** Required.
