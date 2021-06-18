@@ -3,7 +3,4 @@
 
 export enum PartitionKey {
     websiteDocuments = 'websiteDocuments',
-    pageDocuments = 'pageDocuments',
-    websiteScanDocuments = 'websiteScanDocuments',
-    pageScanDocuments = 'pageScanDocuments',
 }
