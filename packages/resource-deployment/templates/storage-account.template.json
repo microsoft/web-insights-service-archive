@@ -1,0 +1,100 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "defaultValue": "[concat('wisstorage',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Azure Storage account."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the Azure resources should be deployed."
+            }
+        },
+        "pageScanRunReportContainerName": {
+            "type": "string",
+            "defaultValue": "page-scan-run-reports",
+            "metadata": {
+                "description": "The name of the blob container for storing report of a page scan run."
+            }
+        },
+        "combinedResultsContainerName": {
+            "type": "string",
+            "defaultValue": "combined-scan-results",
+            "metadata": {
+                "description": "The name of the blob container for storing combined website scan result data."
+            }
+        },
+        "runtimeConfigurationContainerName": {
+            "type": "string",
+            "defaultValue": "runtime-configuration",
+            "metadata": {
+                "description": "The name of the blob container for a service runtime configuration."
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-04-01",
+            "location": "[parameters('location')]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_RAGRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": false,
+                "allowSharedKeyAccess": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            },
+            "resources": [
+                {
+                    "name": "[concat('default/', parameters('runtimeConfigurationContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2021-04-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('pageScanRunReportContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2021-04-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('combinedResultsContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2021-04-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                }
+            ]
+        }
+    ]
+}

@@ -39,3 +39,5 @@ resourceNameSuffix=${resourceName:11}
 
 kubernetesServiceName="wiskube$resourceNameSuffix"
 containerRegistry="wisregistry$resourceNameSuffix"
+keyVault="wiskeyvault$resourceNameSuffix"
+storageAccount="wisstorage$resourceNameSuffix"

@@ -105,9 +105,11 @@ function install() {
     parallelProcesses=(
         "${0%/*}/create-container-registry.sh"
         "${0%/*}/create-cosmos-db.sh"
+        "${0%/*}/create-storage-account.sh"
     )
     runCommandsWithoutSecretsInParallel parallelProcesses
 
+    . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/create-kubernetes-service.sh"
 }
 
