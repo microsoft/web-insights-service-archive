@@ -78,6 +78,16 @@ module.exports = (env) => {
                         from: '../../yarn.lock',
                         to: '',
                     },
+                    {
+                        context: './docker-image-config',
+                        from: '.dockerignore',
+                        to: '',
+                    },
+                    {
+                        context: './docker-image-config',
+                        from: 'Dockerfile',
+                        to: '',
+                    },
                 ],
             }),
         ],

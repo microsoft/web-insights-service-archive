@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+set -eo pipefail
+
+exitWithUsageInfo() {
+    echo "
+Usage: $0 -r <resource group>
+"
+    exit 1
+}
+
+while getopts ":r:" option; do
+    case $option in
+    r) resourceGroupName=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
+done
+
+if [[ -z $resourceGroupName ]]; then
+    exitWithUsageInfo
+fi
+
+templateFile="${0%/*}/../templates/storage-account.template.json"
+
+echo "Creating storage account under resource group '$resourceGroupName' using ARM template $templateFile"
+resources=$(az deployment group create --resource-group "$resourceGroupName" --template-file "$templateFile" --query "properties.outputResources[].id" -o tsv)
+echo "Storage account successfully created"

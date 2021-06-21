@@ -13,8 +13,6 @@ Usage: $0 -r <resource group> -l <location> -c <cluster name> -d <container regi
 }
 
 function attachContainerRegistry() {
-    # grant cluster sp access to container registry
-    principalId=$(az aks show --resource-group "$resourceGroupName" --name "$kubernetesServiceName" --query "identityProfile.kubeletidentity.objectId" -o tsv)
     role="AcrPull"
     containerRegistryId=$(az acr show --resource-group "$resourceGroupName" --name "$containerRegistry" --query id -o tsv)
     scope="--scope $containerRegistryId"
@@ -39,5 +37,11 @@ fi
 
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group $resourceGroupName"
-az aks create --resource-group "$resourceGroupName" --name "$kubernetesServiceName" --location "$location" --no-ssh-key 1>/dev/null
+az aks create --resource-group "$resourceGroupName" --name "$kubernetesServiceName" --location "$location" --no-ssh-key --enable-managed-identity 1>/dev/null
+principalId=$(az aks show --resource-group "$resourceGroupName" --name "$kubernetesServiceName" --query "identity.principalId" -o tsv)
+
+# Grant access to container registry
 attachContainerRegistry
+
+# Grant access to key vault
+. "${0%/*}/enable-msi-for-key-vault.sh"
