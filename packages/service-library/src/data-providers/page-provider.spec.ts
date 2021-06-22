@@ -3,13 +3,14 @@
 
 import 'reflect-metadata';
 
-import { IMock, It, Mock, MockBehavior } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { ItemType, Page } from 'storage-documents';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { PageProvider } from './page-provider';
+import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 
 describe(PageProvider, () => {
     const websiteId = 'website id';
@@ -26,22 +27,30 @@ describe(PageProvider, () => {
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
+    let cosmosQueryResultsProviderMock: IMock<typeof getCosmosQueryResultsIterable>;
 
     let testSubject: PageProvider;
 
     beforeEach(() => {
-        cosmosContainerClientMock = Mock.ofType(CosmosContainerClient, MockBehavior.Strict);
+        cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
         partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.page, pageId)).returns(() => partitionKey);
+        cosmosQueryResultsProviderMock = Mock.ofInstance(() => null);
 
-        testSubject = new PageProvider(cosmosContainerClientMock.object, guidGeneratorMock.object, partitionKeyFactoryMock.object);
+        testSubject = new PageProvider(
+            cosmosContainerClientMock.object,
+            guidGeneratorMock.object,
+            partitionKeyFactoryMock.object,
+            cosmosQueryResultsProviderMock.object,
+        );
     });
 
     afterEach(() => {
         guidGeneratorMock.verifyAll();
         cosmosContainerClientMock.verifyAll();
         partitionKeyFactoryMock.verifyAll();
+        cosmosQueryResultsProviderMock.verifyAll();
     });
 
     describe('createPage', () => {
@@ -108,50 +117,32 @@ describe(PageProvider, () => {
         });
     });
 
-    describe('readAllPagesForWebsite', () => {
-        const expectedPagesList = [{ id: 'page id 1' }, { id: 'page id 2' }, { id: 'page id 3' }] as Page[];
+    describe('getPagesForWebsite', () => {
+        it('calls cosmosQueryResultsProvider with expected query', () => {
+            const expectedQuery = {
+                query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
+                parameters: [
+                    {
+                        name: '@websiteId',
+                        value: websiteId,
+                    },
+                    {
+                        name: '@partitionKey',
+                        value: partitionKey,
+                    },
+                    {
+                        name: '@itemType',
+                        value: ItemType.page,
+                    },
+                ],
+            };
+            const iterableStub = {} as CosmosQueryResultsIterable<Page>;
+            partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.page, websiteId)).returns(() => partitionKey);
+            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
 
-        it('throws if unsuccessful status code', () => {
-            const response = {
-                statusCode: 404,
-            } as CosmosOperationResponse<Page[]>;
-            cosmosContainerClientMock.setup((c) => c.queryDocuments(It.isAny(), It.isAny())).returns(async () => response);
+            const actualIterable = testSubject.getPagesForWebsite(websiteId);
 
-            expect(testSubject.readAllPagesForWebsite(websiteId)).rejects.toThrow();
-        });
-
-        it('with no continuation token', async () => {
-            const response = {
-                statusCode: 200,
-                item: expectedPagesList,
-            } as CosmosOperationResponse<Page[]>;
-            cosmosContainerClientMock.setup((c) => c.queryDocuments(It.isAny(), It.isAny())).returns(async () => response);
-
-            const actualPages = await testSubject.readAllPagesForWebsite(websiteId);
-
-            expect(actualPages).toEqual(expectedPagesList);
-        });
-
-        it('with continuation token', async () => {
-            const continuationToken = 'continuation token';
-            const response1 = {
-                statusCode: 200,
-                item: _.slice(expectedPagesList, 0, 1),
-                continuationToken: continuationToken,
-            } as CosmosOperationResponse<Page[]>;
-            const response2 = {
-                statusCode: 200,
-                item: _.slice(expectedPagesList, 1, expectedPagesList.length),
-            } as CosmosOperationResponse<Page[]>;
-
-            cosmosContainerClientMock.setup((c) => c.queryDocuments(It.isAny(), undefined)).returns(async (query, contToken) => response1);
-            cosmosContainerClientMock
-                .setup((c) => c.queryDocuments(It.isAny(), continuationToken))
-                .returns(async (query, contToken) => response2);
-
-            const actualPages = await testSubject.readAllPagesForWebsite(websiteId);
-
-            expect(actualPages).toEqual(expectedPagesList);
+            expect(actualIterable).toBe(iterableStub);
         });
     });
 });

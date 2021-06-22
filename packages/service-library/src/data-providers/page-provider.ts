@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { client, CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
+import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { ItemType, Page } from 'storage-documents';
 import { GuidGenerator } from 'common';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
+import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 
 @injectable()
 export class PageProvider {
@@ -14,6 +15,7 @@ export class PageProvider {
         @inject(cosmosContainerClientTypes.websiteRepoContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
+        private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
     ) {}
 
     public async createPageForWebsite(pageUrl: string, websiteId: string): Promise<void> {
@@ -36,9 +38,8 @@ export class PageProvider {
         return response.item;
     }
 
-    public async readAllPagesForWebsite(websiteId: string): Promise<Partial<Page>[]> {
+    public getPagesForWebsite(websiteId: string): CosmosQueryResultsIterable<Page> {
         const partitionKey = this.getPagePartitionKey(websiteId);
-
         const query = {
             query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
             parameters: [
@@ -52,24 +53,12 @@ export class PageProvider {
                 },
                 {
                     name: '@itemType',
-                    value: 'page',
+                    value: ItemType.page,
                 },
             ],
         };
 
-        const pageLists: Page[][] = [];
-        let continuationToken;
-        do {
-            const response = (await this.cosmosContainerClient.queryDocuments<Page>(query, continuationToken)) as CosmosOperationResponse<
-                Page[]
-            >;
-
-            client.ensureSuccessStatusCode(response);
-            continuationToken = response.continuationToken;
-            pageLists.push(response.item);
-        } while (continuationToken !== undefined);
-
-        return _.flatten(pageLists);
+        return this.cosmosQueryResultsProvider(this.cosmosContainerClient, query);
     }
 
     private getPagePartitionKey(pageOrWebsiteId: string): string {
