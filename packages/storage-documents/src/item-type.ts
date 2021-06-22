@@ -1,4 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-export type ItemType = 'website' | 'page' | 'websiteScan' | 'pageScan';
+export enum ItemType {
+    website = 'website',
+    page = 'page',
+    websiteScan = 'websiteScan',
+    pageScan = 'page',
+}

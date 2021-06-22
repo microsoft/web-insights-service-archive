@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import { GuidGenerator, HashGenerator } from 'common';
 import { IMock, Mock } from 'typemoq';
+import { ItemType } from 'storage-documents';
 import { PartitionKeyFactory } from './partition-key-factory';
 
 let hashGeneratorMock: IMock<HashGenerator>;
@@ -27,7 +28,7 @@ describe(PartitionKeyFactory, () => {
         const documentId = 'doc1';
         const partitionKeyResult = 'itemType-10';
         setupGenerators('page', documentId, partitionKeyResult);
-        const partitionKey = partitionKeyFactory.createPartitionKeyForDocument('page', documentId);
+        const partitionKey = partitionKeyFactory.createPartitionKeyForDocument(ItemType.page, documentId);
         expect(partitionKey).toEqual(partitionKeyResult);
     });
 });

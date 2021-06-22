@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { Page } from 'storage-documents';
+import { ItemType, Page } from 'storage-documents';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { PageProvider } from './page-provider';
@@ -20,7 +20,7 @@ describe(PageProvider, () => {
         id: pageId,
         websiteId: websiteId,
         url: url,
-        itemType: 'page',
+        itemType: ItemType.page,
         partitionKey: partitionKey,
     };
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
@@ -33,7 +33,7 @@ describe(PageProvider, () => {
         cosmosContainerClientMock = Mock.ofType(CosmosContainerClient, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
-        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument('page', pageId)).returns(() => partitionKey);
+        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.page, pageId)).returns(() => partitionKey);
 
         testSubject = new PageProvider(cosmosContainerClientMock.object, guidGeneratorMock.object, partitionKeyFactoryMock.object);
     });

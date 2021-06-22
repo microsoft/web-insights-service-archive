@@ -3,7 +3,7 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { DocumentDataOnly, PartitionKey, Website } from 'storage-documents';
+import { DocumentDataOnly, ItemType, PartitionKey, Website } from 'storage-documents';
 import { GuidGenerator } from 'common';
 
 @injectable()
@@ -37,7 +37,7 @@ export class WebsiteProvider {
 
         return {
             id: id,
-            itemType: 'website',
+            itemType: ItemType.website,
             partitionKey: PartitionKey.websiteDocuments,
             ...website,
         };
