@@ -3,43 +3,45 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { ItemType, Page } from 'storage-documents';
+import { DocumentDataOnly, ItemType, ScanType, Website, WebsiteScan } from 'storage-documents';
 import { GuidGenerator } from 'common';
-import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 
 @injectable()
-export class PageProvider {
+export class WebsiteScanProvider {
     public constructor(
-        @inject(cosmosContainerClientTypes.websiteRepoContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
+        @inject(cosmosContainerClientTypes.scanMetadataRepoContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
     ) {}
 
-    public async createPageForWebsite(pageUrl: string, websiteId: string): Promise<void> {
-        const page = this.normalizeDbDocument({
+    public async createScanDocumentForWebsite(websiteId: string, scanType: ScanType, frequency: number): Promise<void> {
+        const websiteScanData: DocumentDataOnly<WebsiteScan> = {
             id: this.guidGenerator.createGuidFromBaseGuid(websiteId),
             websiteId: websiteId,
-            url: pageUrl,
-        });
-        await this.cosmosContainerClient.writeDocument(page);
+            scanType: scanType,
+            scanFrequency: frequency,
+            scanStatus: 'pending',
+        };
+        await this.cosmosContainerClient.writeDocument(this.normalizeDbDocument(websiteScanData));
     }
 
-    public async updatePage(page: Partial<Page>): Promise<void> {
-        await this.cosmosContainerClient.mergeOrWriteDocument(this.normalizeDbDocument(page));
+    public async updateWebsitecan(websiteScan: Partial<WebsiteScan>): Promise<void> {
+        const websiteDoc = this.normalizeDbDocument(websiteScan);
+        await this.cosmosContainerClient.mergeOrWriteDocument(websiteDoc);
     }
 
-    public async readPage(id: string): Promise<Page> {
-        const response = await this.cosmosContainerClient.readDocument<Page>(id, this.getPagePartitionKey(id));
+    public async readWebsiteScan(id: string): Promise<Website> {
+        const response = await this.cosmosContainerClient.readDocument<Website>(id, this.getWebsiteScanPartitionKey(id));
         client.ensureSuccessStatusCode(response);
 
         return response.item;
     }
 
-    public getPagesForWebsite(websiteId: string, selectedProperties?: (keyof Page)[]): CosmosQueryResultsIterable<Page> {
-        const partitionKey = this.getPagePartitionKey(websiteId);
+    public getScansForWebsite(websiteId: string, selectedProperties?: (keyof WebsiteScan)[]): CosmosQueryResultsIterable<WebsiteScan> {
+        const partitionKey = this.getWebsiteScanPartitionKey(websiteId);
         const selectedPropertiesString = selectedProperties === undefined ? '*' : selectedProperties.join(', ');
         const query = {
             query: 'SELECT @selectedProperties FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
@@ -54,7 +56,7 @@ export class PageProvider {
                 },
                 {
                     name: '@itemType',
-                    value: ItemType.page,
+                    value: ItemType.websiteScan,
                 },
                 {
                     name: '@selectedProperties',
@@ -66,19 +68,19 @@ export class PageProvider {
         return this.cosmosQueryResultsProvider(this.cosmosContainerClient, query);
     }
 
-    private getPagePartitionKey(pageOrWebsiteId: string): string {
-        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.page, pageOrWebsiteId);
-    }
-
-    private normalizeDbDocument(page: Partial<Page>): Partial<Page> {
-        if (page.id === undefined) {
-            throw new Error('Page document has no associated id');
+    private normalizeDbDocument(websiteScan: Partial<WebsiteScan>): Partial<WebsiteScan> {
+        if (websiteScan.id === undefined) {
+            throw new Error('Website scan document has no id');
         }
 
         return {
-            itemType: ItemType.page,
-            partitionKey: this.getPagePartitionKey(page.id),
-            ...page,
+            itemType: ItemType.websiteScan,
+            partitionKey: this.getWebsiteScanPartitionKey(websiteScan.id),
+            ...websiteScan,
         };
+    }
+
+    private getWebsiteScanPartitionKey(scanOrWebsiteId: string): string {
+        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.websiteScan, scanOrWebsiteId);
     }
 }

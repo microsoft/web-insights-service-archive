@@ -15,5 +15,5 @@ export interface WebsiteScan extends StorageDocument {
     scanType: ScanType;
     scanFrequency: number;
     scanStatus: ScanStatus;
-    reports: ReportData[];
+    reports?: ReportData[];
 }
