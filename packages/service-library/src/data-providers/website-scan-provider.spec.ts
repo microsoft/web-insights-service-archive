@@ -62,7 +62,13 @@ describe(WebsiteScanProvider, () => {
             guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(websiteId)).returns(() => websiteScanId);
             cosmosContainerClientMock.setup((c) => c.writeDocument(websiteScanDoc)).verifiable();
 
-            await testSubject.createScanDocumentForWebsite(websiteId, websiteScanDoc.scanType, websiteScanDoc.scanFrequency);
+            const actualWebsiteScanDoc = await testSubject.createScanDocumentForWebsite(
+                websiteId,
+                websiteScanDoc.scanType,
+                websiteScanDoc.scanFrequency,
+            );
+
+            expect(actualWebsiteScanDoc).toEqual(websiteScanDoc);
         });
     });
 
@@ -80,15 +86,27 @@ describe(WebsiteScanProvider, () => {
                 scanStatus: 'pass',
                 id: websiteScanId,
             };
-            const updatedScanDoc = {
+            const expectedScanDoc = {
                 itemType: ItemType.websiteScan,
                 partitionKey: partitionKey,
                 ...updatedScanData,
             };
+            const updatedWebsiteScan = {
+                id: websiteScanId,
+            } as WebsiteScan;
+            const response: CosmosOperationResponse<WebsiteScan> = {
+                statusCode: 200,
+                item: updatedWebsiteScan,
+            };
 
-            cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(updatedScanDoc)).verifiable();
+            cosmosContainerClientMock
+                .setup((c) => c.mergeOrWriteDocument(expectedScanDoc))
+                .returns(async () => response)
+                .verifiable();
 
-            await testSubject.updateWebsiteScan(updatedScanData);
+            const actualWebsiteScan = await testSubject.updateWebsiteScan(updatedScanData);
+
+            expect(actualWebsiteScan).toEqual(updatedWebsiteScan);
         });
     });
 

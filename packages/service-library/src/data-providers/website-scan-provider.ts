@@ -17,7 +17,7 @@ export class WebsiteScanProvider {
         private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
     ) {}
 
-    public async createScanDocumentForWebsite(websiteId: string, scanType: ScanType, frequency: number): Promise<void> {
+    public async createScanDocumentForWebsite(websiteId: string, scanType: ScanType, frequency: number): Promise<WebsiteScan> {
         const websiteScanData: DocumentDataOnly<WebsiteScan> = {
             id: this.guidGenerator.createGuidFromBaseGuid(websiteId),
             websiteId: websiteId,
@@ -25,12 +25,17 @@ export class WebsiteScanProvider {
             scanFrequency: frequency,
             scanStatus: 'pending',
         };
-        await this.cosmosContainerClient.writeDocument(this.normalizeDbDocument(websiteScanData));
+        const websiteScanDoc = this.normalizeDbDocument(websiteScanData) as WebsiteScan;
+        await this.cosmosContainerClient.writeDocument(websiteScanDoc);
+
+        return websiteScanDoc;
     }
 
-    public async updateWebsiteScan(websiteScan: Partial<WebsiteScan>): Promise<void> {
+    public async updateWebsiteScan(websiteScan: Partial<WebsiteScan>): Promise<WebsiteScan> {
         const websiteScanDoc = this.normalizeDbDocument(websiteScan);
-        await this.cosmosContainerClient.mergeOrWriteDocument(websiteScanDoc);
+        const response = await this.cosmosContainerClient.mergeOrWriteDocument(websiteScanDoc);
+
+        return response.item as WebsiteScan;
     }
 
     public async readWebsiteScan(id: string): Promise<WebsiteScan> {

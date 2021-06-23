@@ -42,7 +42,8 @@ describe(WebsiteProvider, () => {
                 .verifiable();
             cosmosContainerClientMock.setup((c) => c.writeDocument(expectedDocument)).verifiable();
 
-            await testSubject.createWebsite(websiteData);
+            const actualWebsite = await testSubject.createWebsite(websiteData);
+            expect(actualWebsite).toEqual(expectedDocument);
         });
 
         it('does not overwrite existing id', async () => {
@@ -55,7 +56,8 @@ describe(WebsiteProvider, () => {
 
             cosmosContainerClientMock.setup((c) => c.writeDocument(expectedDocument)).verifiable();
 
-            await testSubject.createWebsite(websiteData);
+            const actualWebsite = await testSubject.createWebsite(websiteData);
+            expect(actualWebsite).toEqual(expectedDocument);
         });
     });
 
@@ -74,8 +76,19 @@ describe(WebsiteProvider, () => {
                 id: websiteId,
             };
             const expectedDocument = getNormalizedDocument(websiteData);
+            const updatedDocument = {
+                name: 'updated test website',
+                id: websiteId,
+            } as Website;
+            const response: CosmosOperationResponse<Website> = {
+                statusCode: 200,
+                item: updatedDocument,
+            };
 
-            cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(expectedDocument)).verifiable();
+            cosmosContainerClientMock
+                .setup((c) => c.mergeOrWriteDocument(expectedDocument))
+                .returns(async () => response)
+                .verifiable();
 
             await testSubject.updateWebsite(websiteData);
         });

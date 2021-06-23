@@ -18,17 +18,21 @@ export class PageProvider {
         private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
     ) {}
 
-    public async createPageForWebsite(pageUrl: string, websiteId: string): Promise<void> {
-        const page = this.normalizeDbDocument({
+    public async createPageForWebsite(pageUrl: string, websiteId: string): Promise<Page> {
+        const pageDoc = this.normalizeDbDocument({
             id: this.guidGenerator.createGuidFromBaseGuid(websiteId),
             websiteId: websiteId,
             url: pageUrl,
-        });
-        await this.cosmosContainerClient.writeDocument(page);
+        }) as Page;
+        await this.cosmosContainerClient.writeDocument(pageDoc);
+
+        return pageDoc;
     }
 
-    public async updatePage(page: Partial<Page>): Promise<void> {
-        await this.cosmosContainerClient.mergeOrWriteDocument(this.normalizeDbDocument(page));
+    public async updatePage(page: Partial<Page>): Promise<Page> {
+        const response = await this.cosmosContainerClient.mergeOrWriteDocument<Page>(this.normalizeDbDocument(page) as Page);
+
+        return response.item;
     }
 
     public async readPage(id: string): Promise<Page> {

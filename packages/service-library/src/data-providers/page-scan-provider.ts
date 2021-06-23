@@ -18,7 +18,7 @@ export class PageScanProvider {
         private readonly getCurrentDate: () => Date = () => new Date(),
     ) {}
 
-    public async createPageScan(pageId: string, websiteScanId: string, priority: number): Promise<void> {
+    public async createPageScan(pageId: string, websiteScanId: string, priority: number): Promise<PageScan> {
         const pageScanData: DocumentDataOnly<PageScan> = {
             id: this.hashGenerator.getPageScanDocumentId(pageId, websiteScanId),
             pageId: pageId,
@@ -28,13 +28,17 @@ export class PageScanProvider {
             scanStatus: 'pending',
             retryCount: 0,
         };
-        const pageScanDocument = this.normalizeDbDocument(pageScanData);
+        const pageScanDocument = this.normalizeDbDocument(pageScanData) as PageScan;
         await this.cosmosContainerClient.writeDocument(this.normalizeDbDocument(pageScanDocument));
+
+        return pageScanDocument;
     }
 
-    public async updatePageScan(pageScan: Partial<PageScan>): Promise<void> {
+    public async updatePageScan(pageScan: Partial<PageScan>): Promise<PageScan> {
         const pageScanDoc = this.normalizeDbDocument(pageScan);
-        await this.cosmosContainerClient.mergeOrWriteDocument(pageScanDoc);
+        const response = await this.cosmosContainerClient.mergeOrWriteDocument(pageScanDoc);
+
+        return response.item as PageScan;
     }
 
     public async readPageScan(pageId: string, websiteScanId: string): Promise<PageScan> {

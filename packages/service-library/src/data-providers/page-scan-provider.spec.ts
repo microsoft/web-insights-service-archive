@@ -68,11 +68,21 @@ describe(PageScanProvider, () => {
         it('creates pageScan doc', async () => {
             cosmosContainerClientMock.setup((c) => c.writeDocument(pageScanDoc)).verifiable();
 
-            await testSubject.createPageScan(pageId, websiteScanId, priority);
+            const actualPageScan = await testSubject.createPageScan(pageId, websiteScanId, priority);
+
+            expect(actualPageScan).toEqual(pageScanDoc);
         });
     });
 
     describe('updatePageScan', () => {
+        const updatedScanDoc = {
+            id: pageScanId,
+        } as PageScan;
+        const successfulUpdateResponse: CosmosOperationResponse<PageScan> = {
+            statusCode: 200,
+            item: updatedScanDoc,
+        };
+
         it('throws if no id', () => {
             const pageScanUpdate: Partial<PageScan> = {
                 scanStatus: 'pass',
@@ -87,15 +97,20 @@ describe(PageScanProvider, () => {
                 id: pageScanId,
                 pageId: pageId,
             };
-            const updatedScanDoc = {
+            const expectedScanDoc = {
                 itemType: ItemType.pageScan,
                 partitionKey: partitionKey,
                 ...updatedScanData,
             };
 
-            cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(updatedScanDoc)).verifiable();
+            cosmosContainerClientMock
+                .setup((c) => c.mergeOrWriteDocument(expectedScanDoc))
+                .returns(async () => successfulUpdateResponse)
+                .verifiable();
 
-            await testSubject.updatePageScan(updatedScanData);
+            const actualPageScan = await testSubject.updatePageScan(updatedScanData);
+
+            expect(actualPageScan).toEqual(updatedScanDoc);
         });
 
         it('updates doc with normalized properties when websiteScanId is present', async () => {
@@ -104,15 +119,20 @@ describe(PageScanProvider, () => {
                 id: pageScanId,
                 websiteScanId: websiteScanId,
             };
-            const updatedScanDoc = {
+            const expectedScanDoc = {
                 itemType: ItemType.pageScan,
                 partitionKey: partitionKey,
                 ...updatedScanData,
             };
 
-            cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(updatedScanDoc)).verifiable();
+            cosmosContainerClientMock
+                .setup((c) => c.mergeOrWriteDocument(expectedScanDoc))
+                .returns(async () => successfulUpdateResponse)
+                .verifiable();
 
-            await testSubject.updatePageScan(updatedScanData);
+            const actualPageScan = await testSubject.updatePageScan(updatedScanData);
+
+            expect(actualPageScan).toEqual(updatedScanDoc);
         });
 
         it('does not overwrite partitionKey if websiteScanId and pageId are both missing', async () => {
@@ -120,14 +140,19 @@ describe(PageScanProvider, () => {
                 scanStatus: 'pass',
                 id: pageScanId,
             };
-            const updatedScanDoc = {
+            const expectedScanDoc = {
                 itemType: ItemType.pageScan,
                 ...updatedScanData,
             };
 
-            cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(updatedScanDoc)).verifiable();
+            cosmosContainerClientMock
+                .setup((c) => c.mergeOrWriteDocument(expectedScanDoc))
+                .returns(async () => successfulUpdateResponse)
+                .verifiable();
 
-            await testSubject.updatePageScan(updatedScanData);
+            const actualPageScan = await testSubject.updatePageScan(updatedScanData);
+
+            expect(actualPageScan).toEqual(updatedScanDoc);
         });
     });
 

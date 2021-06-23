@@ -59,7 +59,8 @@ describe(PageProvider, () => {
             guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(websiteId)).returns(() => pageId);
             cosmosContainerClientMock.setup((c) => c.writeDocument(pageDoc)).verifiable();
 
-            await testSubject.createPageForWebsite(url, websiteId);
+            const actualPage = await testSubject.createPageForWebsite(url, websiteId);
+            expect(actualPage).toEqual(pageDoc);
         });
     });
 
@@ -77,15 +78,27 @@ describe(PageProvider, () => {
                 lastScanDate: new Date(0, 1, 2, 3),
                 id: pageId,
             };
-            const updatedPageDoc = {
+            const expectedPageDoc = {
                 itemType: 'page',
                 partitionKey: partitionKey,
                 ...updatedPageData,
             };
+            const updatedPageDoc = {
+                id: pageId,
+                url: 'url',
+            } as Page;
+            const response: CosmosOperationResponse<Page> = {
+                statusCode: 200,
+                item: updatedPageDoc,
+            };
 
-            cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(updatedPageDoc)).verifiable();
+            cosmosContainerClientMock
+                .setup((c) => c.mergeOrWriteDocument(expectedPageDoc))
+                .returns(async () => response)
+                .verifiable();
 
-            await testSubject.updatePage(updatedPageData);
+            const actualUpdatedDoc = await testSubject.updatePage(updatedPageData);
+            expect(actualUpdatedDoc).toEqual(updatedPageDoc);
         });
     });
 
