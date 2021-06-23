@@ -25,7 +25,7 @@
     ],
     "license": "./copyright-header.txt",
     "licenseFormats": {
-        "yaml|npmrc|yml|ps1|gitignore|dockerignore|prettierignore|yarnrc|nsh|sh": {
+        "yaml|npmrc|yml|ps1|gitignore|dockerignore|prettierignore|yarnrc|nsh|sh|shellcheckrc": {
             "eachLine": {
                 "prepend": "# "
             }
