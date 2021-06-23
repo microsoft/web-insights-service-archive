@@ -4,40 +4,44 @@
 # Licensed under the MIT License.
 
 exitWithUsageInfo() {
+    # shellcheck disable=SC2128
     echo "
-Usage: $0 -r <resource group>
+Usage: ${BASH_SOURCE} -r <resource group>
 "
     exit 1
 }
 
 # Read script arguments
 while getopts ":r:" option; do
-    case $option in
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z "$resourceGroupName" ]]; then
+if [[ -z "${resourceGroupName}" ]]; then
     exitWithUsageInfo
     exit 1
 fi
 
 resourceName=$(
     az monitor app-insights component show \
-        --resource-group "$resourceGroupName" \
-        --query "[?starts_with(name,'wisinsights')].name|[0]" \
+        --resource-group "${resourceGroupName}" \
+        --query "[?starts_with(name,'wisappinsights')].name|[0]" \
         -o tsv
 )
 
-if [[ -z $resourceName ]]; then
-    echo "Unable to find Application Insights service in resource group $resourceGroupName to infer name suffix"
+if [[ -z ${resourceName} ]]; then
+    echo "Unable to find Application Insights service in resource group ${resourceGroupName} to infer name suffix"
     return
 fi
 
-resourceNameSuffix=${resourceName:11}
+# Remove app insights name prefix
+resourceNameSuffix=${resourceName:14}
 
-kubernetesServiceName="wiskube$resourceNameSuffix"
-containerRegistry="wisregistry$resourceNameSuffix"
-keyVault="wiskeyvault$resourceNameSuffix"
-storageAccount="wisstorage$resourceNameSuffix"
+export kubernetesService="wiskube${resourceNameSuffix}"
+export containerRegistry="wisregistry${resourceNameSuffix}"
+export keyVault="wiskeyvault${resourceNameSuffix}"
+export storageAccount="wisstorage${resourceNameSuffix}"
+export cosmosDbAccount="wisscosmosdb${resourceNameSuffix}"
+export appInsights="wisappinsights${resourceNameSuffix}"

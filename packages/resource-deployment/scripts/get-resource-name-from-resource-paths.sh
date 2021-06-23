@@ -6,8 +6,9 @@
 set -eo pipefail
 
 exitWithUsageInfo() {
+    # shellcheck disable=SC2128
     echo "
-Usage: $0 -p <provider path> -r <ARM line-separated resource strings>
+Usage: ${BASH_SOURCE} -p <provider path> -r <ARM line-separated resource strings>
 "
     exit 1
 }
@@ -15,15 +16,16 @@ Usage: $0 -p <provider path> -r <ARM line-separated resource strings>
 # Read script arguments
 previousFlag=""
 for arg in "$@"; do
-    case $previousFlag in
-    -p) providerPath=$arg ;;
-    -r) resourcePaths=$arg ;;
+    # shellcheck disable=SC2249
+    case ${previousFlag} in
+    -p) providerPath=${arg} ;;
+    -r) resourcePaths=${arg} ;;
     -?) exitWithUsageInfo ;;
     esac
-    previousFlag=$arg
+    previousFlag=${arg}
 done
 
-if [[ -z $providerPath ]] || [[ -z $resourcePaths ]]; then
+if [[ -z ${providerPath} ]] || [[ -z ${resourcePaths} ]]; then
     exitWithUsageInfo
 fi
 
@@ -31,11 +33,11 @@ shopt -s nocasematch
 providerPathRegEx="/providers/${providerPath}/(.[^/]+)"
 export resourceName=""
 
-for resourcePath in $resourcePaths; do
-    if [[ $resourcePath =~ $providerPathRegEx ]]; then
+for resourcePath in ${resourcePaths}; do
+    if [[ ${resourcePath} =~ ${providerPathRegEx} ]]; then
         resourceName="${BASH_REMATCH[1]}"
         return
     fi
 done
 
-echo "Unable to find $providerPath in resource paths '$resourcePaths'"
+echo "Unable to find ${providerPath} in resource paths '${resourcePaths}'"

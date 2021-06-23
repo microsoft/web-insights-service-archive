@@ -3,28 +3,26 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# shellcheck disable=SC1090
 set -eo pipefail
 
-export resourceGroupName
-
 exitWithUsageInfo() {
+    # shellcheck disable=SC2128
     echo "
-Usage: $0 -r <resource group>
+Usage: ${BASH_SOURCE} -r <resource group>
 "
     exit 1
 }
 
 # Read script arguments
 while getopts ":r:" option; do
-    case $option in
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]]; then
+if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
@@ -35,36 +33,36 @@ fi
 
 function waitForDeployments {
     local pendingDeploymentsQuery="az deployment group list \
-                                --resource-group "$resourceGroupName" \
+                                --resource-group ${resourceGroupName} \
                                 --query \"[?properties.provisioningState=='Running'].name\" \
                                 -o tsv"
+    local pendingDeployments
+    pendingDeployments=$(eval "${pendingDeploymentsQuery}")
 
-    local pendingDeployments=$(eval "$pendingDeploymentsQuery")
-
-    if [[ -n $pendingDeployments ]]; then
+    if [[ -n ${pendingDeployments} ]]; then
         local noPendingDeployments=false
         local maximumWaitTimeInSeconds=120
         local end=$((SECONDS + maximumWaitTimeInSeconds))
 
         echo "There are pending deployments:
-                deployments: $pendingDeployments
+                deployments: ${pendingDeployments}
                 Waiting for the deployments to complete."
-        
-        while [[ $SECONDS -le $end ]] && [[ $noPendingDeployments == false ]]; do
-            pendingDeployments=$(eval "$pendingDeploymentsQuery")
-            if [[ -z $pendingDeployments ]]; then
+
+        while [[ ${SECONDS} -le ${end} ]] && [[ ${noPendingDeployments} == false ]]; do
+            pendingDeployments=$(eval "${pendingDeploymentsQuery}")
+            if [[ -z ${pendingDeployments} ]]; then
                 noPendingDeployments=true
             fi
 
-            if [[ $noPendingDeployments == false ]]; then
+            if [[ ${noPendingDeployments} == false ]]; then
                 printf '.'
                 sleep 5
             fi
-        done 
+        done
 
-        if [[ $noPendingDeployments == false ]]; then 
-            echo "There are still pending deployments after the maximum wait time of $maximumWaitTimeInSeconds seconds.
-                deployments: $pendingDeployments
+        if [[ ${noPendingDeployments} == false ]]; then
+            echo "There are still pending deployments after the maximum wait time of ${maximumWaitTimeInSeconds} seconds.
+                deployments: ${pendingDeployments}
             "
             exit 1
         else
