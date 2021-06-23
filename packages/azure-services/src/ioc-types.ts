@@ -22,8 +22,6 @@ export type CosmosClientProvider = () => Promise<CosmosClient>;
 export type QueueServiceClientProvider = () => Promise<QueueServiceClient>;
 
 export const cosmosContainerClientTypes = {
-    OnDemandScanBatchRequestsCosmosContainerClient: 'onDemandScanBatchRequestsCosmosContainerClient',
-    OnDemandScanRunsCosmosContainerClient: 'onDemandScanRunsCosmosContainerClient',
-    OnDemandScanRequestsCosmosContainerClient: 'onDemandScanRequestsCosmosContainerClient',
-    OnDemandSystemDataCosmosContainerClient: 'onDemandSystemDataCosmosContainerClient',
+    websiteRepoContainerClient: 'websiteRepoContainerClient',
+    scanMetadataRepoContainerClient: 'scanMetadataRepoContainerClient',
 };

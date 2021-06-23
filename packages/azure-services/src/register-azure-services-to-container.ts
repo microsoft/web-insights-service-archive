@@ -47,20 +47,12 @@ export function registerAzureServicesToContainer(
 
     setupSingletonQueueServiceClientProvider(container);
 
-    container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue((context) => {
-        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanBatchRequests');
+    container.bind(cosmosContainerClientTypes.websiteRepoContainerClient).toDynamicValue((context) => {
+        return createCosmosContainerClient(context.container, 'WebInsights', 'websiteData');
     });
 
-    container.bind(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient).toDynamicValue((context) => {
-        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRuns');
-    });
-
-    container.bind(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient).toDynamicValue((context) => {
-        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
-    });
-
-    container.bind(cosmosContainerClientTypes.OnDemandSystemDataCosmosContainerClient).toDynamicValue((context) => {
-        return createCosmosContainerClient(context.container, 'onDemandScanner', 'systemData');
+    container.bind(cosmosContainerClientTypes.scanMetadataRepoContainerClient).toDynamicValue((context) => {
+        return createCosmosContainerClient(context.container, 'WebInsights', 'scanMetadata');
     });
 
     container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
