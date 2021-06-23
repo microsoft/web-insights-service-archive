@@ -72,7 +72,7 @@ describe(WebsiteScanProvider, () => {
                 scanType: 'a11y',
             };
 
-            expect(testSubject.updateWebsitecan(websiteScanData)).rejects.toThrow();
+            expect(testSubject.updateWebsiteScan(websiteScanData)).rejects.toThrow();
         });
 
         it('updates doc with normalized properties', async () => {
@@ -88,7 +88,7 @@ describe(WebsiteScanProvider, () => {
 
             cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(updatedScanDoc)).verifiable();
 
-            await testSubject.updateWebsitecan(updatedScanData);
+            await testSubject.updateWebsiteScan(updatedScanData);
         });
     });
 

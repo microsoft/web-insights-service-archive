@@ -35,17 +35,10 @@ describe('HashGenerator', () => {
         expect(bucket).toEqual('bucket-425');
     });
 
-    it('generate WebsiteScanResultDocumentId', () => {
+    it('generate pageScanDocumentId', () => {
         hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getWebsiteScanResultDocumentId('baseUrl', 'scanGroupId');
-        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'scanGroupId');
-        expect(id).toEqual(expectedId);
-    });
-
-    it('generate WebsiteScanResultPartDocumentId', () => {
-        hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getWebsiteScanResultPartDocumentId('baseId', 'scanId');
-        const expectedId = hashGenerator.generateBase64Hash('baseId', 'scanId');
+        const id = hashGenerator.getPageScanDocumentId('pageId', 'websiteScanId');
+        const expectedId = hashGenerator.generateBase64Hash('pageId', 'websiteScanId');
         expect(id).toEqual(expectedId);
     });
 

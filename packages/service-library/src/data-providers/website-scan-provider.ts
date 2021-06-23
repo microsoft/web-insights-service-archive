@@ -28,13 +28,13 @@ export class WebsiteScanProvider {
         await this.cosmosContainerClient.writeDocument(this.normalizeDbDocument(websiteScanData));
     }
 
-    public async updateWebsitecan(websiteScan: Partial<WebsiteScan>): Promise<void> {
-        const websiteDoc = this.normalizeDbDocument(websiteScan);
-        await this.cosmosContainerClient.mergeOrWriteDocument(websiteDoc);
+    public async updateWebsiteScan(websiteScan: Partial<WebsiteScan>): Promise<void> {
+        const websiteScanDoc = this.normalizeDbDocument(websiteScan);
+        await this.cosmosContainerClient.mergeOrWriteDocument(websiteScanDoc);
     }
 
-    public async readWebsiteScan(id: string): Promise<Website> {
-        const response = await this.cosmosContainerClient.readDocument<Website>(id, this.getWebsiteScanPartitionKey(id));
+    public async readWebsiteScan(id: string): Promise<WebsiteScan> {
+        const response = await this.cosmosContainerClient.readDocument<WebsiteScan>(id, this.getWebsiteScanPartitionKey(id));
         client.ensureSuccessStatusCode(response);
 
         return response.item;
