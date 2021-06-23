@@ -47,7 +47,7 @@
     "dependencies": {
         "@azure/functions": "^1.2.3",
         "applicationinsights-native-metrics": "^0.0.6",
-        "azure-services": "^1.0.0",
+        "azure-services": "1.0.0",
         "common": "^1.0.0",
         "inversify": "^5.1.1",
         "lodash": "^4.17.21",

@@ -3,7 +3,7 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { DocumentDataOnly, ItemType, ScanType, Website, WebsiteScan } from 'storage-documents';
+import { DocumentDataOnly, ItemType, ScanType, WebsiteScan } from 'storage-documents';
 import { GuidGenerator } from 'common';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';

@@ -5,7 +5,6 @@ import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure
 import { inject, injectable } from 'inversify';
 import { DocumentDataOnly, ItemType, PageScan } from 'storage-documents';
 import { HashGenerator } from 'common';
-import { SqlQuerySpec } from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 
@@ -42,6 +41,13 @@ export class PageScanProvider {
         const pageScanId = this.hashGenerator.getPageScanDocumentId(pageId, websiteScanId);
         const partitionKey = this.getPageScanPartitionKey(pageId);
         const response = await this.cosmosContainerClient.readDocument<PageScan>(pageScanId, partitionKey);
+        client.ensureSuccessStatusCode(response);
+
+        return response.item;
+    }
+
+    public async readPageScanWithId(pageScanId: string): Promise<PageScan> {
+        const response = await this.cosmosContainerClient.readDocument<PageScan>(pageScanId);
         client.ensureSuccessStatusCode(response);
 
         return response.item;

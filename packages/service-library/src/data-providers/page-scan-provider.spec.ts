@@ -132,7 +132,7 @@ describe(PageScanProvider, () => {
     });
 
     describe('readPageScan', () => {
-        it('reads pageScan with id', async () => {
+        it('reads pageScan with the specified pageId and websiteScanId', async () => {
             const response = {
                 statusCode: 200,
                 item: pageScanDoc,
@@ -157,6 +157,35 @@ describe(PageScanProvider, () => {
                 .verifiable();
 
             expect(testSubject.readPageScan(pageId, websiteScanId)).rejects.toThrow();
+        });
+    });
+
+    describe('readPageScanWithId', () => {
+        it('reads pageScan with id', async () => {
+            const response = {
+                statusCode: 200,
+                item: pageScanDoc,
+            } as CosmosOperationResponse<PageScan>;
+            cosmosContainerClientMock
+                .setup((c) => c.readDocument(pageScanId))
+                .returns(async () => response)
+                .verifiable();
+
+            const actualPageScan = await testSubject.readPageScanWithId(pageScanId);
+
+            expect(actualPageScan).toBe(pageScanDoc);
+        });
+
+        it('throws if unsuccessful status code', async () => {
+            const response = {
+                statusCode: 404,
+            } as CosmosOperationResponse<PageScan>;
+            cosmosContainerClientMock
+                .setup((c) => c.readDocument(pageScanId))
+                .returns(async () => response)
+                .verifiable();
+
+            expect(testSubject.readPageScanWithId(pageScanId)).rejects.toThrow();
         });
     });
 
