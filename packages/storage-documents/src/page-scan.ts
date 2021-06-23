@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { ItemType } from './item-type';
 import { ReportData } from './report-data';
 import { ScanStatus } from './scan-types';
 import { StorageDocument } from './storage-document';
@@ -10,6 +11,7 @@ import { StorageDocument } from './storage-document';
  * Must have a unique combination of pageId and websiteScanId.
  */
 export interface PageScan extends StorageDocument {
+    itemType: ItemType.pageScan;
     websiteScanId: string; // maps to a WebsiteScan document
     pageId: string; // maps to a Page document
     priority: number;
