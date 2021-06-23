@@ -53,6 +53,9 @@
         "shellformat.effectLanguages": [
             "shellscript"
         ],
+        "shellcheck.customArgs": [
+            "-x"
+        ],
         "files.exclude": {
             "**/node_modules/": true,
             "**/packages/": true,
@@ -92,7 +95,8 @@
             "foxundermoon.shell-format",
             "rogalmic.bash-debug",
             "streetsidesoftware.code-spell-checker",
-            "ms-azuretools.vscode-azurefunctions"
+            "ms-azuretools.vscode-azurefunctions",
+            "timonwong.shellcheck"
         ]
     },
 }

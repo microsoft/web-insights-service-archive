@@ -3,19 +3,19 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# shellcheck disable=SC1090
 set -eo pipefail
 
 export dropFolder="${0%/*}/../../../"
+export templatesFolder="${0%/*}/../templates/"
 export environment
 export location
 export resourceGroupName
 export subscription
-export templatesFolder="${0%/*}/../templates/"
 
 exitWithUsageInfo() {
+    # shellcheck disable=SC2128
     echo "
-Usage: $0 -e <environment> -l <location> -r <resource group> -s <subscription name or id>
+Usage: ${BASH_SOURCE} -e <environment> -l <location> -r <resource group> -s <subscription name or id>
 where:
 
 resource group - The name of the resource group that everything will be deployed in.
@@ -29,6 +29,7 @@ location - Azure region where the instances will be deployed. Available Azure re
     eastus2
     westus
     westus2
+    westus3
     northcentralus
     southcentralus
     westcentralus
@@ -60,22 +61,22 @@ location - Azure region where the instances will be deployed. Available Azure re
 function onExit() {
     local exitCode=$?
 
-    if [[ $exitCode != 0 ]]; then
-        echo "Installation failed with exit code $exitCode"
+    if [[ ${exitCode} != 0 ]]; then
+        echo "Installation failed with exit code ${exitCode}"
         killDescendantProcesses $$
         echo "WARN: Deployments that already were triggered could still be running. To kill them, you may need to goto the Azure portal and cancel corresponding deployment."
     else
-        echo "Installation completed with exit code $exitCode"
+        echo "Installation completed with exit code ${exitCode}"
     fi
 
-    exit $exitCode
+    exit "${exitCode}"
 }
 
 trap "onExit" EXIT
 
 # Read script arguments
 while getopts ":r:s:l:e:" option; do
-    case $option in
+    case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     l) location=${OPTARG} ;;
@@ -84,7 +85,7 @@ while getopts ":r:s:l:e:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${subscription} ]] || [[ -z ${location} ]] || [[ -z ${environment} ]]; then
     exitWithUsageInfo
 fi
 
@@ -94,7 +95,7 @@ function install() {
         az login
     fi
 
-    az account set --subscription "$subscription"
+    az account set --subscription "${subscription}"
 
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
@@ -102,6 +103,7 @@ function install() {
     . "${0%/*}/get-resource-names.sh"
 
     # Set of scripts that can be run in parallel without external dependencies
+    # shellcheck disable=SC2034
     parallelProcesses=(
         "${0%/*}/create-container-registry.sh"
         "${0%/*}/create-cosmos-db.sh"
@@ -110,6 +112,7 @@ function install() {
     runCommandsWithoutSecretsInParallel parallelProcesses
 
     . "${0%/*}/create-key-vault.sh"
+    . "${0%/*}/push-secrets-to-key-vault.sh"
     . "${0%/*}/create-kubernetes-service.sh"
 }
 

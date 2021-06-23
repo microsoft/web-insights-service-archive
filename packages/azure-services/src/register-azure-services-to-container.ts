@@ -125,16 +125,16 @@ function setupSingletonCosmosClientProvider(
 ): void {
     IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async (context) => {
         let cosmosDbUrl: string;
-        let cosmosDbApiUrl: string;
+        let cosmosDbArmUrl: string;
         if (process.env.COSMOS_DB_URL !== undefined && process.env.COSMOS_DB_KEY !== undefined) {
             return cosmosClientFactory({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
         } else {
             const secretProvider = context.container.get(SecretProvider);
             cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
-            cosmosDbApiUrl = await secretProvider.getSecret(secretNames.cosmosDbApiUrl);
+            cosmosDbArmUrl = await secretProvider.getSecret(secretNames.cosmosDbArmUrl);
 
             const cosmosKeyProvider = context.container.get(CosmosKeyProvider);
-            const cosmosDbKey = await cosmosKeyProvider.getCosmosKey(cosmosDbApiUrl);
+            const cosmosDbKey = await cosmosKeyProvider.getCosmosKey(cosmosDbArmUrl);
 
             return cosmosClientFactory({ endpoint: cosmosDbUrl, key: cosmosDbKey });
         }

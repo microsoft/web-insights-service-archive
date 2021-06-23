@@ -6,27 +6,30 @@
 set -eo pipefail
 
 exitWithUsageInfo() {
-    echo "Usage: $0 -h <commit hash>"
+    # shellcheck disable=SC2128
+    echo "
+Usage: ${BASH_SOURCE} -h <commit hash>
+"
     exit 1
 }
 
 while getopts ":h:" option; do
-    case $option in
+    case ${option} in
     h) commitHash=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $commitHash ]]; then
+if [[ -z ${commitHash} ]]; then
     exitWithUsageInfo
 fi
 
 timestamp=$(date '+%Y-%m-%d')
-tag="service@$timestamp"
+tag="service@${timestamp}"
 
-echo "Creating release tag $tag for commit hash $commitHash"
+echo "Creating release tag ${tag} for commit hash ${commitHash}"
 
-git tag $tag $commitHash
-git push origin $tag
+git tag "${tag}" "${commitHash}"
+git push origin "${tag}"
 
 echo "Release tag has been created successfully"
