@@ -8,7 +8,6 @@ import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { ItemType, Page } from 'storage-documents';
 import _ from 'lodash';
-import { SqlQuerySpec } from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { PageProvider } from './page-provider';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
@@ -132,35 +131,9 @@ describe(PageProvider, () => {
     });
 
     describe('getPagesForWebsite', () => {
-        const iterableStub = {} as CosmosQueryResultsIterable<Page>;
-
-        beforeEach(() => {
-            partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.page, websiteId)).returns(() => partitionKey);
-        });
         it('calls cosmosQueryResultsProvider with expected query', () => {
-            const expectedQuery = getQueryWithSelectedProperties('*');
-
-            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
-
-            const actualIterable = testSubject.getPagesForWebsite(websiteId);
-
-            expect(actualIterable).toBe(iterableStub);
-        });
-
-        it('calls cosmosQueryResultsProvider with specific properties selected', () => {
-            const selectedProperties: (keyof Page)[] = ['url', 'id'];
-            const expectedQuery = getQueryWithSelectedProperties('url, id');
-
-            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
-
-            const actualIterable = testSubject.getPagesForWebsite(websiteId, selectedProperties);
-
-            expect(actualIterable).toBe(iterableStub);
-        });
-
-        function getQueryWithSelectedProperties(selectedPropertiesString: string): SqlQuerySpec {
-            return {
-                query: 'SELECT @selectedProperties FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
+            const expectedQuery = {
+                query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
                 parameters: [
                     {
                         name: '@websiteId',
@@ -174,12 +147,16 @@ describe(PageProvider, () => {
                         name: '@itemType',
                         value: ItemType.page,
                     },
-                    {
-                        name: '@selectedProperties',
-                        value: selectedPropertiesString,
-                    },
                 ],
             };
-        }
+            const iterableStub = {} as CosmosQueryResultsIterable<Page>;
+
+            partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.page, websiteId)).returns(() => partitionKey);
+            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
+
+            const actualIterable = testSubject.getPagesForWebsite(websiteId);
+
+            expect(actualIterable).toBe(iterableStub);
+        });
     });
 });

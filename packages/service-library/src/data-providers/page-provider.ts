@@ -42,11 +42,10 @@ export class PageProvider {
         return response.item;
     }
 
-    public getPagesForWebsite(websiteId: string, selectedProperties?: (keyof Page)[]): CosmosQueryResultsIterable<Page> {
+    public getPagesForWebsite(websiteId: string): CosmosQueryResultsIterable<Page> {
         const partitionKey = this.getPagePartitionKey(websiteId);
-        const selectedPropertiesString = selectedProperties === undefined ? '*' : selectedProperties.join(', ');
         const query = {
-            query: 'SELECT @selectedProperties FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
             parameters: [
                 {
                     name: '@websiteId',
@@ -59,10 +58,6 @@ export class PageProvider {
                 {
                     name: '@itemType',
                     value: ItemType.page,
-                },
-                {
-                    name: '@selectedProperties',
-                    value: selectedPropertiesString,
                 },
             ],
         };

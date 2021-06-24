@@ -8,7 +8,6 @@ import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { ItemType, WebsiteScan } from 'storage-documents';
 import _ from 'lodash';
-import { SqlQuerySpec } from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 import { WebsiteScanProvider } from './website-scan-provider';
@@ -140,38 +139,9 @@ describe(WebsiteScanProvider, () => {
     });
 
     describe('getScansForWebsite', () => {
-        const iterableStub = {} as CosmosQueryResultsIterable<WebsiteScan>;
-
-        beforeEach(() => {
-            partitionKeyFactoryMock
-                .setup((p) => p.createPartitionKeyForDocument(ItemType.websiteScan, websiteId))
-                .returns(() => partitionKey);
-        });
-
         it('calls cosmosQueryResultsProvider with expected query', () => {
-            const expectedQuery = getQueryWithSelectedProperties('*');
-
-            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
-
-            const actualIterable = testSubject.getScansForWebsite(websiteId);
-
-            expect(actualIterable).toBe(iterableStub);
-        });
-
-        it('calls cosmosQueryResultsProvider with specific properties selected', () => {
-            const selectedProperties: (keyof WebsiteScan)[] = ['id', 'websiteId'];
-            const expectedQuery = getQueryWithSelectedProperties('id, websiteId');
-
-            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
-
-            const actualIterable = testSubject.getScansForWebsite(websiteId, selectedProperties);
-
-            expect(actualIterable).toBe(iterableStub);
-        });
-
-        function getQueryWithSelectedProperties(selectedPropertiesString: string): SqlQuerySpec {
-            return {
-                query: 'SELECT @selectedProperties FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
+            const expectedQuery = {
+                query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
                 parameters: [
                     {
                         name: '@websiteId',
@@ -185,12 +155,18 @@ describe(WebsiteScanProvider, () => {
                         name: '@itemType',
                         value: ItemType.websiteScan,
                     },
-                    {
-                        name: '@selectedProperties',
-                        value: selectedPropertiesString,
-                    },
                 ],
             };
-        }
+            const iterableStub = {} as CosmosQueryResultsIterable<WebsiteScan>;
+
+            partitionKeyFactoryMock
+                .setup((p) => p.createPartitionKeyForDocument(ItemType.websiteScan, websiteId))
+                .returns(() => partitionKey);
+            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
+
+            const actualIterable = testSubject.getScansForWebsite(websiteId);
+
+            expect(actualIterable).toBe(iterableStub);
+        });
     });
 });

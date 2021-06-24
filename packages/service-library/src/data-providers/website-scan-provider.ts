@@ -45,11 +45,10 @@ export class WebsiteScanProvider {
         return response.item;
     }
 
-    public getScansForWebsite(websiteId: string, selectedProperties?: (keyof WebsiteScan)[]): CosmosQueryResultsIterable<WebsiteScan> {
+    public getScansForWebsite(websiteId: string): CosmosQueryResultsIterable<WebsiteScan> {
         const partitionKey = this.getWebsiteScanPartitionKey(websiteId);
-        const selectedPropertiesString = selectedProperties === undefined ? '*' : selectedProperties.join(', ');
         const query = {
-            query: 'SELECT @selectedProperties FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType',
             parameters: [
                 {
                     name: '@websiteId',
@@ -62,10 +61,6 @@ export class WebsiteScanProvider {
                 {
                     name: '@itemType',
                     value: ItemType.websiteScan,
-                },
-                {
-                    name: '@selectedProperties',
-                    value: selectedPropertiesString,
                 },
             ],
         };

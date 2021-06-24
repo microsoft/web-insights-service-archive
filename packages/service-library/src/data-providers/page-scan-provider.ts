@@ -50,21 +50,10 @@ export class PageScanProvider {
         return response.item;
     }
 
-    public async readPageScanWithId(pageScanId: string): Promise<PageScan> {
-        const response = await this.cosmosContainerClient.readDocument<PageScan>(pageScanId);
-        client.ensureSuccessStatusCode(response);
-
-        return response.item;
-    }
-
-    public getPageScansForWebsiteScan(
-        websiteScanId: string,
-        selectedProperties?: (keyof PageScan)[],
-    ): CosmosQueryResultsIterable<PageScan> {
+    public getPageScansForWebsiteScan(websiteScanId: string): CosmosQueryResultsIterable<PageScan> {
         const partitionKey = this.getPageScanPartitionKey(websiteScanId);
-        const selectedPropertiesString = selectedProperties === undefined ? '*' : selectedProperties.join(', ');
         const query = {
-            query: `SELECT @selectedProperties FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId`,
+            query: `SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId`,
             parameters: [
                 {
                     name: '@partitionKey',
@@ -73,10 +62,6 @@ export class PageScanProvider {
                 {
                     name: '@itemType',
                     value: ItemType.pageScan,
-                },
-                {
-                    name: '@selectedProperties',
-                    value: selectedPropertiesString,
                 },
                 {
                     name: '@websiteScanId',
@@ -92,16 +77,16 @@ export class PageScanProvider {
         if (pageScan.id === undefined) {
             throw new Error('Page scan document has no id');
         }
+        if (pageScan.partitionKey === undefined && pageScan.pageId === undefined && pageScan.websiteScanId === undefined) {
+            throw new Error('Cannot update document without either partitionKey, pageId, or websiteScanId');
+        }
+        const partitionKey = pageScan.partitionKey ?? this.getPageScanPartitionKey(pageScan.pageId ?? pageScan.websiteScanId);
 
         const normalizedDoc: Partial<PageScan> = {
             itemType: ItemType.pageScan,
+            partitionKey: partitionKey,
             ...pageScan,
         };
-
-        if (pageScan.pageId !== undefined || pageScan.websiteScanId !== undefined) {
-            const partitionKey = this.getPageScanPartitionKey(pageScan.pageId ?? pageScan.websiteScanId);
-            normalizedDoc.partitionKey = normalizedDoc.partitionKey ?? partitionKey;
-        }
 
         return normalizedDoc;
     }

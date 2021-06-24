@@ -8,7 +8,6 @@ import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { HashGenerator } from 'common';
 import { ItemType, PageScan } from 'storage-documents';
 import _ from 'lodash';
-import { SqlQuerySpec } from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 import { PageScanProvider } from './page-scan-provider';
@@ -91,6 +90,15 @@ describe(PageScanProvider, () => {
             expect(testSubject.updatePageScan(pageScanUpdate)).rejects.toThrow();
         });
 
+        it('Errors if no partition key is provided and the fields needed to compute it are missing', () => {
+            const pageScanUpdate: Partial<PageScan> = {
+                id: pageScanId,
+                scanStatus: 'pass',
+            };
+
+            expect(testSubject.updatePageScan(pageScanUpdate)).rejects.toThrow();
+        });
+
         it('updates doc with normalized properties when pageId is present', async () => {
             const updatedScanData: Partial<PageScan> = {
                 scanStatus: 'pass',
@@ -135,10 +143,11 @@ describe(PageScanProvider, () => {
             expect(actualPageScan).toEqual(updatedScanDoc);
         });
 
-        it('does not overwrite partitionKey if websiteScanId and pageId are both missing', async () => {
+        it('uses partitionKey if one is provided', async () => {
             const updatedScanData: Partial<PageScan> = {
                 scanStatus: 'pass',
                 id: pageScanId,
+                partitionKey: 'provided partition key',
             };
             const expectedScanDoc = {
                 itemType: ItemType.pageScan,
@@ -185,62 +194,10 @@ describe(PageScanProvider, () => {
         });
     });
 
-    describe('readPageScanWithId', () => {
-        it('reads pageScan with id', async () => {
-            const response = {
-                statusCode: 200,
-                item: pageScanDoc,
-            } as CosmosOperationResponse<PageScan>;
-            cosmosContainerClientMock
-                .setup((c) => c.readDocument(pageScanId))
-                .returns(async () => response)
-                .verifiable();
-
-            const actualPageScan = await testSubject.readPageScanWithId(pageScanId);
-
-            expect(actualPageScan).toBe(pageScanDoc);
-        });
-
-        it('throws if unsuccessful status code', async () => {
-            const response = {
-                statusCode: 404,
-            } as CosmosOperationResponse<PageScan>;
-            cosmosContainerClientMock
-                .setup((c) => c.readDocument(pageScanId))
-                .returns(async () => response)
-                .verifiable();
-
-            expect(testSubject.readPageScanWithId(pageScanId)).rejects.toThrow();
-        });
-    });
-
     describe('getPageScansForWebsiteScan', () => {
-        const iterableStub = {} as CosmosQueryResultsIterable<PageScan>;
-
         it('calls cosmosQueryResultsProvider with expected query', () => {
-            const expectedQuery = getQueryWithSelectedProperties('*');
-
-            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
-
-            const actualIterable = testSubject.getPageScansForWebsiteScan(websiteScanId);
-
-            expect(actualIterable).toBe(iterableStub);
-        });
-
-        it('calls cosmosQueryResultsProvider with specific properties selected', () => {
-            const selectedProperties: (keyof PageScan)[] = ['id', 'websiteScanId'];
-            const expectedQuery = getQueryWithSelectedProperties('id, websiteScanId');
-
-            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
-
-            const actualIterable = testSubject.getPageScansForWebsiteScan(websiteScanId, selectedProperties);
-
-            expect(actualIterable).toBe(iterableStub);
-        });
-
-        function getQueryWithSelectedProperties(selectedPropertiesString: string): SqlQuerySpec {
-            return {
-                query: `SELECT @selectedProperties FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId`,
+            const expectedQuery = {
+                query: `SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId`,
                 parameters: [
                     {
                         name: '@partitionKey',
@@ -251,15 +208,18 @@ describe(PageScanProvider, () => {
                         value: ItemType.pageScan,
                     },
                     {
-                        name: '@selectedProperties',
-                        value: selectedPropertiesString,
-                    },
-                    {
                         name: '@websiteScanId',
                         value: websiteScanId,
                     },
                 ],
             };
-        }
+            const iterableStub = {} as CosmosQueryResultsIterable<PageScan>;
+
+            cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
+
+            const actualIterable = testSubject.getPageScansForWebsiteScan(websiteScanId);
+
+            expect(actualIterable).toBe(iterableStub);
+        });
     });
 });
