@@ -37,10 +37,13 @@ getPackagesLocation() {
     # Path for a script running from a source folder
     packagesLocation="${0%/*}/../../../packages/"
     if [ ! -d "${packagesLocation}" ]; then
+        echo "Path does not exist: ${packagesLocation}"
         # Path for a script running from a dist folder
         packagesLocation="${0%/*}/../../../../packages/"
         if [ ! -d "${packagesLocation}" ]; then
+            echo "Path does not exist: ${packagesLocation}"
             echo "Cannot find 'packages' folder to prepare docker images."
+
             exit 1
         fi
     fi
