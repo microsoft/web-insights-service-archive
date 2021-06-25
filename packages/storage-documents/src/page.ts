@@ -8,5 +8,5 @@ export interface Page extends StorageDocument {
     itemType: ItemType.page;
     websiteId: string; // maps to a Website document
     url: string;
-    lastScanDate?: Date;
+    lastScanTimestamp?: number;
 }

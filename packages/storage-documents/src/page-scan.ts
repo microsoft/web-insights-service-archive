@@ -16,8 +16,7 @@ export interface PageScan extends StorageDocument {
     pageId: string; // maps to a Page document
     priority: number;
     scanStatus: ScanStatus;
-    startDate: Date;
-    completedDate?: Date;
+    completedTimestamp?: number;
     resultsBlobId?: string;
     reports?: ReportData[];
     retryCount: number;

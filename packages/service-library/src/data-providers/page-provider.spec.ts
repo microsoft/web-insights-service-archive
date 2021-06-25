@@ -74,7 +74,7 @@ describe(PageProvider, () => {
 
         it('updates doc with normalized properties', async () => {
             const updatedPageData: Partial<Page> = {
-                lastScanDate: new Date(0, 1, 2, 3),
+                lastScanTimestamp: 123456,
                 id: pageId,
             };
             const expectedPageDoc = {

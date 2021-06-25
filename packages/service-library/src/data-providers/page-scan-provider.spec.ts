@@ -3,11 +3,12 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
-import { HashGenerator } from 'common';
+import { GuidGenerator } from 'common';
 import { ItemType, PageScan } from 'storage-documents';
 import _ from 'lodash';
+import { SqlQuerySpec } from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 import { PageScanProvider } from './page-scan-provider';
@@ -17,8 +18,6 @@ describe(PageScanProvider, () => {
     const pageId = 'page id';
     const pageScanId = 'page scan id';
     const partitionKey = 'partition key';
-    const currentDate = new Date(0, 1, 2, 3);
-    const getCurrentDateStub = () => currentDate;
     const priority = 10;
     const pageScanDoc = {
         id: pageScanId,
@@ -27,12 +26,11 @@ describe(PageScanProvider, () => {
         partitionKey: partitionKey,
         itemType: ItemType.pageScan,
         priority: priority,
-        startDate: currentDate,
         scanStatus: 'pending',
         retryCount: 0,
     } as PageScan;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
-    let hashGeneratorMock: IMock<HashGenerator>;
+    let guidGeneratorMock: IMock<GuidGenerator>;
     let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
     let cosmosQueryResultsProviderMock: IMock<typeof getCosmosQueryResultsIterable>;
 
@@ -40,24 +38,23 @@ describe(PageScanProvider, () => {
 
     beforeEach(() => {
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
-        hashGeneratorMock = Mock.ofType<HashGenerator>();
+        guidGeneratorMock = Mock.ofType<GuidGenerator>();
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
+        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.pageScan, pageScanId)).returns(() => partitionKey);
         partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.pageScan, pageId)).returns(() => partitionKey);
         partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.pageScan, websiteScanId)).returns(() => partitionKey);
-        hashGeneratorMock.setup((h) => h.getPageScanDocumentId(pageId, websiteScanId)).returns(() => pageScanId);
         cosmosQueryResultsProviderMock = Mock.ofInstance(() => null);
 
         testSubject = new PageScanProvider(
             cosmosContainerClientMock.object,
-            hashGeneratorMock.object,
+            guidGeneratorMock.object,
             partitionKeyFactoryMock.object,
             cosmosQueryResultsProviderMock.object,
-            getCurrentDateStub,
         );
     });
 
     afterEach(() => {
-        hashGeneratorMock.verifyAll();
+        guidGeneratorMock.verifyAll();
         cosmosContainerClientMock.verifyAll();
         partitionKeyFactoryMock.verifyAll();
         cosmosQueryResultsProviderMock.verifyAll();
@@ -65,6 +62,7 @@ describe(PageScanProvider, () => {
 
     describe('createPageScan', () => {
         it('creates pageScan doc', async () => {
+            guidGeneratorMock.setup((h) => h.createGuidFromBaseGuid(pageId)).returns(() => pageScanId);
             cosmosContainerClientMock.setup((c) => c.writeDocument(pageScanDoc)).verifiable();
 
             const actualPageScan = await testSubject.createPageScan(pageId, websiteScanId, priority);
@@ -176,7 +174,7 @@ describe(PageScanProvider, () => {
                 .returns(async () => response)
                 .verifiable();
 
-            const actualPageScan = await testSubject.readPageScan(pageId, websiteScanId);
+            const actualPageScan = await testSubject.readPageScan(pageScanId);
 
             expect(actualPageScan).toBe(pageScanDoc);
         });
@@ -190,11 +188,11 @@ describe(PageScanProvider, () => {
                 .returns(async () => response)
                 .verifiable();
 
-            expect(testSubject.readPageScan(pageId, websiteScanId)).rejects.toThrow();
+            expect(testSubject.readPageScan(pageScanId)).rejects.toThrow();
         });
     });
 
-    describe('getPageScansForWebsiteScan', () => {
+    describe('getAllPageScansForWebsiteScan', () => {
         it('calls cosmosQueryResultsProvider with expected query', () => {
             const expectedQuery = {
                 query: `SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId`,
@@ -217,9 +215,86 @@ describe(PageScanProvider, () => {
 
             cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
 
-            const actualIterable = testSubject.getPageScansForWebsiteScan(websiteScanId);
+            const actualIterable = testSubject.getAllPageScansForWebsiteScan(websiteScanId);
 
             expect(actualIterable).toBe(iterableStub);
         });
+    });
+
+    describe('getLatestPageScanFor', () => {
+        it('Throws if unsuccessful status code', () => {
+            const response = {
+                statusCode: 404,
+            } as CosmosOperationResponse<PageScan[]>;
+
+            cosmosContainerClientMock.setup((c) => c.queryDocuments(It.isAny())).returns(async () => response);
+
+            expect(testSubject.getLatestPageScanFor(websiteScanId, pageId)).rejects.toThrow();
+        });
+
+        it('returns undefined if no results are found', async () => {
+            const response = {
+                statusCode: 200,
+                item: [],
+            } as CosmosOperationResponse<PageScan[]>;
+
+            cosmosContainerClientMock.setup((c) => c.queryDocuments(It.isAny())).returns(async () => response);
+
+            expect(await testSubject.getLatestPageScanFor(websiteScanId, pageId)).toBeUndefined();
+        });
+
+        it('queries db with expected query', async () => {
+            const expectedFilterConditions =
+                'c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId and c.pageId = @pageId';
+            const expectedQuery = getExpectedQueryWithConditions(expectedFilterConditions);
+            const response = {
+                statusCode: 200,
+                item: [pageScanDoc],
+            } as CosmosOperationResponse<PageScan[]>;
+
+            cosmosContainerClientMock.setup((c) => c.queryDocuments(expectedQuery)).returns(async () => response);
+
+            const actualResult = await testSubject.getLatestPageScanFor(websiteScanId, pageId);
+            expect(actualResult).toEqual(pageScanDoc);
+        });
+
+        it('queries db with expected query when completed=true', async () => {
+            const expectedFilterConditions =
+                'c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId and c.pageId = @pageId and c.scanStatus != "pending"';
+            const expectedQuery = getExpectedQueryWithConditions(expectedFilterConditions);
+            const response = {
+                statusCode: 200,
+                item: [pageScanDoc],
+            } as CosmosOperationResponse<PageScan[]>;
+
+            cosmosContainerClientMock.setup((c) => c.queryDocuments(expectedQuery)).returns(async () => response);
+
+            const actualResult = await testSubject.getLatestPageScanFor(websiteScanId, pageId, true);
+            expect(actualResult).toEqual(pageScanDoc);
+        });
+
+        function getExpectedQueryWithConditions(filterConditions: string): SqlQuerySpec {
+            return {
+                query: `SELECT TOP 1 * FROM c WHERE ${filterConditions} ORDER BY c._ts DESC`,
+                parameters: [
+                    {
+                        name: '@partitionKey',
+                        value: partitionKey,
+                    },
+                    {
+                        name: '@itemType',
+                        value: ItemType.pageScan,
+                    },
+                    {
+                        name: '@websiteScanId',
+                        value: websiteScanId,
+                    },
+                    {
+                        name: '@pageId',
+                        value: pageId,
+                    },
+                ],
+            };
+        }
     });
 });

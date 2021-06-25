@@ -4,7 +4,7 @@
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { DocumentDataOnly, ItemType, PageScan } from 'storage-documents';
-import { HashGenerator } from 'common';
+import { GuidGenerator } from 'common';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
 
@@ -12,19 +12,17 @@ import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cos
 export class PageScanProvider {
     public constructor(
         @inject(cosmosContainerClientTypes.scanMetadataRepoContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
-        @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
-        private readonly getCurrentDate: () => Date = () => new Date(),
     ) {}
 
     public async createPageScan(pageId: string, websiteScanId: string, priority: number): Promise<PageScan> {
         const pageScanData: DocumentDataOnly<PageScan> = {
-            id: this.hashGenerator.getPageScanDocumentId(pageId, websiteScanId),
+            id: this.guidGenerator.createGuidFromBaseGuid(pageId),
             pageId: pageId,
             websiteScanId: websiteScanId,
             priority: priority,
-            startDate: this.getCurrentDate(),
             scanStatus: 'pending',
             retryCount: 0,
         };
@@ -41,16 +39,15 @@ export class PageScanProvider {
         return response.item as PageScan;
     }
 
-    public async readPageScan(pageId: string, websiteScanId: string): Promise<PageScan> {
-        const pageScanId = this.hashGenerator.getPageScanDocumentId(pageId, websiteScanId);
-        const partitionKey = this.getPageScanPartitionKey(pageId);
-        const response = await this.cosmosContainerClient.readDocument<PageScan>(pageScanId, partitionKey);
+    public async readPageScan(id: string): Promise<PageScan> {
+        const partitionKey = this.getPageScanPartitionKey(id);
+        const response = await this.cosmosContainerClient.readDocument<PageScan>(id, partitionKey);
         client.ensureSuccessStatusCode(response);
 
         return response.item;
     }
 
-    public getPageScansForWebsiteScan(websiteScanId: string): CosmosQueryResultsIterable<PageScan> {
+    public getAllPageScansForWebsiteScan(websiteScanId: string): CosmosQueryResultsIterable<PageScan> {
         const partitionKey = this.getPageScanPartitionKey(websiteScanId);
         const query = {
             query: `SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId`,
@@ -73,25 +70,58 @@ export class PageScanProvider {
         return this.cosmosQueryResultsProvider(this.cosmosContainerClient, query);
     }
 
+    public async getLatestPageScanFor(websiteScanId: string, pageId: string, completed?: boolean): Promise<PageScan | undefined> {
+        const partitionKey = this.getPageScanPartitionKey(websiteScanId);
+        let filterConditions =
+            'c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId and c.pageId = @pageId';
+        if (completed) {
+            filterConditions = `${filterConditions} and c.scanStatus != "pending"`;
+        }
+        const query = {
+            query: `SELECT TOP 1 * FROM c WHERE ${filterConditions} ORDER BY c._ts DESC`,
+            parameters: [
+                {
+                    name: '@partitionKey',
+                    value: partitionKey,
+                },
+                {
+                    name: '@itemType',
+                    value: ItemType.pageScan,
+                },
+                {
+                    name: '@websiteScanId',
+                    value: websiteScanId,
+                },
+                {
+                    name: '@pageId',
+                    value: pageId,
+                },
+            ],
+        };
+        const response = await this.cosmosContainerClient.queryDocuments<PageScan>(query);
+        client.ensureSuccessStatusCode(response);
+        if (response.item.length === 0) {
+            return undefined;
+        }
+
+        return response.item[0];
+    }
+
     private normalizeDbDocument(pageScan: Partial<PageScan>): Partial<PageScan> {
         if (pageScan.id === undefined) {
             throw new Error('Page scan document has no id');
         }
-        if (pageScan.partitionKey === undefined && pageScan.pageId === undefined && pageScan.websiteScanId === undefined) {
-            throw new Error('Cannot update document without either partitionKey, pageId, or websiteScanId');
-        }
-        const partitionKey = pageScan.partitionKey ?? this.getPageScanPartitionKey(pageScan.pageId ?? pageScan.websiteScanId);
 
         const normalizedDoc: Partial<PageScan> = {
             itemType: ItemType.pageScan,
-            partitionKey: partitionKey,
+            partitionKey: this.getPageScanPartitionKey(pageScan.id),
             ...pageScan,
         };
 
         return normalizedDoc;
     }
 
-    private getPageScanPartitionKey(pageOrWebsiteScanId: string): string {
-        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.pageScan, pageOrWebsiteScanId);
+    private getPageScanPartitionKey(guid: string): string {
+        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.pageScan, guid);
     }
 }
