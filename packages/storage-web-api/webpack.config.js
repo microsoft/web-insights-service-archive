@@ -75,7 +75,7 @@ module.exports = (env) => {
                     },
                     {
                         context: '../resource-deployment/runtime-config',
-                        from: `runtime-config.${version}.json`,
+                        from: `runtime-config.${version}.json`, // production config is copied by external deployment script
                         to: 'runtime-config.json',
                     },
                     {

@@ -17,8 +17,6 @@ Usage: ${BASH_SOURCE} -r <resource group> [-e <environment>]
     exit 1
 }
 
-. "${0%/*}/process-utilities.sh"
-
 function recoverIfSoftDeleted() {
     # shellcheck disable=SC2154
     softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='${keyVault}'].id" -o tsv)
