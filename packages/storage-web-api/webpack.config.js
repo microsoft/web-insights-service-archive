@@ -7,7 +7,10 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = (env) => {
-    const version = env ? env.version : 'dev';
+    let version = 'dev';
+    if (env && env.version) {
+        version = env.version;
+    }
     console.log(`Building for version : ${version}`);
 
     return {
@@ -71,12 +74,9 @@ module.exports = (env) => {
                         globOptions: { ignore: ['dist/**'] },
                     },
                     {
-                        from: 'package.json',
-                        to: '',
-                    },
-                    {
-                        from: '../../yarn.lock',
-                        to: '',
+                        context: '../resource-deployment/runtime-config',
+                        from: `runtime-config.${version}.json`,
+                        to: 'runtime-config.json',
                     },
                     {
                         context: './docker-image-config',
