@@ -34,17 +34,19 @@ function onExit() {
 }
 
 getPackagesLocation() {
-    # Path for a script running from a source folder
-    packagesLocation="${0%/*}/../../../packages/"
+    # Path when script runs from a dist folder
+    packagesLocation="${0%/*}/../../../../packages/"
+
     if [ ! -d "${packagesLocation}" ]; then
-        echo "Path does not exist: ${packagesLocation}"
-        # Path for a script running from a dist folder
-        packagesLocation="${0%/*}/../../../../packages/"
+        # Path when script runs from a source folder
+        packagesLocation="${0%/*}/../../../packages/"
+
         if [ ! -d "${packagesLocation}" ]; then
-            echo "Path does not exist: ${packagesLocation}"
-            echo "Cannot find 'packages' folder to prepare docker images."
+            echo "Cannot find 'packages' parent folder to prepare docker images."
 
             exit 1
+        else
+            echo "Running script from a source location."
         fi
     fi
 }
@@ -97,4 +99,4 @@ trap "onExit" EXIT
 getPackagesLocation
 setImageBuildSource
 prepareImageBuildSource
-pushImagesToRegistry
+# pushImagesToRegistry
