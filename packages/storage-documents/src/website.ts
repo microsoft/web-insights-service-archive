@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ItemType } from './item-type';
+import { ItemTypes } from './item-type';
 import { ScanType } from './scan-types';
 import { StorageDocument } from './storage-document';
 
 export interface Website extends StorageDocument {
     name: string;
-    itemType: ItemType.website;
+    itemType: ItemTypes['website'];
     baseUrl: string;
     priority: number;
     discoveryPatterns: string[];

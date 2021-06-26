@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, It, Mock } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { ItemType, PageScan } from 'storage-documents';
+import { itemTypes, PageScan } from 'storage-documents';
 import _ from 'lodash';
 import { SqlQuerySpec } from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
@@ -24,7 +24,7 @@ describe(PageScanProvider, () => {
         pageId: pageId,
         websiteScanId: websiteScanId,
         partitionKey: partitionKey,
-        itemType: ItemType.pageScan,
+        itemType: itemTypes.pageScan,
         priority: priority,
         scanStatus: 'pending',
         retryCount: 0,
@@ -40,9 +40,11 @@ describe(PageScanProvider, () => {
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
-        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.pageScan, pageScanId)).returns(() => partitionKey);
-        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.pageScan, pageId)).returns(() => partitionKey);
-        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.pageScan, websiteScanId)).returns(() => partitionKey);
+        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(itemTypes.pageScan, pageScanId)).returns(() => partitionKey);
+        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(itemTypes.pageScan, pageId)).returns(() => partitionKey);
+        partitionKeyFactoryMock
+            .setup((p) => p.createPartitionKeyForDocument(itemTypes.pageScan, websiteScanId))
+            .returns(() => partitionKey);
         cosmosQueryResultsProviderMock = Mock.ofInstance(() => null);
 
         testSubject = new PageScanProvider(
@@ -104,7 +106,7 @@ describe(PageScanProvider, () => {
                 pageId: pageId,
             };
             const expectedScanDoc = {
-                itemType: ItemType.pageScan,
+                itemType: itemTypes.pageScan,
                 partitionKey: partitionKey,
                 ...updatedScanData,
             };
@@ -126,7 +128,7 @@ describe(PageScanProvider, () => {
                 websiteScanId: websiteScanId,
             };
             const expectedScanDoc = {
-                itemType: ItemType.pageScan,
+                itemType: itemTypes.pageScan,
                 partitionKey: partitionKey,
                 ...updatedScanData,
             };
@@ -148,7 +150,7 @@ describe(PageScanProvider, () => {
                 partitionKey: 'provided partition key',
             };
             const expectedScanDoc = {
-                itemType: ItemType.pageScan,
+                itemType: itemTypes.pageScan,
                 ...updatedScanData,
             };
 
@@ -203,7 +205,7 @@ describe(PageScanProvider, () => {
                     },
                     {
                         name: '@itemType',
-                        value: ItemType.pageScan,
+                        value: itemTypes.pageScan,
                     },
                     {
                         name: '@websiteScanId',
@@ -283,7 +285,7 @@ describe(PageScanProvider, () => {
                     },
                     {
                         name: '@itemType',
-                        value: ItemType.pageScan,
+                        value: itemTypes.pageScan,
                     },
                     {
                         name: '@websiteScanId',

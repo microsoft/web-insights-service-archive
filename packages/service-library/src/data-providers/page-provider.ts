@@ -3,7 +3,7 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { ItemType, Page } from 'storage-documents';
+import { itemTypes, Page } from 'storage-documents';
 import { GuidGenerator } from 'common';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
@@ -57,7 +57,7 @@ export class PageProvider {
                 },
                 {
                     name: '@itemType',
-                    value: ItemType.page,
+                    value: itemTypes.page,
                 },
             ],
         };
@@ -66,7 +66,7 @@ export class PageProvider {
     }
 
     private getPagePartitionKey(pageOrWebsiteId: string): string {
-        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.page, pageOrWebsiteId);
+        return this.partitionKeyFactory.createPartitionKeyForDocument(itemTypes.page, pageOrWebsiteId);
     }
 
     private normalizeDbDocument(page: Partial<Page>): Partial<Page> {
@@ -75,7 +75,7 @@ export class PageProvider {
         }
 
         return {
-            itemType: ItemType.page,
+            itemType: itemTypes.page,
             partitionKey: this.getPagePartitionKey(page.id),
             ...page,
         };

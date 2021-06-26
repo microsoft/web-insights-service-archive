@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { DocumentDataOnly, ItemType, PartitionKey, Website } from 'storage-documents';
+import { DocumentDataOnly, itemTypes, PartitionKey, Website } from 'storage-documents';
 import { WebsiteProvider } from './website-provider';
 
 describe(WebsiteProvider, () => {
@@ -129,7 +129,7 @@ describe(WebsiteProvider, () => {
     function getNormalizedDocument(website: Partial<Website>): Partial<Website> {
         return {
             id: websiteId,
-            itemType: ItemType.website,
+            itemType: itemTypes.website,
             partitionKey: PartitionKey.websiteDocuments,
             ...website,
         };

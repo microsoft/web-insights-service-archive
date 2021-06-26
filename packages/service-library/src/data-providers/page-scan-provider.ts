@@ -3,7 +3,7 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { DocumentDataOnly, ItemType, PageScan } from 'storage-documents';
+import { DocumentDataOnly, itemTypes, PageScan } from 'storage-documents';
 import { GuidGenerator } from 'common';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
@@ -58,7 +58,7 @@ export class PageScanProvider {
                 },
                 {
                     name: '@itemType',
-                    value: ItemType.pageScan,
+                    value: itemTypes.pageScan,
                 },
                 {
                     name: '@websiteScanId',
@@ -86,7 +86,7 @@ export class PageScanProvider {
                 },
                 {
                     name: '@itemType',
-                    value: ItemType.pageScan,
+                    value: itemTypes.pageScan,
                 },
                 {
                     name: '@websiteScanId',
@@ -113,7 +113,7 @@ export class PageScanProvider {
         }
 
         const normalizedDoc: Partial<PageScan> = {
-            itemType: ItemType.pageScan,
+            itemType: itemTypes.pageScan,
             partitionKey: this.getPageScanPartitionKey(pageScan.id),
             ...pageScan,
         };
@@ -122,6 +122,6 @@ export class PageScanProvider {
     }
 
     private getPageScanPartitionKey(guid: string): string {
-        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.pageScan, guid);
+        return this.partitionKeyFactory.createPartitionKeyForDocument(itemTypes.pageScan, guid);
     }
 }

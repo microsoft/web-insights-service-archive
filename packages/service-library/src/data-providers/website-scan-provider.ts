@@ -3,7 +3,7 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { DocumentDataOnly, ItemType, ScanType, WebsiteScan } from 'storage-documents';
+import { DocumentDataOnly, itemTypes, ScanType, WebsiteScan } from 'storage-documents';
 import { GuidGenerator } from 'common';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
@@ -60,7 +60,7 @@ export class WebsiteScanProvider {
                 },
                 {
                     name: '@itemType',
-                    value: ItemType.websiteScan,
+                    value: itemTypes.websiteScan,
                 },
             ],
         };
@@ -74,13 +74,13 @@ export class WebsiteScanProvider {
         }
 
         return {
-            itemType: ItemType.websiteScan,
+            itemType: itemTypes.websiteScan,
             partitionKey: this.getWebsiteScanPartitionKey(websiteScan.id),
             ...websiteScan,
         };
     }
 
     private getWebsiteScanPartitionKey(scanOrWebsiteId: string): string {
-        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.websiteScan, scanOrWebsiteId);
+        return this.partitionKeyFactory.createPartitionKeyForDocument(itemTypes.websiteScan, scanOrWebsiteId);
     }
 }

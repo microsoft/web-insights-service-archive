@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { ItemType, WebsiteScan } from 'storage-documents';
+import { itemTypes, WebsiteScan } from 'storage-documents';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cosmos-query-results-iterable';
@@ -22,7 +22,7 @@ describe(WebsiteScanProvider, () => {
         scanType: 'a11y',
         scanFrequency: 5,
         scanStatus: 'pending',
-        itemType: ItemType.websiteScan,
+        itemType: itemTypes.websiteScan,
         partitionKey: partitionKey,
     };
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
@@ -37,7 +37,7 @@ describe(WebsiteScanProvider, () => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
         partitionKeyFactoryMock
-            .setup((p) => p.createPartitionKeyForDocument(ItemType.websiteScan, websiteScanId))
+            .setup((p) => p.createPartitionKeyForDocument(itemTypes.websiteScan, websiteScanId))
             .returns(() => partitionKey);
         cosmosQueryResultsProviderMock = Mock.ofInstance(() => null);
 
@@ -86,7 +86,7 @@ describe(WebsiteScanProvider, () => {
                 id: websiteScanId,
             };
             const expectedScanDoc = {
-                itemType: ItemType.websiteScan,
+                itemType: itemTypes.websiteScan,
                 partitionKey: partitionKey,
                 ...updatedScanData,
             };
@@ -153,14 +153,14 @@ describe(WebsiteScanProvider, () => {
                     },
                     {
                         name: '@itemType',
-                        value: ItemType.websiteScan,
+                        value: itemTypes.websiteScan,
                     },
                 ],
             };
             const iterableStub = {} as CosmosQueryResultsIterable<WebsiteScan>;
 
             partitionKeyFactoryMock
-                .setup((p) => p.createPartitionKeyForDocument(ItemType.websiteScan, websiteId))
+                .setup((p) => p.createPartitionKeyForDocument(itemTypes.websiteScan, websiteId))
                 .returns(() => partitionKey);
             cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
 

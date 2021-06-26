@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { ItemType, Page } from 'storage-documents';
+import { itemTypes, Page } from 'storage-documents';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { PageProvider } from './page-provider';
@@ -21,7 +21,7 @@ describe(PageProvider, () => {
         id: pageId,
         websiteId: websiteId,
         url: url,
-        itemType: ItemType.page,
+        itemType: itemTypes.page,
         partitionKey: partitionKey,
     };
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
@@ -35,7 +35,7 @@ describe(PageProvider, () => {
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
-        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.page, pageId)).returns(() => partitionKey);
+        partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(itemTypes.page, pageId)).returns(() => partitionKey);
         cosmosQueryResultsProviderMock = Mock.ofInstance(() => null);
 
         testSubject = new PageProvider(
@@ -145,13 +145,13 @@ describe(PageProvider, () => {
                     },
                     {
                         name: '@itemType',
-                        value: ItemType.page,
+                        value: itemTypes.page,
                     },
                 ],
             };
             const iterableStub = {} as CosmosQueryResultsIterable<Page>;
 
-            partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(ItemType.page, websiteId)).returns(() => partitionKey);
+            partitionKeyFactoryMock.setup((p) => p.createPartitionKeyForDocument(itemTypes.page, websiteId)).returns(() => partitionKey);
             cosmosQueryResultsProviderMock.setup((o) => o(cosmosContainerClientMock.object, expectedQuery)).returns(() => iterableStub);
 
             const actualIterable = testSubject.getPagesForWebsite(websiteId);
