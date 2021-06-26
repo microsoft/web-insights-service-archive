@@ -231,7 +231,7 @@ describe(PageScanProvider, () => {
 
             cosmosContainerClientMock.setup((c) => c.queryDocuments(It.isAny())).returns(async () => response);
 
-            expect(testSubject.getLatestPageScanFor(websiteScanId, pageId)).rejects.toThrow();
+            expect(testSubject.getLatestPageScan(websiteScanId, pageId)).rejects.toThrow();
         });
 
         it('returns undefined if no results are found', async () => {
@@ -242,7 +242,7 @@ describe(PageScanProvider, () => {
 
             cosmosContainerClientMock.setup((c) => c.queryDocuments(It.isAny())).returns(async () => response);
 
-            expect(await testSubject.getLatestPageScanFor(websiteScanId, pageId)).toBeUndefined();
+            expect(await testSubject.getLatestPageScan(websiteScanId, pageId)).toBeUndefined();
         });
 
         it('queries db with expected query', async () => {
@@ -256,7 +256,7 @@ describe(PageScanProvider, () => {
 
             cosmosContainerClientMock.setup((c) => c.queryDocuments(expectedQuery)).returns(async () => response);
 
-            const actualResult = await testSubject.getLatestPageScanFor(websiteScanId, pageId);
+            const actualResult = await testSubject.getLatestPageScan(websiteScanId, pageId);
             expect(actualResult).toEqual(pageScanDoc);
         });
 
@@ -271,7 +271,7 @@ describe(PageScanProvider, () => {
 
             cosmosContainerClientMock.setup((c) => c.queryDocuments(expectedQuery)).returns(async () => response);
 
-            const actualResult = await testSubject.getLatestPageScanFor(websiteScanId, pageId, true);
+            const actualResult = await testSubject.getLatestPageScan(websiteScanId, pageId, true);
             expect(actualResult).toEqual(pageScanDoc);
         });
 

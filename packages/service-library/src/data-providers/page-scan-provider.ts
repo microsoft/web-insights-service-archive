@@ -70,7 +70,7 @@ export class PageScanProvider {
         return this.cosmosQueryResultsProvider(this.cosmosContainerClient, query);
     }
 
-    public async getLatestPageScanFor(websiteScanId: string, pageId: string, completed?: boolean): Promise<PageScan | undefined> {
+    public async getLatestPageScan(websiteScanId: string, pageId: string, completed?: boolean): Promise<PageScan | undefined> {
         const partitionKey = this.getPageScanPartitionKey(websiteScanId);
         let filterConditions =
             'c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId and c.pageId = @pageId';
