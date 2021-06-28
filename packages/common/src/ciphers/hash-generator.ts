@@ -12,14 +12,9 @@ const shaJS = require('sha.js');
 export class HashGenerator {
     public constructor(private readonly shaObj = shaJS) {}
 
-    public getWebsiteScanResultDocumentId(baseUrl: string, scanGroupId: string): string {
+    public getPageScanDocumentId(pageId: string, websiteScanId: string): string {
         // Preserve parameters order below for the hash generation compatibility
-        return this.generateBase64Hash(baseUrl, scanGroupId);
-    }
-
-    public getWebsiteScanResultPartDocumentId(baseId: string, scanId: string): string {
-        // Preserve parameters order below for the hash generation compatibility
-        return this.generateBase64Hash(baseId, scanId);
+        return this.generateBase64Hash(pageId, websiteScanId);
     }
 
     public getDbHashBucket(prefix: string, ...values: string[]): string {

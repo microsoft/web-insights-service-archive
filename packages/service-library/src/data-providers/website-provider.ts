@@ -3,7 +3,7 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { DocumentDataOnly, ItemType, PartitionKey, Website } from 'storage-documents';
+import { DocumentDataOnly, itemTypes, PartitionKey, Website } from 'storage-documents';
 import { GuidGenerator } from 'common';
 
 @injectable()
@@ -13,14 +13,19 @@ export class WebsiteProvider {
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {}
 
-    public async createWebsite(websiteData: DocumentDataOnly<Website>): Promise<void> {
+    public async createWebsite(websiteData: DocumentDataOnly<Website>): Promise<Website> {
         const websiteDoc = this.normalizeDbDocument(websiteData, this.guidGenerator.createGuid());
         await this.cosmosContainerClient.writeDocument(websiteDoc);
+
+        return websiteDoc as Website;
     }
 
-    public async updateWebsite(website: Partial<Website>): Promise<void> {
+    public async updateWebsite(website: Partial<Website>): Promise<Website> {
         const websiteDoc = this.normalizeDbDocument(website);
-        await this.cosmosContainerClient.mergeOrWriteDocument(websiteDoc);
+
+        const response = await this.cosmosContainerClient.mergeOrWriteDocument(websiteDoc);
+
+        return response.item as Website;
     }
 
     public async readWebsite(id: string): Promise<Website> {
@@ -37,7 +42,7 @@ export class WebsiteProvider {
 
         return {
             id: id,
-            itemType: ItemType.website,
+            itemType: itemTypes.website,
             partitionKey: PartitionKey.websiteDocuments,
             ...website,
         };

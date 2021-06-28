@@ -3,7 +3,7 @@
 
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { ItemType, Page } from 'storage-documents';
+import { itemTypes, Page } from 'storage-documents';
 import { GuidGenerator } from 'common';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
@@ -18,17 +18,21 @@ export class PageProvider {
         private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
     ) {}
 
-    public async createPageForWebsite(pageUrl: string, websiteId: string): Promise<void> {
-        const page = this.normalizeDbDocument({
+    public async createPageForWebsite(pageUrl: string, websiteId: string): Promise<Page> {
+        const pageDoc = this.normalizeDbDocument({
             id: this.guidGenerator.createGuidFromBaseGuid(websiteId),
             websiteId: websiteId,
             url: pageUrl,
-        });
-        await this.cosmosContainerClient.writeDocument(page);
+        }) as Page;
+        await this.cosmosContainerClient.writeDocument(pageDoc);
+
+        return pageDoc;
     }
 
-    public async updatePage(page: Partial<Page>): Promise<void> {
-        await this.cosmosContainerClient.mergeOrWriteDocument(this.normalizeDbDocument(page));
+    public async updatePage(page: Partial<Page>): Promise<Page> {
+        const response = await this.cosmosContainerClient.mergeOrWriteDocument<Page>(this.normalizeDbDocument(page) as Page);
+
+        return response.item;
     }
 
     public async readPage(id: string): Promise<Page> {
@@ -53,7 +57,7 @@ export class PageProvider {
                 },
                 {
                     name: '@itemType',
-                    value: ItemType.page,
+                    value: itemTypes.page,
                 },
             ],
         };
@@ -62,7 +66,7 @@ export class PageProvider {
     }
 
     private getPagePartitionKey(pageOrWebsiteId: string): string {
-        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.page, pageOrWebsiteId);
+        return this.partitionKeyFactory.createPartitionKeyForDocument(itemTypes.page, pageOrWebsiteId);
     }
 
     private normalizeDbDocument(page: Partial<Page>): Partial<Page> {
@@ -71,7 +75,7 @@ export class PageProvider {
         }
 
         return {
-            itemType: ItemType.page,
+            itemType: itemTypes.page,
             partitionKey: this.getPagePartitionKey(page.id),
             ...page,
         };

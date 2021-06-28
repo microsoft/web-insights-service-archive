@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { DocumentDataOnly, ItemType, PartitionKey, Website } from 'storage-documents';
+import { DocumentDataOnly, itemTypes, PartitionKey, Website } from 'storage-documents';
 import { WebsiteProvider } from './website-provider';
 
 describe(WebsiteProvider, () => {
@@ -42,7 +42,8 @@ describe(WebsiteProvider, () => {
                 .verifiable();
             cosmosContainerClientMock.setup((c) => c.writeDocument(expectedDocument)).verifiable();
 
-            await testSubject.createWebsite(websiteData);
+            const actualWebsite = await testSubject.createWebsite(websiteData);
+            expect(actualWebsite).toEqual(expectedDocument);
         });
 
         it('does not overwrite existing id', async () => {
@@ -55,7 +56,8 @@ describe(WebsiteProvider, () => {
 
             cosmosContainerClientMock.setup((c) => c.writeDocument(expectedDocument)).verifiable();
 
-            await testSubject.createWebsite(websiteData);
+            const actualWebsite = await testSubject.createWebsite(websiteData);
+            expect(actualWebsite).toEqual(expectedDocument);
         });
     });
 
@@ -74,8 +76,19 @@ describe(WebsiteProvider, () => {
                 id: websiteId,
             };
             const expectedDocument = getNormalizedDocument(websiteData);
+            const updatedDocument = {
+                name: 'updated test website',
+                id: websiteId,
+            } as Website;
+            const response: CosmosOperationResponse<Website> = {
+                statusCode: 200,
+                item: updatedDocument,
+            };
 
-            cosmosContainerClientMock.setup((c) => c.mergeOrWriteDocument(expectedDocument)).verifiable();
+            cosmosContainerClientMock
+                .setup((c) => c.mergeOrWriteDocument(expectedDocument))
+                .returns(async () => response)
+                .verifiable();
 
             await testSubject.updateWebsite(websiteData);
         });
@@ -116,7 +129,7 @@ describe(WebsiteProvider, () => {
     function getNormalizedDocument(website: Partial<Website>): Partial<Website> {
         return {
             id: websiteId,
-            itemType: ItemType.website,
+            itemType: itemTypes.website,
             partitionKey: PartitionKey.websiteDocuments,
             ...website,
         };
