@@ -51,7 +51,7 @@ createCosmosCollection() {
             --resource-group "${resourceGroupName}" \
             --ttl "${ttl}" 1>/dev/null
 
-        echo "Cosmos DB ollection '${collectionName}' successfully updated."
+        echo "Cosmos DB collection '${collectionName}' successfully updated."
     else
         echo "Collection '${collectionName}' does not exist"
 
