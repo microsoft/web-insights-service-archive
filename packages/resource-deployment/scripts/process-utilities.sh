@@ -29,7 +29,7 @@ function runCommandsWithoutSecretsInParallel {
     local list="${commands}[@]"
     for command in "${!list}"; do
         eval "${command}" &
-        echo "Created process with pid $! for command - ${command}"
+        echo "Created process with pid $! for command: '${command}'"
         parallelizableProcesses+=("$!")
     done
 

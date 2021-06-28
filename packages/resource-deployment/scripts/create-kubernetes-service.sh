@@ -40,9 +40,16 @@ if [[ -z ${kubernetesService} ]] || [[ -z ${containerRegistry} ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
 
+# Get the default subscription
+subscription=$(az account show --query "id" -o tsv)
+
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group ${resourceGroupName}"
-az aks create --resource-group "${resourceGroupName}" --name "${kubernetesService}" --location "${location}" --no-ssh-key --enable-managed-identity 1>/dev/null
+az aks create --resource-group "${resourceGroupName}" --name "${kubernetesService}" --location "${location}" \
+    --no-ssh-key --enable-managed-identity --enable-addons monitoring,http_application_routing \
+    --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
+    1>/dev/null
+
 principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identity.principalId" -o tsv)
 
 # Grant access to container registry
