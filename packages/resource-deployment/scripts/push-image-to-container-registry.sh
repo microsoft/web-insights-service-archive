@@ -99,4 +99,4 @@ trap "onExit" EXIT
 getPackagesLocation
 setImageBuildSource
 prepareImageBuildSource
-# pushImagesToRegistry
+pushImagesToRegistry
