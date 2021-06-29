@@ -102,6 +102,7 @@ createAppInsightsApiKey() {
     echo "App Insights API key successfully created '${appInsightsApiKey}'"
 }
 
+# function runs in a subshell to isolate trap handler
 pushSecretsToKeyVault() (
     echo "Pushing secrets to key vault ${keyVault}"
     getLoggedInUserCredentials

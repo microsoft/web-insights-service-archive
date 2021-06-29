@@ -70,6 +70,7 @@ pushImageToRegistry() {
     az acr build --platform "${platform}" --image "${containerRegistry}".azurecr.io/"${name}":latest --registry "${containerRegistry}" "${source}" | sed -e "s/^/[${name}] /"
 }
 
+# function runs in a subshell to isolate trap handler
 pushImagesToRegistry() (
     trap "onExitPushImages" EXIT
 
