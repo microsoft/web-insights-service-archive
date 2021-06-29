@@ -64,6 +64,7 @@
             "**/out": true,
             "**/test-results": true
         },
+        "csharp.suppressDotnetRestoreNotification": true,
         "cSpell.words": [
             "Configurator",
             "Finalizer",
@@ -84,7 +85,6 @@
             "unscannable",
             "upsert"
         ],
-        "csharp.suppressDotnetRestoreNotification": true
     },
     "extensions": {
         "recommendations": [
@@ -96,7 +96,8 @@
             "rogalmic.bash-debug",
             "streetsidesoftware.code-spell-checker",
             "ms-azuretools.vscode-azurefunctions",
-            "timonwong.shellcheck"
+            "timonwong.shellcheck",
+            "ms-kubernetes-tools.vscode-kubernetes-tools"
         ]
     },
 }

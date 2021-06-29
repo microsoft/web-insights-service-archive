@@ -22,7 +22,7 @@ while getopts ":r:e:" option; do
     esac
 done
 
-function onExit() {
+function onExitPushImages() {
     local exitCode=$?
     if [[ ${exitCode} != 0 ]]; then
         echo "Failed to push images to Azure Container Registry."
@@ -70,7 +70,9 @@ pushImageToRegistry() {
     az acr build --platform "${platform}" --image "${containerRegistry}".azurecr.io/"${name}":latest --registry "${containerRegistry}" "${source}" | sed -e "s/^/[${name}] /"
 }
 
-pushImagesToRegistry() {
+pushImagesToRegistry() (
+    trap "onExitPushImages" EXIT
+
     # shellcheck disable=SC2034
     local imageBuildProcesses=(
         "pushImageToRegistry \"storage-web-api-func\" \"${storageWebApiDist}\" \"linux\""
@@ -78,7 +80,7 @@ pushImagesToRegistry() {
 
     echo "Pushing images to Azure Container Registry."
     runCommandsWithoutSecretsInParallel imageBuildProcesses
-}
+)
 
 if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
@@ -93,8 +95,6 @@ fi
 
 # Login to container registry
 az acr login --name "${containerRegistry}"
-
-trap "onExit" EXIT
 
 getPackagesLocation
 setImageBuildSource
