@@ -8,4 +8,4 @@ steps:
 
     - script: |
           yarn install --frozen-lockfile
-      displayName: install dependencies
+      displayName: Install dependencies

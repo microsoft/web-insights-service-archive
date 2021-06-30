@@ -5,15 +5,15 @@ steps:
 
     - script: |
           yarn format:check
-      displayName: check code formatting
+      displayName: Check code formatting
 
     - script: |
           yarn copyright:check
-      displayName: check copyright headers
+      displayName: Check copyright headers
 
     - script: |
           yarn lint:check
-      displayName: run linter
+      displayName: Run linter
 
     - template: ./build-steps.yaml
 
