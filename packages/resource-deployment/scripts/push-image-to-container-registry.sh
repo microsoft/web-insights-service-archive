@@ -34,15 +34,15 @@ function onExitPushImages() {
 }
 
 getPackagesLocation() {
-    # Path when script runs from a dist folder
-    packagesLocation="${0%/*}/../../../../packages/"
+    # Path when script runs from a agent artifacts folder
+    packagesLocation="${0%/*}/../../../../drop/"
 
     if [ ! -d "${packagesLocation}" ]; then
         # Path when script runs from a source folder
         packagesLocation="${0%/*}/../../../packages/"
 
         if [ ! -d "${packagesLocation}" ]; then
-            echo "Cannot find 'packages' parent folder to prepare docker images."
+            echo "Cannot find '${packagesLocation}' folder to prepare docker images."
 
             exit 1
         else
