@@ -33,9 +33,6 @@ if [[ -z ${kubernetesService} ]] || [[ -z ${containerRegistry} ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
 
-# Login to Azure subscription to mitigate a bug to attach ACR
-az login
-
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 echo "Default subscription ${subscription}"
