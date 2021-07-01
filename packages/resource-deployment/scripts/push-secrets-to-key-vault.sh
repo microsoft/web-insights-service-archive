@@ -102,6 +102,32 @@ createAppInsightsApiKey() {
     echo "App Insights API key successfully created '${appInsightsApiKey}'"
 }
 
+# function runs in a subshell to isolate trap handler
+pushSecretsToKeyVault() (
+    echo "Pushing secrets to key vault ${keyVault}"
+    getLoggedInUserCredentials
+
+    trap 'revokePermissionsToKeyVault' EXIT
+    grantWritePermissionToKeyVault
+
+    getCosmosDbUrl
+    pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"
+
+    getCosmosDbArmUrl
+    pushSecretToKeyVault "cosmosDbArmUrl" "${cosmosDbArmUrl}"
+
+    getStorageAccessKey
+    pushSecretToKeyVault "storageAccountName" "${storageAccount}"
+    pushSecretToKeyVault "storageAccountKey" "${storageAccountKey}"
+
+    createAppInsightsApiKey
+    pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
+
+    getContainerRegistryLogin
+    pushSecretToKeyVault "containerRegistryUsername" "${containerRegistryUsername}"
+    pushSecretToKeyVault "containerRegistryPassword" "${containerRegistryPassword}"
+)
+
 # Read script arguments
 while getopts ":r:" option; do
     case ${option} in
@@ -120,27 +146,5 @@ subscription=$(az account show --query "id" -o tsv)
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "Pushing secrets to key vault ${keyVault}"
-getLoggedInUserCredentials
-
-trap 'revokePermissionsToKeyVault' EXIT
-grantWritePermissionToKeyVault
-
-getCosmosDbUrl
-pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"
-
-getCosmosDbArmUrl
-pushSecretToKeyVault "cosmosDbArmUrl" "${cosmosDbArmUrl}"
-
-getStorageAccessKey
-pushSecretToKeyVault "storageAccountName" "${storageAccount}"
-pushSecretToKeyVault "storageAccountKey" "${storageAccountKey}"
-
-createAppInsightsApiKey
-pushSecretToKeyVault "appInsightsApiKey" "${appInsightsApiKey}"
-
-getContainerRegistryLogin
-pushSecretToKeyVault "containerRegistryUsername" "${containerRegistryUsername}"
-pushSecretToKeyVault "containerRegistryPassword" "${containerRegistryPassword}"
-
+pushSecretsToKeyVault
 echo "Key vault secrets successfully updated."

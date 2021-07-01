@@ -13,13 +13,6 @@ Usage: ${BASH_SOURCE} -r <resource group> -l <location> [-c <cluster name>] [-d 
     exit 1
 }
 
-function attachContainerRegistry() {
-    role="AcrPull"
-    containerRegistryId=$(az acr show --resource-group "${resourceGroupName}" --name "${containerRegistry}" --query id -o tsv)
-    scope="--scope ${containerRegistryId}"
-    . "${0%/*}/role-assign-for-sp.sh"
-}
-
 # Read script arguments
 while getopts ":r:c:l:d:" option; do
     case ${option} in
@@ -40,6 +33,13 @@ if [[ -z ${kubernetesService} ]] || [[ -z ${containerRegistry} ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
 
+function attachContainerRegistry() {
+    role="AcrPull"
+    containerRegistryId=$(az acr show --resource-group "${resourceGroupName}" --name "${containerRegistry}" --query id -o tsv)
+    scope="--scope ${containerRegistryId}"
+    . "${0%/*}/role-assign-for-sp.sh"
+}
+
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
@@ -50,7 +50,7 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
     --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
     1>/dev/null
 
-principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identity.principalId" -o tsv)
+principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
 
 # Grant access to container registry
 attachContainerRegistry

@@ -5,17 +5,17 @@ steps:
 
     - script: |
           yarn format:check
-      displayName: check code formatting
+      displayName: Check code formatting
 
     - script: |
           yarn copyright:check
-      displayName: check for copyright headers
-
-    - template: ./build-steps.yaml
+      displayName: Check copyright headers
 
     - script: |
           yarn lint:check
-      displayName: run linter
+      displayName: Run linter
+
+    - template: ./build-steps.yaml
 
     - template: ./test-steps.yaml
       parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
@@ -24,15 +24,16 @@ steps:
       inputs:
           SourceFolder: packages
           Contents: |
+              storage-web-api/dist/**/*
               resource-deployment/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      displayName: 'Copy files to staging directory'
+      displayName: Copy files to staging directory
 
     - task: PublishBuildArtifacts@1
       inputs:
           pathtoPublish: '$(Build.ArtifactStagingDirectory)'
           artifactName: drop
-      displayName: 'Publish build artifacts'
+      displayName: Publish build artifacts
