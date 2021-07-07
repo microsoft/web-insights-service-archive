@@ -2583,10 +2583,10 @@
     "@types/node" "*"
     "@types/responselike" "*"
 
-"@types/convict@^6.0.2":
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-6.0.2.tgz#0827a974620931c69b64b3a52359f42de753e9fc"
-  integrity sha512-lYFEgTO7c36/Sq8+FKTn64jA/6B7xLeKv0/NZkWIaavMlBzlU5zgiyfJvl9rOTCxvlUT2rXTD6In5DmEGTK5+w==
+"@types/convict@^6.1.1":
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-6.1.1.tgz#6752095a7fbf0fb5a50bb0016515a9c987ca5a29"
+  integrity sha512-R+JLaTvhsD06p4jyjUDtbd5xMtZTRE3c0iI+lrFWZogSVEjgTWPYwvJPVf+t92E+yrlbXa4X4Eg9ro6gPdUt4w==
   dependencies:
     "@types/node" "*"
 
