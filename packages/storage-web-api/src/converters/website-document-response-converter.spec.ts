@@ -80,4 +80,17 @@ describe(createWebsiteApiResponse, () => {
 
         expect(actualResponse).toEqual(expectedResponse);
     });
+
+    it('Handles undefined pages', async () => {
+        const expectedResponse: GetWebsiteResponse = {
+            ...websiteData,
+            id: websiteId,
+            pages: [],
+        };
+        const pagesIterableMock = mockCosmosQueryResults<Page>(pages.map((pageData) => Promise.resolve(undefined)));
+
+        const actualResponse = await createWebsiteApiResponse(websiteDocument, pagesIterableMock.object);
+
+        expect(actualResponse).toEqual(expectedResponse);
+    });
 });

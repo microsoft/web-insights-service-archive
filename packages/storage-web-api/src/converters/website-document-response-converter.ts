@@ -46,11 +46,13 @@ export const createWebsiteApiResponse = async (
     };
 
     for await (const page of pagesIterable) {
-        response.pages.push({
-            id: page.id,
-            url: page.url,
-            lastScanTimestamp: page.lastScanTimestamp,
-        });
+        if (page !== undefined) {
+            response.pages.push({
+                id: page.id,
+                url: page.url,
+                lastScanTimestamp: page.lastScanTimestamp,
+            });
+        }
     }
 
     return response;
