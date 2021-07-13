@@ -72,7 +72,7 @@ describe(createWebsiteApiResponse, () => {
                     websiteId,
                     itemType: StorageDocuments.itemTypes.page,
                     partitionKey: 'partition key',
-                }),
+                } as StorageDocuments.Page),
             ),
         );
 

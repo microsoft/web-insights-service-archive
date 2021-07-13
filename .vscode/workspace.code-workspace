@@ -33,6 +33,10 @@
             "path": "../packages/common"
         },
         {
+            "integration-tests",
+            "path": "../packages/integration-tests"
+        }
+        {
             "name": "root",
             "path": "../"
         }

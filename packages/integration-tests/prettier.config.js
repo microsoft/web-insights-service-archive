@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+const baseConfig = require('../../prettier.config');
 
-export interface Page {
-    id: string;
-    url: string;
-    lastScanTimestamp?: number;
-}
+module.exports = {
+    ...baseConfig,
+};
