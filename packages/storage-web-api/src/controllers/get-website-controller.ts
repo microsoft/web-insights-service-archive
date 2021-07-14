@@ -5,7 +5,9 @@ import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import { HttpResponse, WebApiErrorCodes, ApiController } from 'service-library';
+import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider } from 'service-library';
+import * as StorageDocuments from 'storage-documents';
+import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 
 @injectable()
 export class GetWebsiteController extends ApiController {
@@ -16,6 +18,9 @@ export class GetWebsiteController extends ApiController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(WebsiteProvider) private readonly websiteProvider: WebsiteProvider,
+        @inject(PageProvider) private readonly pageProvider: PageProvider,
+        private readonly convertWebsiteDocumentToResponse: WebsiteDocumentResponseConverter = createWebsiteApiResponse,
     ) {
         super(logger);
     }
@@ -31,13 +36,22 @@ export class GetWebsiteController extends ApiController {
             return;
         }
 
-        const website = {
-            id: websiteId,
-            baseUrl: 'https://accessibilityinsights.io/',
-        };
+        let websiteDoc: StorageDocuments.Website;
+        try {
+            websiteDoc = await this.websiteProvider.readWebsite(websiteId);
+        } catch (e) {
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+            this.logger.logError('Error reading website document', { error: JSON.stringify(e) });
+
+            return;
+        }
+
+        const websitePagesIterable = this.pageProvider.getPagesForWebsite(websiteId);
+        const websiteResponseBody = await this.convertWebsiteDocumentToResponse(websiteDoc, websitePagesIterable);
+
         this.context.res = {
             status: 200,
-            body: website,
+            body: websiteResponseBody,
         };
         this.logger.logInfo('Website metadata successfully fetched from a storage.');
     }

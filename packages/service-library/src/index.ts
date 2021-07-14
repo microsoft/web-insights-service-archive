@@ -8,6 +8,7 @@ export { WebControllerDispatcher, Newable } from './web-api/web-controller-dispa
 export { getGlobalWebControllerDispatcher } from './web-api/get-global-web-controller-dispatcher';
 export * from './web-api/web-api-error-codes';
 export { HttpResponse } from './web-api/http-response';
+export { CosmosQueryResultsIterable } from './data-providers/cosmos-query-results-iterable';
 export { PageProvider } from './data-providers/page-provider';
 export { PageScanProvider } from './data-providers/page-scan-provider';
 export { WebsiteProvider } from './data-providers/website-provider';

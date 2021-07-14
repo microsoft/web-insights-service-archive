@@ -189,7 +189,7 @@ export class CosmosClientWrapper {
 
             return {
                 item: itemT,
-                statusCode: 200,
+                statusCode: response.statusCode,
             };
         } catch (error) {
             this.logFailedResponse('readItem', error, {

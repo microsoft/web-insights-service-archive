@@ -131,7 +131,7 @@ describe('CosmosClientWrapper', () => {
             collectionMock.setup((c) => c.item(responseItem.id, partitionKey)).returns(() => itemMock.object);
             itemMock
                 .setup(async (i) => i.read())
-                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined, statusCode: 200 } as any));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName, partitionKey);
 
@@ -154,7 +154,7 @@ describe('CosmosClientWrapper', () => {
             collectionMock.setup((c) => c.item(responseItem.id, undefined)).returns(() => itemMock.object);
             itemMock
                 .setup(async (i) => i.read())
-                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined, statusCode: 200 } as any));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName, undefined);
 
