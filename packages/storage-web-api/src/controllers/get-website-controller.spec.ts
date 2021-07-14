@@ -3,19 +3,13 @@
 
 import 'reflect-metadata';
 
+import * as ApiContracts from 'api-contracts';
 import { IMock, Mock } from 'typemoq';
 import { ServiceConfiguration } from 'common';
 import { ContextAwareLogger } from 'logger';
-import {
-    CosmosQueryResultsIterable,
-    GetWebsiteResponse,
-    HttpResponse,
-    PageProvider,
-    WebApiErrorCodes,
-    WebsiteProvider,
-} from 'service-library';
+import { CosmosQueryResultsIterable, HttpResponse, PageProvider, WebApiErrorCodes, WebsiteProvider } from 'service-library';
 import { Context } from '@azure/functions';
-import { Page, Website } from 'storage-documents';
+import * as StorageDocuments from 'storage-documents';
 import { WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 import { GetWebsiteController } from './get-website-controller';
 
@@ -83,13 +77,13 @@ describe(GetWebsiteController, () => {
         const websiteStub = {
             baseUrl: 'baseUrl',
             name: 'test website',
-        } as Website;
-        const pageIterableMock = Mock.ofType<CosmosQueryResultsIterable<Page>>();
+        } as StorageDocuments.Website;
+        const pageIterableMock = Mock.ofType<CosmosQueryResultsIterable<StorageDocuments.Page>>();
         const expectedResponseBody = {
             ...websiteStub,
             id: websiteId,
             pages: [],
-        } as GetWebsiteResponse;
+        } as ApiContracts.Website;
 
         websiteProviderMock.setup((w) => w.readWebsite(websiteId)).returns(async () => websiteStub);
         pageProviderMock.setup((p) => p.getPagesForWebsite(websiteId)).returns(() => pageIterableMock.object);

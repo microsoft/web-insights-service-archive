@@ -3,14 +3,14 @@
 
 import 'reflect-metadata';
 
-import { DocumentDataOnly, itemTypes, Page, Website } from 'storage-documents';
-import { GetWebsiteResponse, PageData } from 'service-library';
+import * as ApiContracts from 'api-contracts';
+import * as StorageDocuments from 'storage-documents';
 import { mockCosmosQueryResults } from '../test-utilities/cosmos-query-results-iterable-mock';
 import { createWebsiteApiResponse } from './website-document-response-converter';
 
 describe(createWebsiteApiResponse, () => {
     const websiteId = 'website id';
-    const websiteData: DocumentDataOnly<Website> = {
+    const websiteData: StorageDocuments.DocumentDataOnly<StorageDocuments.Website> = {
         name: 'website name',
         baseUrl: 'base url',
         priority: 10,
@@ -42,13 +42,13 @@ describe(createWebsiteApiResponse, () => {
         manageCookieXpath: 'xpath',
         isCookieManagable: true,
     };
-    const websiteDocument: Website = {
+    const websiteDocument: StorageDocuments.Website = {
         id: websiteId,
-        itemType: itemTypes.website,
+        itemType: StorageDocuments.itemTypes.website,
         partitionKey: 'partition key',
         ...websiteData,
     };
-    const pages: PageData[] = [
+    const pages: ApiContracts.Page[] = [
         {
             id: 'page 1 id',
             url: 'page 1 url',
@@ -60,17 +60,17 @@ describe(createWebsiteApiResponse, () => {
     ];
 
     it('creates expected response', async () => {
-        const expectedResponse: GetWebsiteResponse = {
+        const expectedResponse: ApiContracts.Website = {
             ...websiteData,
             id: websiteId,
             pages: pages,
         };
-        const pagesIterableMock = mockCosmosQueryResults<Page>(
+        const pagesIterableMock = mockCosmosQueryResults<StorageDocuments.Page>(
             pages.map((pageData) =>
                 Promise.resolve({
                     ...pageData,
                     websiteId,
-                    itemType: itemTypes.page,
+                    itemType: StorageDocuments.itemTypes.page,
                     partitionKey: 'partition key',
                 }),
             ),
@@ -82,12 +82,12 @@ describe(createWebsiteApiResponse, () => {
     });
 
     it('Handles undefined pages', async () => {
-        const expectedResponse: GetWebsiteResponse = {
+        const expectedResponse: ApiContracts.Website = {
             ...websiteData,
             id: websiteId,
             pages: [],
         };
-        const pagesIterableMock = mockCosmosQueryResults<Page>(pages.map((pageData) => Promise.resolve(undefined)));
+        const pagesIterableMock = mockCosmosQueryResults<StorageDocuments.Page>(pages.map((pageData) => Promise.resolve(undefined)));
 
         const actualResponse = await createWebsiteApiResponse(websiteDocument, pagesIterableMock.object);
 

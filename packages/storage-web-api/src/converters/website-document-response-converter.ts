@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { CosmosQueryResultsIterable, GetWebsiteResponse } from 'service-library';
-import { Page, Website } from 'storage-documents';
+import { CosmosQueryResultsIterable } from 'service-library';
+import * as StorageDocuments from 'storage-documents';
+import * as ApiContracts from 'api-contracts';
 
 export type WebsiteDocumentResponseConverter = typeof createWebsiteApiResponse;
 
 export const createWebsiteApiResponse = async (
-    websiteDocument: Website,
-    pagesIterable: CosmosQueryResultsIterable<Page>,
-): Promise<GetWebsiteResponse> => {
-    const response: GetWebsiteResponse = {
+    websiteDocument: StorageDocuments.Website,
+    pagesIterable: CosmosQueryResultsIterable<StorageDocuments.Page>,
+): Promise<ApiContracts.Website> => {
+    const response: ApiContracts.Website = {
         id: websiteDocument.id,
         name: websiteDocument.name,
         baseUrl: websiteDocument.baseUrl,

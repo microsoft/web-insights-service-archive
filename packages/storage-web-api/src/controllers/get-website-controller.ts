@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider } from 'service-library';
-import { Website } from 'storage-documents';
+import * as StorageDocuments from 'storage-documents';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 
 @injectable()
@@ -36,7 +36,7 @@ export class GetWebsiteController extends ApiController {
             return;
         }
 
-        let websiteDoc: Website;
+        let websiteDoc: StorageDocuments.Website;
         try {
             websiteDoc = await this.websiteProvider.readWebsite(websiteId);
         } catch (e) {
