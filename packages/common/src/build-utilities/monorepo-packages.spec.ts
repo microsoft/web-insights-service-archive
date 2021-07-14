@@ -7,6 +7,7 @@ describe('listMonorepoPackageNames', () => {
     it('returns the pinned set of package names', () => {
         expect(listMonorepoPackageNames()).toMatchInlineSnapshot(`
 Array [
+  "api-contracts",
   "azure-services",
   "common",
   "logger",
