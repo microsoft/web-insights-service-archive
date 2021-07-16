@@ -5,78 +5,34 @@ import 'reflect-metadata';
 
 /* eslint-disable import/no-internal-modules */
 
-import { isValidWebsite, Website } from 'api-contracts';
+import { isValidWebsite, Website, websiteWithAllProperties, websiteWithRequiredProperties } from 'api-contracts';
 
 describe(isValidWebsite, () => {
-    const websiteRequiredProperties: Website = {
-        name: 'website name',
-        baseUrl: 'base url',
-        priority: 10,
-        discoveryPatterns: ['discovery pattern'],
-        knownPages: ['known page'],
-        scanners: ['a11y'],
-        domainId: 'domain id',
-        compliant: false,
-        enableCrawler: true,
-        deleted: false,
-        noBanner: true,
-        serviceTreeId: 'service tree id',
-        isCustomBanner: false,
-        isMicrosoftOwned: true,
-        isCookieManagable: true,
-    };
-
-    const websiteAllProperties: Website = {
-        ...websiteRequiredProperties,
-        id: 'website id',
-        owners: ['owner'],
-        orgCvp: 'org cvp',
-        usingUhf: true,
-        divisionId: 1,
-        stateId: 2,
-        noBannerReasonId: 3,
-        notes: 'notes',
-        alias: 'alias',
-        organizationId: 4,
-        celaAccessibilityContacts: ['accessibility contact'],
-        privacyEGRCExceptionId: 'privacy exception id',
-        A11yEGRCExceptionId: 'a11y exception id',
-        optOutSecurityReason: 'security opt out reason',
-        requireAuthentication: false,
-        manageCookieXpath: 'xpath',
-        pages: [
-            {
-                id: 'page id',
-                url: 'page url',
-            },
-        ],
-    };
-
     it('Returns true for website with all required properties', () => {
-        expect(isValidWebsite(websiteAllProperties)).toBe(true);
+        expect(isValidWebsite(websiteWithRequiredProperties)).toBe(true);
     });
 
     it('Returns true for website with all properties', () => {
-        expect(isValidWebsite(websiteAllProperties)).toBe(true);
+        expect(isValidWebsite(websiteWithAllProperties)).toBe(true);
     });
 
     it('Returns false for website with unknown properties', () => {
         const obj = {
-            ...websiteRequiredProperties,
+            ...websiteWithRequiredProperties,
             unknownProperty: 'test value',
         };
         expect(isValidWebsite(obj)).toBe(false);
     });
 
     it('Returns false for website missing required properties', () => {
-        const { baseUrl, ...obj } = websiteRequiredProperties;
+        const { baseUrl, ...obj } = websiteWithRequiredProperties;
 
         expect(isValidWebsite(obj as Website)).toBe(false);
     });
 
     it('Returns false if website has incorrect format for pages', () => {
         const obj = {
-            ...websiteRequiredProperties,
+            ...websiteWithRequiredProperties,
             pages: [
                 {
                     unknownProperty: 'value',

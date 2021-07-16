@@ -7,6 +7,7 @@ import * as ApiContracts from 'api-contracts';
 import * as StorageDocuments from 'storage-documents';
 import { mockCosmosQueryResults } from '../test-utilities/cosmos-query-results-iterable-mock';
 import { createWebsiteApiResponse } from './website-document-response-converter';
+import { PageDocumentResponseConverter } from './page-document-response-converter';
 
 describe(createWebsiteApiResponse, () => {
     const websiteId = 'website id';
@@ -58,6 +59,10 @@ describe(createWebsiteApiResponse, () => {
             url: 'page 2 url',
         },
     ];
+    const createPageApiResponseStub: PageDocumentResponseConverter = (page) => ({
+        id: page.id,
+        url: page.url,
+    });
 
     it('creates expected response', async () => {
         const expectedResponse: ApiContracts.Website = {
@@ -76,7 +81,7 @@ describe(createWebsiteApiResponse, () => {
             ),
         );
 
-        const actualResponse = await createWebsiteApiResponse(websiteDocument, pagesIterableMock.object);
+        const actualResponse = await createWebsiteApiResponse(websiteDocument, pagesIterableMock.object, createPageApiResponseStub);
 
         expect(actualResponse).toEqual(expectedResponse);
     });
@@ -89,7 +94,7 @@ describe(createWebsiteApiResponse, () => {
         };
         const pagesIterableMock = mockCosmosQueryResults<StorageDocuments.Page>(pages.map((pageData) => Promise.resolve(undefined)));
 
-        const actualResponse = await createWebsiteApiResponse(websiteDocument, pagesIterableMock.object);
+        const actualResponse = await createWebsiteApiResponse(websiteDocument, pagesIterableMock.object, createPageApiResponseStub);
 
         expect(actualResponse).toEqual(expectedResponse);
     });
