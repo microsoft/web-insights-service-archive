@@ -46,7 +46,7 @@ subscription=$(az account show --query "id" -o tsv)
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group ${resourceGroupName}"
 az aks create --resource-group "${resourceGroupName}" --name "${kubernetesService}" --location "${location}" \
-    --no-ssh-key --enable-managed-identity --enable-addons monitoring,http_application_routing \
+    --no-ssh-key --enable-managed-identity --enable-addons monitoring \
     --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
     1>/dev/null
 
