@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { IMock, Mock, MockBehavior } from 'typemoq';
+import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { DocumentDataOnly, itemTypes, PartitionKey, Website } from 'storage-documents';
@@ -86,11 +86,50 @@ describe(WebsiteProvider, () => {
             };
 
             cosmosContainerClientMock
-                .setup((c) => c.mergeOrWriteDocument(expectedDocument))
+                .setup((c) => c.mergeOrWriteDocument(expectedDocument, PartitionKey.websiteDocuments, true, It.isAny()))
                 .returns(async () => response)
                 .verifiable();
 
             await testSubject.updateWebsite(websiteData);
+        });
+
+        describe('merges array properties', () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            let mergeCustomizer: (target: any, source: any, key: string) => any;
+
+            beforeEach(async () => {
+                cosmosContainerClientMock
+                    .setup((c) => c.mergeOrWriteDocument(It.isAny(), PartitionKey.websiteDocuments, true, It.isAny()))
+                    .callback(async (_doc, _partitionKey, _throwOnError, customizer) => {
+                        mergeCustomizer = customizer;
+                    })
+                    .returns(async () => ({ item: {} } as CosmosOperationResponse<Website>));
+
+                await testSubject.updateWebsite({ id: websiteId });
+            });
+
+            it('deduplicates and merges knownPages', () => {
+                const target = ['page1', 'page2'];
+                const source = ['page2', 'page3'];
+                const expectedArray = ['page1', 'page2', 'page3'];
+
+                expect(mergeCustomizer(target, source, 'knownPages')).toEqual(expectedArray);
+            });
+
+            it('deduplicates and overwrites arrays', () => {
+                const target = ['value1', 'value2'];
+                const source = ['new value 1', 'new value 2', 'new value 2'];
+                const expectedArray = ['new value 1', 'new value 2'];
+
+                expect(mergeCustomizer(target, source, 'discoveryPatterns')).toEqual(expectedArray);
+            });
+
+            it('returns undefined for non-array property', () => {
+                const target = 'old baseUrl';
+                const source = 'new baseUrl';
+
+                expect(mergeCustomizer(target, source, 'baseUrl')).toBeUndefined();
+            });
         });
     });
 

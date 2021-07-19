@@ -85,6 +85,7 @@ export class CosmosContainerClient {
         document: T,
         partitionKey?: string,
         throwIfNotSuccess: boolean = true,
+        customMerge?: (target: any, source: any, key: string) => any,
     ): Promise<CosmosOperationResponse<T>> {
         if (document.id === undefined) {
             return Promise.reject(
@@ -111,13 +112,13 @@ export class CosmosContainerClient {
         }
 
         const mergedDocument = response.item;
-        _.mergeWith(mergedDocument, document, (target: T, source: T, key) => {
+        _.mergeWith(mergedDocument, document, (target: any, source: any, key) => {
             // preserve the storage document _etag value
             if (key === '_etag') {
                 return target;
             }
 
-            return undefined;
+            return customMerge === undefined ? undefined : customMerge(target, source, key);
         });
 
         // normalize document properties by converting from null to undefined

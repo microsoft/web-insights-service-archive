@@ -1,12 +1,6 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "outDir": "dist",
-        "plugins": [
-            {
-                "transform": "typescript-is/lib/transform-inline/transformer",
-                "disallowSuperfluousObjectProperties": true
-            }
-        ]
+        "outDir": "dist"
     }
 }
