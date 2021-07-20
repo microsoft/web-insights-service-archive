@@ -74,7 +74,8 @@ export class CosmosContainerClient {
      *
      * Source document properties that resolve to `undefined` are skipped on merge if a current storage document value exists.
      * Source document properties that resolve to `null` will set corresponding target properties to `undefined`.
-     * Plain object properties are merged recursively. Array object merged by item index. Other objects and value types are overridden.
+     * Plain object properties are merged recursively. Arrays will be deduplicated and overridden. Other objects and value types
+     * are overridden.
      *
      * Use document `partitionKey` property if defined; otherwise, the `partitionKey` parameter.
      *
@@ -113,12 +114,21 @@ export class CosmosContainerClient {
 
         const mergedDocument = response.item;
         _.mergeWith(mergedDocument, document, (target: any, source: any, key) => {
+            if (customMerge) {
+                const customMergeResult = customMerge(source, target, key);
+                if (customMergeResult !== undefined) {
+                    return customMergeResult;
+                }
+            }
+
             // preserve the storage document _etag value
             if (key === '_etag') {
                 return target;
             }
-
-            return customMerge === undefined ? undefined : customMerge(target, source, key);
+            if (_.isArray(target)) {
+                // deduplicate and overwrite array fields
+                return _.uniq(source as unknown[]);
+            }
         });
 
         // normalize document properties by converting from null to undefined

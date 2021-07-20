@@ -33,10 +33,6 @@ export class WebsiteProvider {
                     // concat and deduplicate knownPages
                     return _.uniq([...(target as string[]), ...(source as string[])]);
                 }
-                if (_.isArray(target)) {
-                    // deduplicate and overwrite other array fields
-                    return _.uniq(source as unknown[]);
-                }
 
                 return undefined;
             },

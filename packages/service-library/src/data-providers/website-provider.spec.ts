@@ -116,15 +116,7 @@ describe(WebsiteProvider, () => {
                 expect(mergeCustomizer(target, source, 'knownPages')).toEqual(expectedArray);
             });
 
-            it('deduplicates and overwrites arrays', () => {
-                const target = ['value1', 'value2'];
-                const source = ['new value 1', 'new value 2', 'new value 2'];
-                const expectedArray = ['new value 1', 'new value 2'];
-
-                expect(mergeCustomizer(target, source, 'discoveryPatterns')).toEqual(expectedArray);
-            });
-
-            it('returns undefined for non-array property', () => {
+            it('returns undefined for other properties', () => {
                 const target = 'old baseUrl';
                 const source = 'new baseUrl';
 

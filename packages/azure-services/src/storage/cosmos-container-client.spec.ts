@@ -201,16 +201,19 @@ describe('mergeOrWriteDocument()', () => {
             id: '123',
             partitionKey: 'item-partitionKey',
             value: 'value1',
+            arrayField: ['item1', 'item2', 'item3'],
         };
         const documentItem = {
             id: '123',
             partitionKey: 'item-partitionKey',
             value: 'value2',
+            arrayField: ['item4', 'item4'],
         };
         const expectedMergedItem = {
             id: '123',
             partitionKey: 'item-partitionKey',
             value: mergedValue,
+            arrayField: ['item4'],
         };
         const mergeCustomizer = (target: typeof storageItem, source: typeof documentItem, key: string) => {
             if (key === 'value') {
