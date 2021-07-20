@@ -11,11 +11,16 @@ import * as StorageDocuments from 'storage-documents';
 import { createPageApiResponse, PageDocumentResponseConverter } from '../converters/page-document-response-converter';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 
+type WebsiteUpdateResponse = {
+    website: ApiContracts.Website | StorageDocuments.Website;
+    created: boolean;
+};
+
 @injectable()
 export class PostWebsiteController extends ApiController {
     public readonly apiVersion = '1.0';
 
-    public readonly apiName = 'storage-web-api-get-website';
+    public readonly apiName = 'storage-web-api-post-website';
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
@@ -35,18 +40,20 @@ export class PostWebsiteController extends ApiController {
 
         const websiteRequest = this.tryGetPayload<ApiContracts.Website>();
 
-        const websiteDoc = await this.createOrUpdateWebsite(websiteRequest);
+        const { website: websiteDocument, created: websiteCreated } = await this.createOrUpdateWebsite(websiteRequest);
 
-        const pagesIterator = this.pageProvider.getPagesForWebsite(websiteDoc.id);
-        let websiteResponse = await this.convertWebsiteDocumentToResponse(websiteDoc, pagesIterator);
+        const pagesIterator = this.pageProvider.getPagesForWebsite(websiteDocument.id);
+        let websiteResponse = await this.convertWebsiteDocumentToResponse(websiteDocument as StorageDocuments.Website, pagesIterator);
+        let pagesCreated: boolean;
 
-        websiteResponse = await this.createNewPages(websiteResponse);
+        // eslint-disable-next-line prefer-const
+        ({ website: websiteResponse, created: pagesCreated } = await this.createNewPages(websiteResponse));
 
         this.context.res = {
-            status: 200,
+            status: websiteCreated || pagesCreated ? 201 : 200,
             body: websiteResponse,
         };
-        this.logger.logInfo('Website metadata successfully fetched from a storage.');
+        this.logger.logInfo('Website metadata successfully posted to storage.');
     }
 
     protected validateRequest(): boolean {
@@ -68,22 +75,27 @@ export class PostWebsiteController extends ApiController {
         return true;
     }
 
-    private async createOrUpdateWebsite(websiteRequest: ApiContracts.Website): Promise<StorageDocuments.Website> {
+    private async createOrUpdateWebsite(websiteRequest: ApiContracts.Website): Promise<WebsiteUpdateResponse> {
         let websiteDoc: StorageDocuments.Website;
+        let created = false;
         if (websiteRequest.id === undefined) {
             websiteDoc = await this.websiteProvider.createWebsite(websiteRequest);
             this.logger.setCommonProperties({ websiteId: websiteDoc.id });
             this.logger.logInfo('Successfully created new website document');
+            created = true;
         } else {
             this.logger.setCommonProperties({ websiteId: websiteRequest.id });
             websiteDoc = await this.websiteProvider.updateWebsite(websiteRequest);
             this.logger.logInfo('Successfully updated website document');
         }
 
-        return websiteDoc;
+        return {
+            website: websiteDoc,
+            created: created,
+        };
     }
 
-    private async createNewPages(websiteResponse: ApiContracts.Website): Promise<ApiContracts.Website> {
+    private async createNewPages(websiteResponse: ApiContracts.Website): Promise<WebsiteUpdateResponse> {
         const existingPageUrls = websiteResponse.pages.map((page) => page.url);
         const newPageUrls = _.difference(websiteResponse.knownPages, existingPageUrls);
         await Promise.all(
@@ -95,6 +107,9 @@ export class PostWebsiteController extends ApiController {
             }),
         );
 
-        return websiteResponse;
+        return {
+            website: websiteResponse,
+            created: newPageUrls.length > 0,
+        };
     }
 }

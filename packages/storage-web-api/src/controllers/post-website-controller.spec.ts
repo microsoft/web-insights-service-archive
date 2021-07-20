@@ -157,7 +157,7 @@ describe(PostWebsiteController, () => {
 
         await testSubject.invoke(context);
 
-        expect(context.res.status).toBe(200);
+        expect(context.res.status).toBe(201);
         expect(context.res.body).toEqual(convertedWebsiteDoc);
     });
 
@@ -215,7 +215,7 @@ describe(PostWebsiteController, () => {
 
         await testSubject.invoke(context);
 
-        expect(context.res.status).toBe(200);
+        expect(context.res.status).toBe(201);
         expect(context.res.body).toEqual(expectedResponseBody);
     });
 });
