@@ -17,7 +17,7 @@ Usage: ${BASH_SOURCE} -r <resource group> [-e <environment>]
     exit 1
 }
 
-function recoverIfSoftDeleted() {
+recoverIfSoftDeleted() {
     # shellcheck disable=SC2154
     softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='${keyVault}'].id" -o tsv)
     if [[ -n "${softDeleted}" ]]; then
@@ -31,7 +31,7 @@ function recoverIfSoftDeleted() {
     fi
 }
 
-function createKeyVaultIfNotExists() {
+createKeyVaultIfNotExists() {
     local existingResourceId
     existingResourceId=$(
         az keyvault list \
@@ -55,14 +55,14 @@ function createKeyVaultIfNotExists() {
     fi
 }
 
-function createOrRecoverKeyVault() {
+createOrRecoverKeyVault() {
     recoverIfSoftDeleted
     if [[ -z ${keyvaultRecovered} ]]; then
         createKeyVaultIfNotExists
     fi
 }
 
-function setupKeyVaultResources() {
+setupKeyVaultResources() {
     echo "Setting up key vault resources using ARM template."
     resources=$(
         az deployment group create \

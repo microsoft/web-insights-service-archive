@@ -1,0 +1,38 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+# Default values for storage-web-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+    name: storage-web-api-func
+    repository: ''
+    pullPolicy: Always
+    tag: latest
+
+nameOverride: ''
+fullnameOverride: ''
+
+podAnnotations:
+    release: ppe
+    releaseId: ''
+
+service:
+    type: LoadBalancer
+    port: 80
+
+autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+env:
+  - name: APPINSIGHTS_INSTRUMENTATIONKEY
+    value: ''
+  - name: KEY_VAULT_URL
+    value: ''

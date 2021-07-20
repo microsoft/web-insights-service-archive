@@ -1,0 +1,18 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "storage-web-api.fullname" . }}-test-connection"
+  labels:
+    {{- include "storage-web-api.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "storage-web-api.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

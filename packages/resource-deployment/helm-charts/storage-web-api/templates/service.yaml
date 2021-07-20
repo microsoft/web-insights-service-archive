@@ -1,0 +1,17 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "storage-web-api.fullname" . }}
+  labels:
+    {{- include "storage-web-api.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector: {{- include "storage-web-api.selectorLabels" . | nindent 4 }}

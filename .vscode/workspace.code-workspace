@@ -85,6 +85,10 @@
             "unscannable",
             "upsert"
         ],
+        "prettier.disableLanguages": [
+            "helm",
+            "yaml"
+        ],
     },
     "extensions": {
         "recommendations": [
@@ -97,7 +101,8 @@
             "streetsidesoftware.code-spell-checker",
             "ms-azuretools.vscode-azurefunctions",
             "timonwong.shellcheck",
-            "ms-kubernetes-tools.vscode-kubernetes-tools"
+            "ms-kubernetes-tools.vscode-kubernetes-tools",
+            "tim-koehler.helm-intellisense"
         ]
     },
 }

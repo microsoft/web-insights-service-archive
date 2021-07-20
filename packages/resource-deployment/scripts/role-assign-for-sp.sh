@@ -15,21 +15,6 @@ Usage: ${BASH_SOURCE} -r <resource group> -p <service principal id> -o <Azure ro
     exit 1
 }
 
-# Read script arguments
-while getopts ":r:p:o:s:" option; do
-    case ${option} in
-    r) resourceGroupName=${OPTARG} ;;
-    p) principalId=${OPTARG} ;;
-    o) role=${OPTARG} ;;
-    s) scope=${OPTARG} ;;
-    *) exitWithUsageInfo ;;
-    esac
-done
-
-if [[ -z ${resourceGroupName} ]] || [[ -z ${principalId} ]] || [[ -z ${role} ]] || [[ -z ${scope} ]]; then
-    exitWithUsageInfo
-fi
-
 grantRoleToResource() {
     local end=$((SECONDS + 300))
 
@@ -55,5 +40,20 @@ grantRoleToResource() {
 
     echo "Successfully granted '${role}' role for service principal ${principalId} in ${scope}"
 }
+
+# Read script arguments
+while getopts ":r:p:o:s:" option; do
+    case ${option} in
+    r) resourceGroupName=${OPTARG} ;;
+    p) principalId=${OPTARG} ;;
+    o) role=${OPTARG} ;;
+    s) scope=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
+done
+
+if [[ -z ${resourceGroupName} ]] || [[ -z ${principalId} ]] || [[ -z ${role} ]] || [[ -z ${scope} ]]; then
+    exitWithUsageInfo
+fi
 
 grantRoleToResource

@@ -13,16 +13,7 @@ Usage: ${BASH_SOURCE} -r <resource group> [-e <runtime environment>]
     exit 1
 }
 
-# Read script arguments
-while getopts ":r:e:" option; do
-    case ${option} in
-    r) resourceGroupName=${OPTARG} ;;
-    e) environment=${OPTARG} ;;
-    *) exitWithUsageInfo ;;
-    esac
-done
-
-function onExitPushImages() {
+onExitPushImages() {
     local exitCode=$?
     if [[ ${exitCode} != 0 ]]; then
         echo "Failed to push images to Azure Container Registry."
@@ -82,6 +73,15 @@ pushImagesToRegistry() (
     echo "Pushing images to Azure Container Registry."
     runCommandsWithoutSecretsInParallel imageBuildProcesses
 )
+
+# Read script arguments
+while getopts ":r:e:" option; do
+    case ${option} in
+    r) resourceGroupName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
+done
 
 if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo

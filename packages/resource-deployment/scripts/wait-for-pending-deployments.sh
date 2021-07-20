@@ -13,24 +13,6 @@ Usage: ${BASH_SOURCE} -r <resource group>
     exit 1
 }
 
-# Read script arguments
-while getopts ":r:" option; do
-    case ${option} in
-    r) resourceGroupName=${OPTARG} ;;
-    *) exitWithUsageInfo ;;
-    esac
-done
-
-# Print script usage help
-if [[ -z ${resourceGroupName} ]]; then
-    exitWithUsageInfo
-fi
-
-# Login to Azure account if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
-
 function waitForDeployments {
     local pendingDeploymentsQuery="az deployment group list \
                                 --resource-group ${resourceGroupName} \
@@ -74,5 +56,23 @@ function waitForDeployments {
         echo "There are no pending deployments."
     fi
 }
+
+# Read script arguments
+while getopts ":r:" option; do
+    case ${option} in
+    r) resourceGroupName=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
+done
+
+# Print script usage help
+if [[ -z ${resourceGroupName} ]]; then
+    exitWithUsageInfo
+fi
+
+# Login to Azure account if required
+if ! az account show 1>/dev/null; then
+    az login
+fi
 
 waitForDeployments
