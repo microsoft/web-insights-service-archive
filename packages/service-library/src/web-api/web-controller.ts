@@ -5,6 +5,7 @@ import { Context } from '@azure/functions';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
+import { WebRequestValidator } from './web-request-validator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -12,7 +13,10 @@ import { ContextAwareLogger } from 'logger';
 export abstract class WebController {
     public context: Context;
 
-    constructor(@inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger) {}
+    constructor(
+        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
+        protected readonly requestValidator: WebRequestValidator,
+    ) {}
 
     public abstract readonly apiVersion: string;
 
@@ -25,7 +29,7 @@ export abstract class WebController {
             this.logger.setCommonProperties(this.getBaseTelemetryProperties());
 
             let result: unknown;
-            if (this.validateRequest(...args)) {
+            if (this.requestValidator.validateRequest(this.context)) {
                 result = await this.handleRequest(...args);
             }
 
@@ -37,8 +41,6 @@ export abstract class WebController {
             throw error;
         }
     }
-
-    protected abstract validateRequest(...args: any[]): boolean;
 
     protected abstract handleRequest(...args: any[]): Promise<unknown>;
 
