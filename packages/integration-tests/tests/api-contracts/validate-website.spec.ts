@@ -5,15 +5,15 @@ import 'reflect-metadata';
 
 /* eslint-disable import/no-internal-modules */
 
-import { isValidWebsite, Website, websiteWithAllProperties, websiteWithRequiredProperties } from 'api-contracts';
+import { isValidWebsiteObject, Website, websiteWithAllProperties, websiteWithRequiredProperties } from 'api-contracts';
 
-describe(isValidWebsite, () => {
+describe(isValidWebsiteObject, () => {
     it('Returns true for website with all required properties', () => {
-        expect(isValidWebsite(websiteWithRequiredProperties)).toBe(true);
+        expect(isValidWebsiteObject(websiteWithRequiredProperties)).toBe(true);
     });
 
     it('Returns true for website with all properties', () => {
-        expect(isValidWebsite(websiteWithAllProperties)).toBe(true);
+        expect(isValidWebsiteObject(websiteWithAllProperties)).toBe(true);
     });
 
     it('Returns false for website with unknown properties', () => {
@@ -21,13 +21,13 @@ describe(isValidWebsite, () => {
             ...websiteWithRequiredProperties,
             unknownProperty: 'test value',
         };
-        expect(isValidWebsite(obj)).toBe(false);
+        expect(isValidWebsiteObject(obj)).toBe(false);
     });
 
     it('Returns false for website missing required properties', () => {
         const { baseUrl, ...obj } = websiteWithRequiredProperties;
 
-        expect(isValidWebsite(obj as Website)).toBe(false);
+        expect(isValidWebsiteObject(obj as Website)).toBe(false);
     });
 
     it('Returns false if website has incorrect format for pages', () => {
@@ -40,6 +40,6 @@ describe(isValidWebsite, () => {
             ],
         };
 
-        expect(isValidWebsite(obj as unknown as Website)).toBe(false);
+        expect(isValidWebsiteObject(obj as unknown as Website)).toBe(false);
     });
 });

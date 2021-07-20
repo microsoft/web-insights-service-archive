@@ -36,7 +36,7 @@ describe(PostWebsiteController, () => {
     let guidGeneratorMock: IMock<GuidGenerator>;
     let websiteProviderMock: IMock<WebsiteProvider>;
     let pageProviderMock: IMock<PageProvider>;
-    let isValidWebsiteMock: IMock<typeof ApiContracts.isValidWebsite>;
+    let isValidWebsiteMock: IMock<typeof ApiContracts.isValidWebsiteObject>;
     let websiteDocumentResponseConverterMock: IMock<WebsiteDocumentResponseConverter>;
     let pageDocumentResponseConverterMock: IMock<PageDocumentResponseConverter>;
     let context: Context;
@@ -50,7 +50,7 @@ describe(PostWebsiteController, () => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         websiteProviderMock = Mock.ofType(WebsiteProvider, MockBehavior.Strict);
         pageProviderMock = Mock.ofType<PageProvider>();
-        isValidWebsiteMock = Mock.ofType<typeof ApiContracts.isValidWebsite>();
+        isValidWebsiteMock = Mock.ofType<typeof ApiContracts.isValidWebsiteObject>();
         websiteDocumentResponseConverterMock = Mock.ofType<WebsiteDocumentResponseConverter>();
         pageDocumentResponseConverterMock = Mock.ofType<PageDocumentResponseConverter>();
         pageIterableMock = Mock.ofType<CosmosQueryResultsIterable<StorageDocuments.Page>>();

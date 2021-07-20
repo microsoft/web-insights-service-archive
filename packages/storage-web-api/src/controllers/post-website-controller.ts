@@ -23,7 +23,7 @@ export class PostWebsiteController extends ApiController {
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(WebsiteProvider) private readonly websiteProvider: WebsiteProvider,
         @inject(PageProvider) private readonly pageProvider: PageProvider,
-        private readonly isValidWebsite: typeof ApiContracts.isValidWebsite = ApiContracts.isValidWebsite,
+        private readonly isValidWebsiteObject: typeof ApiContracts.isValidWebsiteObject = ApiContracts.isValidWebsiteObject,
         private readonly convertWebsiteDocumentToResponse: WebsiteDocumentResponseConverter = createWebsiteApiResponse,
         private readonly convertPageDocumentToResponse: PageDocumentResponseConverter = createPageApiResponse,
     ) {
@@ -59,7 +59,7 @@ export class PostWebsiteController extends ApiController {
         const hasInvalidProperties = (website: ApiContracts.Website) => website.pages !== undefined;
 
         const payload = this.tryGetPayload<ApiContracts.Website>();
-        if (!this.isValidWebsite(payload) || hasInvalidId(payload) || hasInvalidProperties(payload)) {
+        if (!this.isValidWebsiteObject(payload) || hasInvalidId(payload) || hasInvalidProperties(payload)) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
 
             return false;

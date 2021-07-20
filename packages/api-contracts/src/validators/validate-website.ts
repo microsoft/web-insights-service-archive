@@ -4,6 +4,6 @@
 import { is } from 'typescript-is';
 import { Website } from '../types/website';
 
-export function isValidWebsite(obj: Website): boolean {
+export function isValidWebsiteObject(obj: Website): boolean {
     return is<Website>(obj);
 }

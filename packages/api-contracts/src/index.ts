@@ -3,5 +3,5 @@
 
 export { Page } from './types/page';
 export { Website } from './types/website';
-export { isValidWebsite } from './validators/validate-website';
+export { isValidWebsiteObject } from './validators/validate-website';
 export * from './test-data/sample-website-data';
