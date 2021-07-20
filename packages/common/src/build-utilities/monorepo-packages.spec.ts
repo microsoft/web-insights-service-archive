@@ -10,6 +10,7 @@ Array [
   "api-contracts",
   "azure-services",
   "common",
+  "integration-tests",
   "logger",
   "resource-deployment",
   "service-library",

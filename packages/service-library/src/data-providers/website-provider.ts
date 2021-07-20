@@ -5,6 +5,7 @@ import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure
 import { inject, injectable } from 'inversify';
 import { DocumentDataOnly, itemTypes, PartitionKey, Website } from 'storage-documents';
 import { GuidGenerator } from 'common';
+import _ from 'lodash';
 
 @injectable()
 export class WebsiteProvider {
@@ -23,7 +24,19 @@ export class WebsiteProvider {
     public async updateWebsite(website: Partial<Website>): Promise<Website> {
         const websiteDoc = this.normalizeDbDocument(website);
 
-        const response = await this.cosmosContainerClient.mergeOrWriteDocument(websiteDoc);
+        const response = await this.cosmosContainerClient.mergeOrWriteDocument(
+            websiteDoc,
+            websiteDoc.partitionKey,
+            true,
+            (target, source, key) => {
+                if (key === 'knownPages') {
+                    // concat and deduplicate knownPages
+                    return _.uniq([...(target as string[]), ...(source as string[])]);
+                }
+
+                return undefined;
+            },
+        );
 
         return response.item as Website;
     }

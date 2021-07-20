@@ -194,6 +194,53 @@ describe('mergeOrWriteDocument()', () => {
         expect(response.item).toEqual(expectedMergedItem);
         cosmosClientWrapperMock.verifyAll();
     });
+
+    it('use custom merge', async () => {
+        const mergedValue = 'custom merged value';
+        const storageItem = {
+            id: '123',
+            partitionKey: 'item-partitionKey',
+            value: 'value1',
+            arrayField: ['item1', 'item2', 'item3'],
+        };
+        const documentItem = {
+            id: '123',
+            partitionKey: 'item-partitionKey',
+            value: 'value2',
+            arrayField: ['item4', 'item4'],
+        };
+        const expectedMergedItem = {
+            id: '123',
+            partitionKey: 'item-partitionKey',
+            value: mergedValue,
+            arrayField: ['item4'],
+        };
+        const mergeCustomizer = (target: typeof storageItem, source: typeof documentItem, key: string) => {
+            if (key === 'value') {
+                return mergedValue;
+            }
+
+            return undefined;
+        };
+
+        let mergedItem = {};
+        cosmosClientWrapperMock
+            .setup(async (o) => o.readItem(documentItem.id, dbName, collectionName, partitionKey, false))
+            .returns(async () => Promise.resolve({ statusCode: 200, item: storageItem }))
+            .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async (o) => o.upsertItem(It.isAny(), dbName, collectionName, partitionKey, true))
+            .callback(async (i, d, c, p) => {
+                mergedItem = i;
+            })
+            .returns(async () => Promise.resolve({ statusCode: 200, item: mergedItem }))
+            .verifiable(Times.once());
+
+        const response = await cosmosContainerClient.mergeOrWriteDocument(documentItem, partitionKey, true, mergeCustomizer);
+
+        expect(response.item).toEqual(expectedMergedItem);
+        cosmosClientWrapperMock.verifyAll();
+    });
 });
 
 describe('CosmosContainerClient.tryExecuteOperation()', () => {

@@ -5,6 +5,6 @@ import * as StorageDocuments from 'storage-documents';
 import { Page } from './page';
 
 export interface Website extends Omit<StorageDocuments.Website, keyof StorageDocuments.StorageDocument> {
-    id: string;
-    pages: Page[];
+    id?: string;
+    pages?: Page[];
 }
