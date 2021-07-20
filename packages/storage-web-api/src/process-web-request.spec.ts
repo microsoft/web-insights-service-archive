@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { ApiController } from 'service-library';
+import { ApiController, WebRequestValidator } from 'service-library';
 import { processWebRequest } from './process-web-request';
 
 type TestRequestResponse = {
@@ -20,6 +20,10 @@ class TestableController extends ApiController {
     public readonly apiName = 'test api name';
 
     public readonly logger: Logger;
+
+    protected readonly requestValidator: WebRequestValidator = {
+        validateRequest: (context: Context) => true,
+    };
 
     protected readonly serviceConfig: ServiceConfiguration;
 
