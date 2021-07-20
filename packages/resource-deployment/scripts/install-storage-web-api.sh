@@ -17,7 +17,6 @@ Usage: ${BASH_SOURCE} -r <resource group> [-c <aks cluster name>] [-e <environme
 while getopts ":r:s:c:e:v:d" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
-    s) serviceName=${OPTARG} ;;
     c) kubernetesService=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
