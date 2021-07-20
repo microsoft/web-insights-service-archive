@@ -11,16 +11,18 @@ export environment
 export location
 export resourceGroupName
 export subscription
+export releaseVersion
 
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -e <environment> -l <location> -r <resource group> -s <subscription name or id>
+Usage: ${BASH_SOURCE} -e <environment> -l <location> -r <resource group> -s <subscription name or id> [-v <release version>]
 where:
 
 resource group - The name of the resource group that everything will be deployed in.
 subscription - The subscription for the resource group.
-environment - The environment in which the set up is running (dev, ci, ppe, or prod)
+environment - The environment in which the set up is running (dev, ci, ppe, or prod).
+release version - The deployment release version.
 location - Azure region where the instances will be deployed. Available Azure regions:
     centralus
     eastasia
@@ -56,9 +58,7 @@ location - Azure region where the instances will be deployed. Available Azure re
     exit 1
 }
 
-. "${0%/*}/process-utilities.sh"
-
-function onExit() {
+onExit() {
     local exitCode=$?
 
     if [[ ${exitCode} != 0 ]]; then
@@ -72,24 +72,7 @@ function onExit() {
     exit "${exitCode}"
 }
 
-trap "onExit" EXIT
-
-# Read script arguments
-while getopts ":r:s:l:e:" option; do
-    case ${option} in
-    r) resourceGroupName=${OPTARG} ;;
-    s) subscription=${OPTARG} ;;
-    l) location=${OPTARG} ;;
-    e) environment=${OPTARG} ;;
-    *) exitWithUsageInfo ;;
-    esac
-done
-
-if [[ -z ${resourceGroupName} ]] || [[ -z ${subscription} ]] || [[ -z ${location} ]] || [[ -z ${environment} ]]; then
-    exitWithUsageInfo
-fi
-
-function install() {
+install() {
     # Login to Azure if required
     if ! az account show 1>/dev/null; then
         az login
@@ -117,5 +100,25 @@ function install() {
     . "${0%/*}/push-image-to-container-registry.sh"
     . "${0%/*}/create-kubernetes-service.sh"
 }
+
+# Read script arguments
+while getopts ":r:s:l:e:v:" option; do
+    case ${option} in
+    r) resourceGroupName=${OPTARG} ;;
+    s) subscription=${OPTARG} ;;
+    l) location=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
+    v) releaseVersion=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
+done
+
+if [[ -z ${resourceGroupName} ]] || [[ -z ${subscription} ]] || [[ -z ${location} ]] || [[ -z ${environment} ]]; then
+    exitWithUsageInfo
+fi
+
+trap "onExit" EXIT
+
+. "${0%/*}/process-utilities.sh"
 
 install

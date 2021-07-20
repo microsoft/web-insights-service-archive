@@ -86,7 +86,7 @@ createCosmosDatabase() {
     fi
 }
 
-function setupCosmosDb() {
+setupCosmosDb() {
     createCosmosAccount
 
     local webInsightsDbName="WebInsights"

@@ -6,6 +6,9 @@
 LICENSE
 yarn.lock
 .dockerignore
+.shellcheckrc
+.helmignore
+copyright-header.txt
 
 **/*.code-workspace
 **/Dockerfile
@@ -24,8 +27,9 @@ dist/
 **/.env.*
 **/yarn-*.log
 **/*.ts.snap
-copyright-header.txt
 **/.DS_Store
 **/.funcignore
 **/extensions.csproj
 **/*.ps1
+**/*.tpl
+**/*.yaml

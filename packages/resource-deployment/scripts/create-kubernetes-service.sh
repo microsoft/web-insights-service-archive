@@ -8,9 +8,16 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -l <location> [-c <cluster name>] [-d <container registry>]
+Usage: ${BASH_SOURCE} -r <resource group> -l <location> [-c <aks cluster name>] [-d <container registry>]
 "
     exit 1
+}
+
+attachContainerRegistry() {
+    role="AcrPull"
+    containerRegistryId=$(az acr show --resource-group "${resourceGroupName}" --name "${containerRegistry}" --query id -o tsv)
+    scope="--scope ${containerRegistryId}"
+    . "${0%/*}/role-assign-for-sp.sh"
 }
 
 # Read script arguments
@@ -32,13 +39,6 @@ fi
 if [[ -z ${kubernetesService} ]] || [[ -z ${containerRegistry} ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
-
-function attachContainerRegistry() {
-    role="AcrPull"
-    containerRegistryId=$(az acr show --resource-group "${resourceGroupName}" --name "${containerRegistry}" --query id -o tsv)
-    scope="--scope ${containerRegistryId}"
-    . "${0%/*}/role-assign-for-sp.sh"
-}
 
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)

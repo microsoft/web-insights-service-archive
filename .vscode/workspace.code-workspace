@@ -86,7 +86,8 @@
             "upsert"
         ],
         "prettier.disableLanguages": [
-            "helm"
+            "helm",
+            "yaml"
         ],
     },
     "extensions": {
