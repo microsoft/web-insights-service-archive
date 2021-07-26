@@ -7,17 +7,11 @@ import * as ApiContracts from 'api-contracts';
 import { IMock, Mock } from 'typemoq';
 import { ServiceConfiguration } from 'common';
 import { ContextAwareLogger } from 'logger';
-import {
-    ApiRequestValidator,
-    CosmosQueryResultsIterable,
-    HttpResponse,
-    PageProvider,
-    WebApiErrorCodes,
-    WebsiteProvider,
-} from 'service-library';
+import { CosmosQueryResultsIterable, HttpResponse, PageProvider, WebApiErrorCodes, WebsiteProvider } from 'service-library';
 import { Context } from '@azure/functions';
 import * as StorageDocuments from 'storage-documents';
 import { WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
+import { GetWebsiteRequestValidator } from '../request-validators/get-website-request-validator';
 import { GetWebsiteController } from './get-website-controller';
 
 describe(GetWebsiteController, () => {
@@ -25,7 +19,7 @@ describe(GetWebsiteController, () => {
     const websiteId = 'website id';
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<ContextAwareLogger>;
-    let requestValidatorMock: IMock<ApiRequestValidator>;
+    let requestValidatorMock: IMock<GetWebsiteRequestValidator>;
     let websiteProviderMock: IMock<WebsiteProvider>;
     let pageProviderMock: IMock<PageProvider>;
     let websiteDocumentResponseConverterMock: IMock<WebsiteDocumentResponseConverter>;
@@ -36,7 +30,7 @@ describe(GetWebsiteController, () => {
     beforeEach(() => {
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         loggerMock = Mock.ofType<ContextAwareLogger>();
-        requestValidatorMock = Mock.ofType<ApiRequestValidator>();
+        requestValidatorMock = Mock.ofType<GetWebsiteRequestValidator>();
         websiteProviderMock = Mock.ofType<WebsiteProvider>();
         pageProviderMock = Mock.ofType<PageProvider>();
         websiteDocumentResponseConverterMock = Mock.ofType<WebsiteDocumentResponseConverter>();

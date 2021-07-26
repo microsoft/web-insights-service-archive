@@ -5,9 +5,10 @@ import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider, ApiRequestValidator } from 'service-library';
+import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
+import { GetWebsiteRequestValidator } from '../request-validators/get-website-request-validator';
 
 @injectable()
 export class GetWebsiteController extends ApiController {
@@ -18,7 +19,7 @@ export class GetWebsiteController extends ApiController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(ApiRequestValidator) requestValidator: ApiRequestValidator,
+        @inject(GetWebsiteRequestValidator) requestValidator: GetWebsiteRequestValidator,
         @inject(WebsiteProvider) private readonly websiteProvider: WebsiteProvider,
         @inject(PageProvider) private readonly pageProvider: PageProvider,
         private readonly convertWebsiteDocumentToResponse: WebsiteDocumentResponseConverter = createWebsiteApiResponse,

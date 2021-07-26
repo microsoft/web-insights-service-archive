@@ -3,11 +3,12 @@
 
 import * as ApiContracts from 'api-contracts';
 import { Context } from '@azure/functions';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import _ from 'lodash';
 import { GuidGenerator } from 'common';
 import { ApiRequestValidator, HttpResponse, WebApiErrorCodes } from 'service-library';
 
+@injectable()
 export class PostWebsiteRequestValidator extends ApiRequestValidator {
     public static readonly apiVersions = ['1.0'];
 
