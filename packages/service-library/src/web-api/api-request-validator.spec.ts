@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import 'reflect-metadata';
+
 import { Context } from '@azure/functions';
 import { ApiRequestValidator } from './api-request-validator';
 import { HttpResponse } from './http-response';
@@ -11,8 +13,12 @@ describe(ApiRequestValidator, () => {
 
     let testSubject: ApiRequestValidator;
 
+    class TestableApiRequestValidator extends ApiRequestValidator {
+        protected readonly apiVersions = [apiVersion];
+    }
+
     beforeEach(() => {
-        testSubject = new ApiRequestValidator([apiVersion]);
+        testSubject = new TestableApiRequestValidator();
     });
 
     it('rejects request with no query parameters', () => {

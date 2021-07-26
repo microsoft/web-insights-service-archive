@@ -10,13 +10,13 @@ import { ApiRequestValidator, HttpResponse, WebApiErrorCodes } from 'service-lib
 
 @injectable()
 export class PostWebsiteRequestValidator extends ApiRequestValidator {
-    public static readonly apiVersions = ['1.0'];
+    protected readonly apiVersions = ['1.0'];
 
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         private readonly isValidWebsiteObject: typeof ApiContracts.isValidWebsiteObject = ApiContracts.isValidWebsiteObject,
     ) {
-        super(PostWebsiteRequestValidator.apiVersions);
+        super();
     }
 
     public validateRequest(context: Context): boolean {

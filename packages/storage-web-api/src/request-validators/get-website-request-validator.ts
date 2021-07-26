@@ -6,9 +6,5 @@ import { ApiRequestValidator } from 'service-library';
 
 @injectable()
 export class GetWebsiteRequestValidator extends ApiRequestValidator {
-    public static readonly apiVersions = ['1.0'];
-
-    constructor() {
-        super(GetWebsiteRequestValidator.apiVersions);
-    }
+    protected readonly apiVersions = ['1.0'];
 }

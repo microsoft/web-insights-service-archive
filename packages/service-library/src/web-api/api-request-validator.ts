@@ -2,13 +2,15 @@
 // Licensed under the MIT License.
 
 import { Context } from '@azure/functions';
+import { injectable } from 'inversify';
 import _ from 'lodash';
 import { HttpResponse } from './http-response';
 import { WebApiErrorCodes } from './web-api-error-codes';
 import { WebRequestValidator } from './web-request-validator';
 
-export class ApiRequestValidator implements WebRequestValidator {
-    constructor(protected readonly apiVersions: string[]) {}
+@injectable()
+export abstract class ApiRequestValidator implements WebRequestValidator {
+    protected abstract readonly apiVersions: string[];
 
     public validateRequest(context: Context): boolean {
         if (!this.validateApiVersion(context) || !this.validateContentType(context)) {
