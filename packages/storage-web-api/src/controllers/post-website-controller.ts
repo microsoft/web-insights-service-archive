@@ -2,14 +2,15 @@
 // Licensed under the MIT License.
 
 import * as ApiContracts from 'api-contracts';
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider } from 'service-library';
+import { ApiController, WebsiteProvider, PageProvider } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
 import { createPageApiResponse, PageDocumentResponseConverter } from '../converters/page-document-response-converter';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
+import { PostWebsiteRequestValidator } from '../request-validators/post-website-request-validator';
 
 type WebsiteUpdateResponse = {
     website: ApiContracts.Website | StorageDocuments.Website;
@@ -25,14 +26,13 @@ export class PostWebsiteController extends ApiController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @inject(PostWebsiteRequestValidator) requestValidator: PostWebsiteRequestValidator,
         @inject(WebsiteProvider) private readonly websiteProvider: WebsiteProvider,
         @inject(PageProvider) private readonly pageProvider: PageProvider,
-        private readonly isValidWebsiteObject: typeof ApiContracts.isValidWebsiteObject = ApiContracts.isValidWebsiteObject,
         private readonly convertWebsiteDocumentToResponse: WebsiteDocumentResponseConverter = createWebsiteApiResponse,
         private readonly convertPageDocumentToResponse: PageDocumentResponseConverter = createPageApiResponse,
     ) {
-        super(logger);
+        super(logger, requestValidator);
     }
 
     public async handleRequest(): Promise<void> {
@@ -54,25 +54,6 @@ export class PostWebsiteController extends ApiController {
             body: websiteResponse,
         };
         this.logger.logInfo('Website metadata successfully posted to storage.');
-    }
-
-    protected validateRequest(): boolean {
-        if (!super.validateRequest()) {
-            return false;
-        }
-
-        const hasInvalidId = (website: ApiContracts.Website) => website.id !== undefined && !this.guidGenerator.isValidV6Guid(website.id);
-        // Existing page documents will not be updated through this endpoint
-        const hasInvalidProperties = (website: ApiContracts.Website) => website.pages !== undefined;
-
-        const payload = this.tryGetPayload<ApiContracts.Website>();
-        if (!this.isValidWebsiteObject(payload) || hasInvalidId(payload) || hasInvalidProperties(payload)) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
-
-            return false;
-        }
-
-        return true;
     }
 
     private async createOrUpdateWebsite(websiteRequest: ApiContracts.Website): Promise<WebsiteUpdateResponse> {

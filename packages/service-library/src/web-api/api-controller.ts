@@ -32,58 +32,6 @@ export abstract class ApiController extends WebController {
         return undefined;
     }
 
-    protected validateRequest(...args: any[]): boolean {
-        if (!this.validateApiVersion() || !this.validateContentType()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected validateContentType(): boolean {
-        if (this.context.req.method !== 'POST' && this.context.req.method !== 'PUT') {
-            return true;
-        }
-
-        if (!this.hasPayload()) {
-            this.context.res = {
-                status: 204, // No Content
-            };
-
-            return false;
-        }
-
-        if (this.context.req.headers === undefined || this.context.req.headers['content-type'] === undefined) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader);
-
-            return false;
-        }
-
-        if (this.context.req.headers['content-type'] !== 'application/json') {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedContentType);
-
-            return false;
-        }
-
-        return true;
-    }
-
-    protected validateApiVersion(): boolean {
-        if (this.context.req.query === undefined || this.context.req.query['api-version'] === undefined) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter);
-
-            return false;
-        }
-
-        if (this.context.req.query['api-version'] !== this.apiVersion && this.context.req.query['api-version'] !== '2.0') {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion);
-
-            return false;
-        }
-
-        return true;
-    }
-
     protected async getRestApiConfig(): Promise<RestApiConfig> {
         return this.serviceConfig.getConfigValue('restApiConfig');
     }

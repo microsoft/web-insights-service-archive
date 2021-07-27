@@ -5,13 +5,14 @@ import 'reflect-metadata';
 
 import * as ApiContracts from 'api-contracts';
 import * as StorageDocuments from 'storage-documents';
-import { IMock, It, Mock, MockBehavior } from 'typemoq';
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { IMock, Mock, MockBehavior } from 'typemoq';
+import { ServiceConfiguration } from 'common';
 import { ContextAwareLogger } from 'logger';
-import { CosmosQueryResultsIterable, HttpResponse, PageProvider, WebApiErrorCodes, WebsiteProvider } from 'service-library';
+import { CosmosQueryResultsIterable, PageProvider, WebsiteProvider } from 'service-library';
 import { Context } from '@azure/functions';
 import { WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 import { PageDocumentResponseConverter } from '../converters/page-document-response-converter';
+import { PostWebsiteRequestValidator } from '../request-validators/post-website-request-validator';
 import { PostWebsiteController } from './post-website-controller';
 
 describe(PostWebsiteController, () => {
@@ -33,10 +34,9 @@ describe(PostWebsiteController, () => {
 
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<ContextAwareLogger>;
-    let guidGeneratorMock: IMock<GuidGenerator>;
+    let requestValidatorMock: IMock<PostWebsiteRequestValidator>;
     let websiteProviderMock: IMock<WebsiteProvider>;
     let pageProviderMock: IMock<PageProvider>;
-    let isValidWebsiteMock: IMock<typeof ApiContracts.isValidWebsiteObject>;
     let websiteDocumentResponseConverterMock: IMock<WebsiteDocumentResponseConverter>;
     let pageDocumentResponseConverterMock: IMock<PageDocumentResponseConverter>;
     let context: Context;
@@ -47,16 +47,13 @@ describe(PostWebsiteController, () => {
     beforeEach(() => {
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         loggerMock = Mock.ofType<ContextAwareLogger>();
-        guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        requestValidatorMock = Mock.ofType<PostWebsiteRequestValidator>();
         websiteProviderMock = Mock.ofType(WebsiteProvider, MockBehavior.Strict);
         pageProviderMock = Mock.ofType<PageProvider>();
-        isValidWebsiteMock = Mock.ofType<typeof ApiContracts.isValidWebsiteObject>();
         websiteDocumentResponseConverterMock = Mock.ofType<WebsiteDocumentResponseConverter>();
         pageDocumentResponseConverterMock = Mock.ofType<PageDocumentResponseConverter>();
         pageIterableMock = Mock.ofType<CosmosQueryResultsIterable<StorageDocuments.Page>>();
 
-        isValidWebsiteMock.setup((f) => f(It.isAny())).returns(() => true);
-        guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteId)).returns(() => true);
         pageProviderMock.setup((p) => p.getPagesForWebsite(websiteId)).returns(() => pageIterableMock.object);
         websiteDocumentResponseConverterMock
             .setup((c) => c(websiteDocument, pageIterableMock.object))
@@ -83,10 +80,9 @@ describe(PostWebsiteController, () => {
         testSubject = new PostWebsiteController(
             serviceConfigMock.object,
             loggerMock.object,
-            guidGeneratorMock.object,
+            requestValidatorMock.object,
             websiteProviderMock.object,
             pageProviderMock.object,
-            isValidWebsiteMock.object,
             websiteDocumentResponseConverterMock.object,
             pageDocumentResponseConverterMock.object,
         );
@@ -95,52 +91,6 @@ describe(PostWebsiteController, () => {
 
     afterEach(() => {
         websiteProviderMock.verifyAll();
-    });
-
-    describe('Rejects invalid inputs', () => {
-        it('if website does not match interface', async () => {
-            const malformedWebsite = { invalidProperty: 'value' } as unknown as ApiContracts.Website;
-            isValidWebsiteMock.reset();
-            isValidWebsiteMock.setup((o) => o(malformedWebsite)).returns(() => false);
-
-            context.req.rawBody = JSON.stringify(malformedWebsite);
-
-            await testSubject.invoke(context);
-            expect(context.res).toMatchObject(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
-        });
-
-        it('if website has an invalid id', async () => {
-            const websiteRequest = {
-                ...ApiContracts.websiteWithRequiredProperties,
-                id: websiteId,
-            };
-            guidGeneratorMock.reset();
-            guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteId)).returns(() => false);
-            isValidWebsiteMock.setup((o) => o(websiteRequest)).returns(() => true);
-
-            context.req.rawBody = JSON.stringify(websiteRequest);
-
-            await testSubject.invoke(context);
-            expect(context.res).toMatchObject(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
-        });
-
-        it('if website contains pages field', async () => {
-            const websiteRequest = {
-                ...ApiContracts.websiteWithRequiredProperties,
-                pages: [
-                    {
-                        id: 'page id',
-                        url: 'page url',
-                    },
-                ],
-            };
-            isValidWebsiteMock.setup((o) => o(websiteRequest)).returns(() => true);
-
-            context.req.rawBody = JSON.stringify(websiteRequest);
-
-            await testSubject.invoke(context);
-            expect(context.res).toMatchObject(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
-        });
     });
 
     it('Creates a new document if no id is given', async () => {
@@ -155,7 +105,7 @@ describe(PostWebsiteController, () => {
             .returns(async () => websiteDocument)
             .verifiable();
 
-        await testSubject.invoke(context);
+        await testSubject.handleRequest();
 
         expect(context.res.status).toBe(201);
         expect(context.res.body).toEqual(convertedWebsiteDoc);
@@ -174,7 +124,7 @@ describe(PostWebsiteController, () => {
             .returns(async () => websiteDocument)
             .verifiable();
 
-        await testSubject.invoke(context);
+        await testSubject.handleRequest();
 
         expect(context.res.status).toBe(200);
         expect(context.res.body).toEqual(convertedWebsiteDoc);
@@ -213,7 +163,7 @@ describe(PostWebsiteController, () => {
         pageProviderMock.setup((p) => p.createPageForWebsite(newPageUrl, websiteId)).returns(async () => newPageDocument);
         pageDocumentResponseConverterMock.setup((c) => c(newPageDocument)).returns(() => newPageObj);
 
-        await testSubject.invoke(context);
+        await testSubject.handleRequest();
 
         expect(context.res.status).toBe(201);
         expect(context.res.body).toEqual(expectedResponseBody);

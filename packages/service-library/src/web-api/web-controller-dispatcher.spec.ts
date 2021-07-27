@@ -10,6 +10,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebController } from './web-controller';
 import { WebControllerDispatcher } from './web-controller-dispatcher';
+import { WebRequestValidator } from './web-request-validator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -45,11 +46,13 @@ describe(WebControllerDispatcher, () => {
     let testableWebController: TestableWebController;
     let processLifeCycleContainerMock: IMock<Container>;
     let loggerMock: IMock<MockableLogger>;
+    let requestValidatorMock: IMock<WebRequestValidator>;
 
     beforeEach(() => {
         context = <Context>(<unknown>{ bindingDefinitions: {} });
         loggerMock = Mock.ofType(MockableLogger);
-        testableWebController = new TestableWebController(loggerMock.object);
+        requestValidatorMock = Mock.ofType<WebRequestValidator>();
+        testableWebController = new TestableWebController(loggerMock.object, requestValidatorMock.object);
 
         containerMock = Mock.ofType(Container);
         processLifeCycleContainerMock = Mock.ofType(Container);

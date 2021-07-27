@@ -11,6 +11,7 @@ import { CosmosQueryResultsIterable, HttpResponse, PageProvider, WebApiErrorCode
 import { Context } from '@azure/functions';
 import * as StorageDocuments from 'storage-documents';
 import { WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
+import { GetWebsiteRequestValidator } from '../request-validators/get-website-request-validator';
 import { GetWebsiteController } from './get-website-controller';
 
 describe(GetWebsiteController, () => {
@@ -18,6 +19,7 @@ describe(GetWebsiteController, () => {
     const websiteId = 'website id';
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<ContextAwareLogger>;
+    let requestValidatorMock: IMock<GetWebsiteRequestValidator>;
     let websiteProviderMock: IMock<WebsiteProvider>;
     let pageProviderMock: IMock<PageProvider>;
     let websiteDocumentResponseConverterMock: IMock<WebsiteDocumentResponseConverter>;
@@ -28,6 +30,7 @@ describe(GetWebsiteController, () => {
     beforeEach(() => {
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         loggerMock = Mock.ofType<ContextAwareLogger>();
+        requestValidatorMock = Mock.ofType<GetWebsiteRequestValidator>();
         websiteProviderMock = Mock.ofType<WebsiteProvider>();
         pageProviderMock = Mock.ofType<PageProvider>();
         websiteDocumentResponseConverterMock = Mock.ofType<WebsiteDocumentResponseConverter>();
@@ -49,6 +52,7 @@ describe(GetWebsiteController, () => {
         testSubject = new GetWebsiteController(
             serviceConfigMock.object,
             loggerMock.object,
+            requestValidatorMock.object,
             websiteProviderMock.object,
             pageProviderMock.object,
             websiteDocumentResponseConverterMock.object,

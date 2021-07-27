@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 export { ProcessEntryPointBase } from './process-entry-point-base';
-export { WebController } from './web-api/web-controller';
 export { ApiController } from './web-api/api-controller';
+export { ApiRequestValidator } from './web-api/api-request-validator';
+export { WebController } from './web-api/web-controller';
 export { WebControllerDispatcher, Newable } from './web-api/web-controller-dispatcher';
+export { WebRequestValidator } from './web-api/web-request-validator';
 export { getGlobalWebControllerDispatcher } from './web-api/get-global-web-controller-dispatcher';
 export * from './web-api/web-api-error-codes';
 export { HttpResponse } from './web-api/http-response';
