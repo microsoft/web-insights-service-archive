@@ -95,7 +95,7 @@ getInstallAction
 helm "${installAction}" "${releaseName}" "${helmChart}" \
     -f "${valuesManifest}" \
     --set image.repository="${repository}" \
-    --set podAnnotations.releaseId="${releaseVersion}" \
+    --set podAnnotations.releaseId="'${releaseVersion}'" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
     ${flags}
