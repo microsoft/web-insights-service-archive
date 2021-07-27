@@ -16,10 +16,10 @@ spec:
       {{- include "storage-web-api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- range $key, $val := .Values.podAnnotations }}
+        {{ $key }}: {{ $val | quote }}
+        {{- end }}
       labels:
         {{- include "storage-web-api.selectorLabels" . | nindent 8 }}
     spec:
