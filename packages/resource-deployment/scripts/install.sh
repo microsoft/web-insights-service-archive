@@ -99,6 +99,7 @@ install() {
     . "${0%/*}/push-secrets-to-key-vault.sh"
     . "${0%/*}/push-image-to-container-registry.sh"
     . "${0%/*}/create-kubernetes-service.sh"
+    . "${0%/*}/install-storage-web-api.sh"
 }
 
 # Read script arguments
