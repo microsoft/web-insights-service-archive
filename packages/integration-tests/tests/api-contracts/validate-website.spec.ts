@@ -3,8 +3,6 @@
 
 import 'reflect-metadata';
 
-/* eslint-disable import/no-internal-modules */
-
 import { isValidWebsiteObject, Website, websiteWithAllProperties, websiteWithRequiredProperties } from 'api-contracts';
 
 describe(isValidWebsiteObject, () => {

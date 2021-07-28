@@ -3,10 +3,7 @@
 
 import { ScanType } from 'storage-documents';
 
-export interface Page {
-    id?: string;
-    websiteId?: string;
-    url: string;
-    lastScanTimestamp?: number;
+export interface PageUpdate {
+    pageId: string;
     disabledScans?: ScanType[];
 }
