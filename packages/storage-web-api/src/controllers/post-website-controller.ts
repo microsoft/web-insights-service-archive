@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, WebsiteProvider, PageProvider } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
-import { createPageApiResponse, PageDocumentResponseConverter } from '../converters/page-document-response-converter';
+import { createPageApiObject, PageDocumentResponseConverter } from '../converters/page-document-response-converter';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 import { PostWebsiteRequestValidator } from '../request-validators/post-website-request-validator';
 
@@ -30,7 +30,7 @@ export class PostWebsiteController extends ApiController {
         @inject(WebsiteProvider) private readonly websiteProvider: WebsiteProvider,
         @inject(PageProvider) private readonly pageProvider: PageProvider,
         private readonly convertWebsiteDocumentToResponse: WebsiteDocumentResponseConverter = createWebsiteApiResponse,
-        private readonly convertPageDocumentToResponse: PageDocumentResponseConverter = createPageApiResponse,
+        private readonly convertPageDocumentToApiObject: PageDocumentResponseConverter = createPageApiObject,
     ) {
         super(logger, requestValidator);
     }
@@ -82,7 +82,7 @@ export class PostWebsiteController extends ApiController {
         await Promise.all(
             newPageUrls.map(async (url) => {
                 const pageDoc = await this.pageProvider.createPageForWebsite(url, websiteResponse.id);
-                websiteResponse.pages.push(this.convertPageDocumentToResponse(pageDoc));
+                websiteResponse.pages.push(this.convertPageDocumentToApiObject(pageDoc));
 
                 this.logger.logInfo('Created new page document', { pageUrl: url, pageId: pageDoc.id });
             }),

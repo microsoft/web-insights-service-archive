@@ -4,14 +4,14 @@
 import { CosmosQueryResultsIterable } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
 import * as ApiContracts from 'api-contracts';
-import { createPageApiResponse, PageDocumentResponseConverter } from './page-document-response-converter';
+import { createPageApiObject, PageDocumentResponseConverter } from './page-document-response-converter';
 
 export type WebsiteDocumentResponseConverter = typeof createWebsiteApiResponse;
 
 export const createWebsiteApiResponse = async (
     websiteDocument: StorageDocuments.Website,
     pagesIterable: CosmosQueryResultsIterable<StorageDocuments.Page>,
-    createPageObject: PageDocumentResponseConverter = createPageApiResponse,
+    createPageObject: PageDocumentResponseConverter = createPageApiObject,
 ): Promise<ApiContracts.Website> => {
     const response: ApiContracts.Website = {
         id: websiteDocument.id,
