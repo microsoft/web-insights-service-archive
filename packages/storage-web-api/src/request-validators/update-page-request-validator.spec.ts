@@ -9,21 +9,24 @@ import { Context } from '@azure/functions';
 import { GuidGenerator } from 'common';
 import { HttpResponse, WebApiErrorCodes } from 'service-library';
 import _ from 'lodash';
-import { PostWebsiteRequestValidator } from './post-website-request-validator';
+import { UpdatePageRequestValidator } from './update-page-request-validator';
 
-describe(PostWebsiteRequestValidator, () => {
-    let website: ApiContracts.Website;
+describe(UpdatePageRequestValidator, () => {
+    let pageUpdate: ApiContracts.PageUpdate;
     let guidGeneratorMock: IMock<GuidGenerator>;
-    let isValidWebsiteMock: IMock<typeof ApiContracts.isValidWebsiteObject>;
+    let isValidPageUpdateMock: IMock<typeof ApiContracts.isValidPageUpdateObject>;
 
-    let testSubject: PostWebsiteRequestValidator;
+    let testSubject: UpdatePageRequestValidator;
 
     beforeEach(() => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
-        isValidWebsiteMock = Mock.ofInstance(() => true);
-        website = _.cloneDeep(ApiContracts.websiteWithRequiredProperties);
+        isValidPageUpdateMock = Mock.ofInstance(() => true);
+        pageUpdate = {
+            pageId: 'page id',
+            disabledScans: ['a11y'],
+        };
 
-        testSubject = new PostWebsiteRequestValidator(guidGeneratorMock.object, isValidWebsiteMock.object);
+        testSubject = new UpdatePageRequestValidator(guidGeneratorMock.object, isValidPageUpdateMock.object);
     });
 
     it('rejects invalid api version', () => {
@@ -35,8 +38,8 @@ describe(PostWebsiteRequestValidator, () => {
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
     });
 
-    it('rejects invalid website object', () => {
-        isValidWebsiteMock.setup((v) => v(website)).returns(() => false);
+    it('rejects invalid page update object', () => {
+        isValidPageUpdateMock.setup((v) => v(pageUpdate)).returns(() => false);
         const context: Context = createRequestContext();
 
         const isValidRequest = testSubject.validateRequest(context);
@@ -45,12 +48,12 @@ describe(PostWebsiteRequestValidator, () => {
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
-    it('rejects website with invalid guid', () => {
-        website.id = 'website id';
+    it('rejects page update with missing id', () => {
+        pageUpdate.pageId = undefined;
         const context: Context = createRequestContext();
 
-        isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
-        guidGeneratorMock.setup((g) => g.isValidV6Guid(website.id)).returns(() => false);
+        isValidPageUpdateMock.setup((v) => v(pageUpdate)).returns(() => true);
+        guidGeneratorMock.setup((g) => g.isValidV6Guid(pageUpdate.pageId)).returns(() => false);
 
         const isValidRequest = testSubject.validateRequest(context);
 
@@ -58,11 +61,11 @@ describe(PostWebsiteRequestValidator, () => {
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
-    it('rejects website with pages property', () => {
-        website.pages = [{ id: 'page id', url: 'page url' }];
+    it('rejects page update with invalid guid', () => {
         const context: Context = createRequestContext();
 
-        isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
+        isValidPageUpdateMock.setup((v) => v(pageUpdate)).returns(() => true);
+        guidGeneratorMock.setup((g) => g.isValidV6Guid(pageUpdate.pageId)).returns(() => false);
 
         const isValidRequest = testSubject.validateRequest(context);
 
@@ -70,22 +73,11 @@ describe(PostWebsiteRequestValidator, () => {
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
-    it('accepts valid website with no id', () => {
+    it('accepts valid page update with valid guid', () => {
         const context: Context = createRequestContext();
 
-        isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
-
-        const isValidRequest = testSubject.validateRequest(context);
-
-        expect(isValidRequest).toBeTruthy();
-    });
-
-    it('accepts valid website with valid guid', () => {
-        website.id = 'website id';
-        const context: Context = createRequestContext();
-
-        isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
-        guidGeneratorMock.setup((g) => g.isValidV6Guid(website.id)).returns(() => true);
+        isValidPageUpdateMock.setup((v) => v(pageUpdate)).returns(() => true);
+        guidGeneratorMock.setup((g) => g.isValidV6Guid(pageUpdate.pageId)).returns(() => true);
 
         const isValidRequest = testSubject.validateRequest(context);
 
@@ -95,7 +87,7 @@ describe(PostWebsiteRequestValidator, () => {
     function createRequestContext(apiVersion: string = '1.0'): Context {
         return <Context>(<unknown>{
             req: {
-                url: 'baseUrl/websites',
+                url: 'baseUrl/pages',
                 method: 'POST',
                 headers: {
                     'content-type': 'application/json',
@@ -103,7 +95,7 @@ describe(PostWebsiteRequestValidator, () => {
                 query: {
                     'api-version': apiVersion,
                 },
-                rawBody: JSON.stringify(website),
+                rawBody: JSON.stringify(pageUpdate),
             },
         });
     }
