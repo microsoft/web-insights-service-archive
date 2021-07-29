@@ -17,7 +17,7 @@ export class WebsiteScanProvider {
         private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
     ) {}
 
-    public async createScanDocumentForWebsite(websiteId: string, scanType: ScanType, frequency: number): Promise<WebsiteScan> {
+    public async createScanDocumentForWebsite(websiteId: string, scanType: ScanType, frequency: string): Promise<WebsiteScan> {
         const websiteScanData: DocumentDataOnly<WebsiteScan> = {
             id: this.guidGenerator.createGuidFromBaseGuid(websiteId),
             websiteId: websiteId,

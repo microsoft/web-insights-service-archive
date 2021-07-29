@@ -13,7 +13,7 @@ export interface WebsiteScan extends StorageDocument {
     itemType: ItemTypes['websiteScan'];
     websiteId: string; // Maps to a Website
     scanType: ScanType;
-    scanFrequency: number;
+    scanFrequency: string; // cron expression
     scanStatus: ScanStatus;
     reports?: ReportData[];
 }

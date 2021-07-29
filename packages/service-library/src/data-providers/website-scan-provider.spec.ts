@@ -20,7 +20,7 @@ describe(WebsiteScanProvider, () => {
         id: websiteScanId,
         websiteId: websiteId,
         scanType: 'a11y',
-        scanFrequency: 5,
+        scanFrequency: 'frequency',
         scanStatus: 'pending',
         itemType: itemTypes.websiteScan,
         partitionKey: partitionKey,
