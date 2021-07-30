@@ -14,7 +14,7 @@ export class PostWebsiteRequestValidator extends ApiRequestValidator {
 
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-        private readonly isValidWebsiteObject: typeof ApiContracts.isValidWebsiteObject = ApiContracts.isValidWebsiteObject,
+        private readonly isValidWebsiteObject: ApiContracts.ApiObjectValidator<ApiContracts.Website> = ApiContracts.isValidWebsiteObject,
     ) {
         super();
     }
