@@ -16,15 +16,7 @@ describe(WebsiteScanProvider, () => {
     const websiteId = 'website id';
     const websiteScanId = 'scan id';
     const partitionKey = 'partition key';
-    const websiteScanDoc: WebsiteScan = {
-        id: websiteScanId,
-        websiteId: websiteId,
-        scanType: 'a11y',
-        scanFrequency: 'frequency',
-        scanStatus: 'pending',
-        itemType: itemTypes.websiteScan,
-        partitionKey: partitionKey,
-    };
+    let websiteScanDoc: WebsiteScan;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
@@ -40,6 +32,17 @@ describe(WebsiteScanProvider, () => {
             .setup((p) => p.createPartitionKeyForDocument(itemTypes.websiteScan, websiteScanId))
             .returns(() => partitionKey);
         cosmosQueryResultsProviderMock = Mock.ofInstance(() => null);
+
+        websiteScanDoc = {
+            id: websiteScanId,
+            websiteId: websiteId,
+            scanType: 'a11y',
+            scanFrequency: 'frequency',
+            scanStatus: 'pending',
+            itemType: itemTypes.websiteScan,
+            partitionKey: partitionKey,
+            priority: 0,
+        };
 
         testSubject = new WebsiteScanProvider(
             cosmosContainerClientMock.object,
@@ -65,6 +68,23 @@ describe(WebsiteScanProvider, () => {
                 websiteId,
                 websiteScanDoc.scanType,
                 websiteScanDoc.scanFrequency,
+            );
+
+            expect(actualWebsiteScanDoc).toEqual(websiteScanDoc);
+        });
+
+        it('creates websiteScan doc with priority', async () => {
+            const priority = 10;
+            websiteScanDoc.priority = priority;
+
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(websiteId)).returns(() => websiteScanId);
+            cosmosContainerClientMock.setup((c) => c.writeDocument(websiteScanDoc)).verifiable();
+
+            const actualWebsiteScanDoc = await testSubject.createScanDocumentForWebsite(
+                websiteId,
+                websiteScanDoc.scanType,
+                websiteScanDoc.scanFrequency,
+                priority,
             );
 
             expect(actualWebsiteScanDoc).toEqual(websiteScanDoc);

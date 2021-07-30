@@ -14,6 +14,8 @@ export declare type WebApiErrorCodeName =
     | 'MissingContentTypeHeader'
     | 'UnsupportedContentType'
     | 'UnsupportedApiVersion'
+    | 'InvalidFrequencyExpression'
+    | 'OutOfRangePriority'
     | 'MalformedBody';
 
 export interface WebApiErrorCode {
@@ -112,12 +114,30 @@ export class WebApiErrorCodes {
         },
     };
 
+    public static outOfRangePriority: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'OutOfRangePriority',
+            codeId: 4010,
+            message: 'A priority specified in the request is outside the permissible range.',
+        },
+    };
+
     public static malformedRequest: WebApiErrorCode = {
         statusCode: 400,
         error: {
             code: 'MalformedBody',
             codeId: 4011,
             message: 'The request body does not match the API schema for the given API version.',
+        },
+    };
+
+    public static invalidFrequencyExpression: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'InvalidFrequencyExpression',
+            codeId: 4012,
+            message: 'The frequency is not a valid cron expression.',
         },
     };
 }

@@ -10,6 +10,8 @@ import { CosmosQueryResultsIterable, getCosmosQueryResultsIterable } from './cos
 
 @injectable()
 export class WebsiteScanProvider {
+    private readonly defaultPriority = 0;
+
     public constructor(
         @inject(cosmosContainerClientTypes.scanMetadataRepoContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
@@ -17,13 +19,19 @@ export class WebsiteScanProvider {
         private readonly cosmosQueryResultsProvider: typeof getCosmosQueryResultsIterable = getCosmosQueryResultsIterable,
     ) {}
 
-    public async createScanDocumentForWebsite(websiteId: string, scanType: ScanType, frequency: string): Promise<WebsiteScan> {
+    public async createScanDocumentForWebsite(
+        websiteId: string,
+        scanType: ScanType,
+        frequency: string,
+        priority?: number,
+    ): Promise<WebsiteScan> {
         const websiteScanData: DocumentDataOnly<WebsiteScan> = {
             id: this.guidGenerator.createGuidFromBaseGuid(websiteId),
             websiteId: websiteId,
             scanType: scanType,
             scanFrequency: frequency,
             scanStatus: 'pending',
+            priority: priority ?? this.defaultPriority,
         };
         const websiteScanDoc = this.normalizeDbDocument(websiteScanData) as WebsiteScan;
         await this.cosmosContainerClient.writeDocument(websiteScanDoc);

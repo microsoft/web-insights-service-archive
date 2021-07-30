@@ -6,5 +6,6 @@ import { ScanType } from 'storage-documents';
 export interface WebsiteScanRequest {
     websiteId: string;
     scanType: ScanType;
+    priority?: number;
     scanFrequency?: string; // cron expression
 }

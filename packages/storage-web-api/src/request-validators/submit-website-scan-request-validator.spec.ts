@@ -8,6 +8,7 @@ import { IMock, Mock } from 'typemoq';
 import { GuidGenerator } from 'common';
 import * as cronParser from 'cron-parser';
 import { Context } from '@azure/functions';
+import { HttpResponse, WebApiErrorCodes } from 'service-library';
 import { SubmitWebsiteScanRequestValidator } from './submit-website-scan-request-validator';
 
 describe(SubmitWebsiteScanRequestValidator, () => {
@@ -37,6 +38,7 @@ describe(SubmitWebsiteScanRequestValidator, () => {
     it('rejects request with invalid api version', () => {
         const context = createRequestContext('2.0');
         expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
     });
 
     it('rejects invalid website scan request object', () => {
@@ -45,6 +47,7 @@ describe(SubmitWebsiteScanRequestValidator, () => {
 
         const context = createRequestContext();
         expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
     it('rejects website scan request with invalid website guid', () => {
@@ -53,6 +56,7 @@ describe(SubmitWebsiteScanRequestValidator, () => {
 
         const context = createRequestContext();
         expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
     });
 
     it('rejects website scan request with invalid cron expression', () => {
@@ -65,6 +69,7 @@ describe(SubmitWebsiteScanRequestValidator, () => {
 
         const context = createRequestContext();
         expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidFrequencyExpression));
     });
 
     it('accepts website scan request with valid guid and no specified frequency', () => {

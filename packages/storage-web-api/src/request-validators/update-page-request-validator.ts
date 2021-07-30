@@ -24,8 +24,14 @@ export class UpdatePageRequestValidator extends ApiRequestValidator {
         }
 
         const payload = this.tryGetPayload<ApiContracts.PageUpdate>(context);
-        if (!this.isValidPageUpdateObject(payload) || !this.hasValidId(payload)) {
+        if (!this.isValidPageUpdateObject(payload)) {
             context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
+
+            return false;
+        }
+
+        if (!this.hasValidId(payload)) {
+            context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
 
             return false;
         }

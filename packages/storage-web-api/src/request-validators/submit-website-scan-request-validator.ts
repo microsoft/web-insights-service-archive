@@ -29,15 +29,30 @@ export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
         }
 
         const payload = this.tryGetPayload<ApiContracts.WebsiteScanRequest>(context);
-        if (
-            !this.isValidWebsiteScanRequest(payload) ||
-            !this.guidGenerator.isValidV6Guid(payload.websiteId) ||
-            this.hasInvalidFrequencyExpression(payload)
-        ) {
+        if (!this.isValidWebsiteScanRequest(payload)) {
             context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
 
             return false;
         }
+
+        if (!this.guidGenerator.isValidV6Guid(payload.websiteId)) {
+            context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
+
+            return false;
+        }
+
+        if (this.hasInvalidFrequencyExpression(payload)) {
+            context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidFrequencyExpression);
+
+            return false;
+        }
+
+        // needs async call to serviceConfig--do in handleRequest or change interface to be async
+        // if (await this.priorityIsInvalid(payload.priority)) {
+        //     context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.outOfRangePriority);
+
+        //     return false;
+        // }
 
         return true;
     }
@@ -55,4 +70,11 @@ export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
 
         return false;
     }
+
+    // private async priorityIsInvalid(priority?: number): Promise<boolean> {
+    //     const restApiConfig = await this.serviceConfiguration.getConfigValue('restApiConfig');
+
+    //     return priority !== undefined &&
+    //          (priority < restApiConfig.minScanPriorityValue || priority > restApiConfig.maxScanPriorityValue);
+    // }
 }

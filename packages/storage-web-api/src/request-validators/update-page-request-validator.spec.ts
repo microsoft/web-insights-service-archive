@@ -70,7 +70,7 @@ describe(UpdatePageRequestValidator, () => {
         const isValidRequest = testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeFalsy();
-        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
     });
 
     it('accepts valid page update with valid guid', () => {

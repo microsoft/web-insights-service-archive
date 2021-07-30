@@ -25,8 +25,14 @@ export class PostWebsiteRequestValidator extends ApiRequestValidator {
         }
 
         const payload = this.tryGetPayload<ApiContracts.Website>(context);
-        if (!this.isValidWebsiteObject(payload) || this.hasInvalidId(payload) || this.hasDisallowedProperties(payload)) {
+        if (!this.isValidWebsiteObject(payload) || this.hasDisallowedProperties(payload)) {
             context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
+
+            return false;
+        }
+
+        if (this.hasInvalidId(payload)) {
+            context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
 
             return false;
         }
