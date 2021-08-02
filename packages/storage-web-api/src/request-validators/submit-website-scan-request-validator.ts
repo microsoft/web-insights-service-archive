@@ -5,7 +5,7 @@ import * as ApiContracts from 'api-contracts';
 import { Context } from '@azure/functions';
 import { inject, injectable } from 'inversify';
 import _ from 'lodash';
-import { GuidGenerator } from 'common';
+import { GuidGenerator, ServiceConfiguration } from 'common';
 import { ApiRequestValidator, HttpResponse, WebApiErrorCodes } from 'service-library';
 import * as cronParser from 'cron-parser';
 
@@ -15,6 +15,7 @@ export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
 
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @inject(ServiceConfiguration) private readonly serviceConfiguration: ServiceConfiguration,
         // prettier-ignore
         private readonly isValidWebsiteScanRequest: ApiContracts.ApiObjectValidator<ApiContracts.WebsiteScanRequest>
             = ApiContracts.isValidWebsiteScanRequestObject,
@@ -23,8 +24,8 @@ export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
         super();
     }
 
-    public validateRequest(context: Context): boolean {
-        if (!super.validateRequest(context)) {
+    public async validateRequest(context: Context): Promise<boolean> {
+        if (!(await super.validateRequest(context))) {
             return false;
         }
 
@@ -47,12 +48,11 @@ export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
             return false;
         }
 
-        // needs async call to serviceConfig--do in handleRequest or change interface to be async
-        // if (await this.priorityIsInvalid(payload.priority)) {
-        //     context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.outOfRangePriority);
+        if (await this.isInvalidScanPriority(payload.priority)) {
+            context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.outOfRangePriority);
 
-        //     return false;
-        // }
+            return false;
+        }
 
         return true;
     }
@@ -71,10 +71,9 @@ export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
         return false;
     }
 
-    // private async priorityIsInvalid(priority?: number): Promise<boolean> {
-    //     const restApiConfig = await this.serviceConfiguration.getConfigValue('restApiConfig');
+    private async isInvalidScanPriority(priority?: number): Promise<boolean> {
+        const restApiConfig = await this.serviceConfiguration.getConfigValue('restApiConfig');
 
-    //     return priority !== undefined &&
-    //          (priority < restApiConfig.minScanPriorityValue || priority > restApiConfig.maxScanPriorityValue);
-    // }
+        return priority !== undefined && (priority < restApiConfig.minScanPriorityValue || priority > restApiConfig.maxScanPriorityValue);
+    }
 }

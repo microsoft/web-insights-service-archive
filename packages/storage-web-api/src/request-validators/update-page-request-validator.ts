@@ -18,8 +18,8 @@ export class UpdatePageRequestValidator extends ApiRequestValidator {
         super();
     }
 
-    public validateRequest(context: Context): boolean {
-        if (!super.validateRequest(context)) {
+    public async validateRequest(context: Context): Promise<boolean> {
+        if (!(await super.validateRequest(context))) {
             return false;
         }
 

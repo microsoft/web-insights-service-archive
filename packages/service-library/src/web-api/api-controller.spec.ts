@@ -48,7 +48,7 @@ describe(ApiController, () => {
     let isValidRequest: boolean;
     let loggerMock: IMock<MockableLogger>;
     const requestValidatorStub: WebRequestValidator = {
-        validateRequest: () => isValidRequest,
+        validateRequest: async () => isValidRequest,
     };
 
     beforeEach(() => {

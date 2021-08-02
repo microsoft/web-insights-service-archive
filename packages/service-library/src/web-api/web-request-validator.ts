@@ -5,5 +5,5 @@ import { Context } from '@azure/functions';
 
 export interface WebRequestValidator {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    validateRequest(context: Context): boolean;
+    validateRequest(context: Context): Promise<boolean>;
 }

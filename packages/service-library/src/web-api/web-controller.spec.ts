@@ -44,8 +44,8 @@ describe(WebController, () => {
     beforeEach(() => {
         context = <Context>(<unknown>{ bindingDefinitions: {}, res: {}, invocationId: invocationId });
         loggerMock = Mock.ofType(MockableLogger);
-        requestValidatorMock = Mock.ofInstance({ validateRequest: () => true });
-        requestValidatorMock.setup((v) => v.validateRequest(context)).returns(() => true);
+        requestValidatorMock = Mock.ofInstance({ validateRequest: async () => true });
+        requestValidatorMock.setup((v) => v.validateRequest(context)).returns(async () => true);
 
         testSubject = new TestableWebController(loggerMock.object, requestValidatorMock.object);
 
@@ -79,7 +79,7 @@ describe(WebController, () => {
         requestValidatorMock.reset();
         requestValidatorMock
             .setup((v) => v.validateRequest(context))
-            .returns(() => false)
+            .returns(async () => false)
             .verifiable();
         await testSubject.invoke(context);
         expect(testSubject.handleRequestInvoked).toEqual(false);

@@ -22,7 +22,7 @@ class TestableController extends ApiController {
     public readonly logger: Logger;
 
     protected readonly requestValidator: WebRequestValidator = {
-        validateRequest: (context: Context) => true,
+        validateRequest: async (context: Context) => true,
     };
 
     protected readonly serviceConfig: ServiceConfiguration;

@@ -26,68 +26,68 @@ describe(PostWebsiteRequestValidator, () => {
         testSubject = new PostWebsiteRequestValidator(guidGeneratorMock.object, isValidWebsiteMock.object);
     });
 
-    it('rejects invalid api version', () => {
+    it('rejects invalid api version', async () => {
         const context: Context = createRequestContext('invalid api version');
 
-        const isValidRequest = testSubject.validateRequest(context);
+        const isValidRequest = await testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
     });
 
-    it('rejects invalid website object', () => {
+    it('rejects invalid website object', async () => {
         isValidWebsiteMock.setup((v) => v(website)).returns(() => false);
         const context: Context = createRequestContext();
 
-        const isValidRequest = testSubject.validateRequest(context);
+        const isValidRequest = await testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
-    it('rejects website with invalid guid', () => {
+    it('rejects website with invalid guid', async () => {
         website.id = 'website id';
         const context: Context = createRequestContext();
 
         isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
         guidGeneratorMock.setup((g) => g.isValidV6Guid(website.id)).returns(() => false);
 
-        const isValidRequest = testSubject.validateRequest(context);
+        const isValidRequest = await testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
     });
 
-    it('rejects website with pages property', () => {
+    it('rejects website with pages property', async () => {
         website.pages = [{ id: 'page id', url: 'page url' }];
         const context: Context = createRequestContext();
 
         isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
 
-        const isValidRequest = testSubject.validateRequest(context);
+        const isValidRequest = await testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
-    it('accepts valid website with no id', () => {
+    it('accepts valid website with no id', async () => {
         const context: Context = createRequestContext();
 
         isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
 
-        const isValidRequest = testSubject.validateRequest(context);
+        const isValidRequest = await testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeTruthy();
     });
 
-    it('accepts valid website with valid guid', () => {
+    it('accepts valid website with valid guid', async () => {
         website.id = 'website id';
         const context: Context = createRequestContext();
 
         isValidWebsiteMock.setup((v) => v(website)).returns(() => true);
         guidGeneratorMock.setup((g) => g.isValidV6Guid(website.id)).returns(() => true);
 
-        const isValidRequest = testSubject.validateRequest(context);
+        const isValidRequest = await testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeTruthy();
     });

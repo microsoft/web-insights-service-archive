@@ -21,18 +21,18 @@ describe(ApiRequestValidator, () => {
         testSubject = new TestableApiRequestValidator();
     });
 
-    it('rejects request with no query parameters', () => {
+    it('rejects request with no query parameters', async () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'GET',
             },
         });
 
-        expect(testSubject.validateRequest(context)).toBeFalse();
+        expect(await testSubject.validateRequest(context)).toBeFalse();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter));
     });
 
-    it('rejects request with missing api version', () => {
+    it('rejects request with missing api version', async () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'GET',
@@ -40,11 +40,11 @@ describe(ApiRequestValidator, () => {
             },
         });
 
-        expect(testSubject.validateRequest(context)).toBeFalse();
+        expect(await testSubject.validateRequest(context)).toBeFalse();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter));
     });
 
-    it('rejects request with unsupported api version', () => {
+    it('rejects request with unsupported api version', async () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'GET',
@@ -54,11 +54,11 @@ describe(ApiRequestValidator, () => {
             },
         });
 
-        expect(testSubject.validateRequest(context)).toBeFalse();
+        expect(await testSubject.validateRequest(context)).toBeFalse();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
     });
 
-    it('Accepts GET request with supported api version', () => {
+    it('Accepts GET request with supported api version', async () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'GET',
@@ -68,7 +68,7 @@ describe(ApiRequestValidator, () => {
             },
         });
 
-        expect(testSubject.validateRequest(context)).toBeTrue();
+        expect(await testSubject.validateRequest(context)).toBeTrue();
     });
 
     describe.each(['POST', 'PUT'])('%s request', (method) => {
@@ -86,50 +86,50 @@ describe(ApiRequestValidator, () => {
             });
         });
 
-        it('rejects when there is no payload', () => {
-            expect(testSubject.validateRequest(context)).toBeFalse();
+        it('rejects when there is no payload', async () => {
+            expect(await testSubject.validateRequest(context)).toBeFalse();
             expect(context.res.status).toEqual(204);
         });
 
-        it.each([undefined, '{}'])('rejects when payload=%s', (payload) => {
+        it.each([undefined, '{}'])('rejects when payload=%s', async (payload) => {
             context.req.rawBody = payload;
 
-            expect(testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toBeFalse();
             expect(context.res.status).toEqual(204);
         });
 
-        it('rejects when body is invalid JSON', () => {
+        it('rejects when body is invalid JSON', async () => {
             context.req.rawBody = 'invalid JSON string';
 
-            expect(testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toBeFalse();
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument));
         });
 
-        it.each([undefined, {}])('rejects with missingContentTypeHeader when headers=%s', (headers) => {
+        it.each([undefined, {}])('rejects with missingContentTypeHeader when headers=%s', async (headers) => {
             context.req.rawBody = validPayload;
             context.req.headers = headers;
 
-            expect(testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toBeFalse();
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader));
         });
 
-        it("rejects if content type is not 'application/json'", () => {
+        it("rejects if content type is not 'application/json'", async () => {
             context.req.rawBody = validPayload;
             context.req.headers = {
                 'content-type': 'text/plain',
             };
 
-            expect(testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toBeFalse();
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedContentType));
         });
 
-        it('accepts request with valid payload and correct content type', () => {
+        it('accepts request with valid payload and correct content type', async () => {
             context.req.rawBody = validPayload;
             context.req.headers = {
                 'content-type': 'application/json',
             };
 
-            expect(testSubject.validateRequest(context)).toBeTrue();
+            expect(await testSubject.validateRequest(context)).toBeTrue();
         });
     });
 });

@@ -5,15 +5,21 @@ import 'reflect-metadata';
 
 import * as ApiContracts from 'api-contracts';
 import { IMock, Mock } from 'typemoq';
-import { GuidGenerator } from 'common';
+import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import * as cronParser from 'cron-parser';
 import { Context } from '@azure/functions';
 import { HttpResponse, WebApiErrorCodes } from 'service-library';
 import { SubmitWebsiteScanRequestValidator } from './submit-website-scan-request-validator';
 
 describe(SubmitWebsiteScanRequestValidator, () => {
+    const restApiConfig = {
+        maxScanPriorityValue: 1000,
+        minScanPriorityValue: -1000,
+    } as RestApiConfig;
+
     let websiteScanRequest: ApiContracts.WebsiteScanRequest;
     let guidGeneratorMock: IMock<GuidGenerator>;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
     let isValidWebsiteScanRequestMock: IMock<typeof ApiContracts.isValidWebsiteScanRequestObject>;
     let cronParserMock: IMock<typeof cronParser>;
 
@@ -21,8 +27,12 @@ describe(SubmitWebsiteScanRequestValidator, () => {
 
     beforeEach(() => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         isValidWebsiteScanRequestMock = Mock.ofInstance(() => null);
         cronParserMock = Mock.ofInstance(cronParser);
+
+        serviceConfigMock.setup((sc) => sc.getConfigValue('restApiConfig')).returns(async () => restApiConfig);
+
         websiteScanRequest = {
             websiteId: 'website id',
             scanType: 'a11y',
@@ -30,36 +40,37 @@ describe(SubmitWebsiteScanRequestValidator, () => {
 
         testSubject = new SubmitWebsiteScanRequestValidator(
             guidGeneratorMock.object,
+            serviceConfigMock.object,
             isValidWebsiteScanRequestMock.object,
             cronParserMock.object,
         );
     });
 
-    it('rejects request with invalid api version', () => {
+    it('rejects request with invalid api version', async () => {
         const context = createRequestContext('2.0');
-        expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(await testSubject.validateRequest(context)).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
     });
 
-    it('rejects invalid website scan request object', () => {
+    it('rejects invalid website scan request object', async () => {
         isValidWebsiteScanRequestMock.setup((v) => v(websiteScanRequest)).returns(() => false);
         guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteScanRequest.websiteId)).returns(() => true);
 
         const context = createRequestContext();
-        expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(await testSubject.validateRequest(context)).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
-    it('rejects website scan request with invalid website guid', () => {
+    it('rejects website scan request with invalid website guid', async () => {
         isValidWebsiteScanRequestMock.setup((v) => v(websiteScanRequest)).returns(() => true);
         guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteScanRequest.websiteId)).returns(() => false);
 
         const context = createRequestContext();
-        expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(await testSubject.validateRequest(context)).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
     });
 
-    it('rejects website scan request with invalid cron expression', () => {
+    it('rejects website scan request with invalid cron expression', async () => {
         const scanFrequency = 'invalid cron expression';
         websiteScanRequest.scanFrequency = scanFrequency;
 
@@ -68,19 +79,33 @@ describe(SubmitWebsiteScanRequestValidator, () => {
         cronParserMock.setup((p) => p.parseExpression(scanFrequency)).throws(new Error('test error'));
 
         const context = createRequestContext();
-        expect(testSubject.validateRequest(context)).toBeFalsy();
+        expect(await testSubject.validateRequest(context)).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidFrequencyExpression));
     });
 
-    it('accepts website scan request with valid guid and no specified frequency', () => {
+    it.each([restApiConfig.maxScanPriorityValue + 1, restApiConfig.minScanPriorityValue - 1])(
+        'rejects website scan request with invalid priority=%s',
+        async (priority) => {
+            websiteScanRequest.priority = priority;
+
+            isValidWebsiteScanRequestMock.setup((v) => v(websiteScanRequest)).returns(() => true);
+            guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteScanRequest.websiteId)).returns(() => true);
+
+            const context = createRequestContext();
+            expect(await testSubject.validateRequest(context)).toBeFalsy();
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.outOfRangePriority));
+        },
+    );
+
+    it('accepts website scan request with valid guid and no specified frequency or priority', async () => {
         isValidWebsiteScanRequestMock.setup((v) => v(websiteScanRequest)).returns(() => true);
         guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteScanRequest.websiteId)).returns(() => true);
 
         const context = createRequestContext();
-        expect(testSubject.validateRequest(context)).toBeTruthy();
+        expect(await testSubject.validateRequest(context)).toBeTruthy();
     });
 
-    it('accepts website scan request with valid guid and valid frequency expression', () => {
+    it('accepts website scan request with valid guid and valid frequency expression', async () => {
         const scanFrequency = 'valid cron expression';
         websiteScanRequest.scanFrequency = scanFrequency;
 
@@ -89,10 +114,23 @@ describe(SubmitWebsiteScanRequestValidator, () => {
         cronParserMock.setup((p) => p.parseExpression(scanFrequency)).verifiable();
 
         const context = createRequestContext();
-        expect(testSubject.validateRequest(context)).toBeTruthy();
+        expect(await testSubject.validateRequest(context)).toBeTruthy();
 
         cronParserMock.verifyAll();
     });
+
+    it.each([restApiConfig.maxScanPriorityValue, restApiConfig.minScanPriorityValue, 0])(
+        'accepts website scan request with valid guid and valid priority=%s',
+        async (priority) => {
+            websiteScanRequest.priority = priority;
+
+            isValidWebsiteScanRequestMock.setup((v) => v(websiteScanRequest)).returns(() => true);
+            guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteScanRequest.websiteId)).returns(() => true);
+
+            const context = createRequestContext();
+            expect(await testSubject.validateRequest(context)).toBeTruthy();
+        },
+    );
 
     function createRequestContext(apiVersion: string = '1.0'): Context {
         return <Context>(<unknown>{
