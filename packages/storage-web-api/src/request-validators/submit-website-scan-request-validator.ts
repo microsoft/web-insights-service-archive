@@ -30,7 +30,7 @@ export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
         }
 
         const payload = this.tryGetPayload<ApiContracts.WebsiteScanRequest>(context);
-        if (!this.isValidWebsiteScanRequest(payload)) {
+        if (!this.isValidWebsiteScanRequest(payload) || payload.websiteId === undefined) {
             context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
 
             return false;

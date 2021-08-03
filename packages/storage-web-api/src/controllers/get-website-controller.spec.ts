@@ -15,7 +15,6 @@ import { GetWebsiteRequestValidator } from '../request-validators/get-website-re
 import { GetWebsiteController } from './get-website-controller';
 
 describe(GetWebsiteController, () => {
-    const apiVersion = '1.0';
     const websiteId = 'website id';
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<ContextAwareLogger>;
@@ -36,18 +35,11 @@ describe(GetWebsiteController, () => {
         websiteDocumentResponseConverterMock = Mock.ofType<WebsiteDocumentResponseConverter>();
 
         context = <Context>(<unknown>{
-            req: {
-                url: 'baseUrl/websites/$websiteId/',
-                method: 'GET',
-                headers: {},
-                query: {},
-            },
+            req: {},
             bindingData: {
                 websiteId,
             },
         });
-        context.req.query['api-version'] = apiVersion;
-        context.req.headers['content-type'] = 'application/json';
 
         testSubject = new GetWebsiteController(
             serviceConfigMock.object,

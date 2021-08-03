@@ -6,7 +6,7 @@ import { Page } from './page';
 
 export interface PageScan {
     id: string;
-    websiteScanId: string;
+    websiteScanId?: string;
     page: Page;
     priority: number;
     scanStatus: ScanStatus;

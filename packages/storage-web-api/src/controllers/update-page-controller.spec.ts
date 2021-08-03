@@ -15,7 +15,6 @@ import { UpdatePageRequestValidator } from '../request-validators/update-page-re
 import { UpdatePageController } from './update-page-controller';
 
 describe(UpdatePageController, () => {
-    const apiVersion = '1.0';
     const pageId = 'page';
     const pageDocument: StorageDocuments.Page = {
         id: pageId,
@@ -54,14 +53,6 @@ describe(UpdatePageController, () => {
 
         context = <Context>(<unknown>{
             req: {
-                url: 'baseUrl/pages',
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                },
-                query: {
-                    'api-version': apiVersion,
-                },
                 rawBody: JSON.stringify(pageUpdate),
             },
         });

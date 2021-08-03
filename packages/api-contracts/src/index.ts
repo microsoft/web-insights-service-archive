@@ -8,5 +8,6 @@ export { Website } from './types/website';
 export { WebsiteScan } from './types/website-scan';
 export { WebsiteScanRequest } from './types/website-scan-request';
 export * from './api-object-validators';
+export * from './test-data/sample-page-scan-data';
 export * from './test-data/sample-website-data';
 export * from './test-data/sample-website-scan-data';

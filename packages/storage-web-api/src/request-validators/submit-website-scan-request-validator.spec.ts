@@ -61,6 +61,16 @@ describe(SubmitWebsiteScanRequestValidator, () => {
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
     });
 
+    it('rejects request with no websiteId', async () => {
+        websiteScanRequest.websiteId = undefined;
+        isValidWebsiteScanRequestMock.setup((v) => v(websiteScanRequest)).returns(() => true);
+        guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteScanRequest.websiteId)).returns(() => true);
+
+        const context = createRequestContext();
+        expect(await testSubject.validateRequest(context)).toBeFalsy();
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
+    });
+
     it('rejects website scan request with invalid website guid', async () => {
         isValidWebsiteScanRequestMock.setup((v) => v(websiteScanRequest)).returns(() => true);
         guidGeneratorMock.setup((g) => g.isValidV6Guid(websiteScanRequest.websiteId)).returns(() => false);
