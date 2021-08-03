@@ -2,13 +2,20 @@
 // Licensed under the MIT License.
 
 import * as ApiContracts from 'api-contracts';
-import { ServiceConfiguration } from 'common';
+import * as StorageDocuments from 'storage-documents';
+import { RestApiConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, WebApiErrorCodes, WebsiteProvider, WebsiteScanProvider } from 'service-library';
 import { createWebsiteScanApiResponse, WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 import { SubmitWebsiteScanRequestValidator } from '../request-validators/submit-website-scan-request-validator';
+
+const defaultFrequencyKeys: { [key in StorageDocuments.ScanType]: keyof RestApiConfig } = {
+    a11y: 'defaultA11yScanFrequency',
+    privacy: undefined,
+    security: undefined,
+};
 
 @injectable()
 export class SubmitWebsiteScanController extends ApiController {
@@ -33,7 +40,10 @@ export class SubmitWebsiteScanController extends ApiController {
         const websiteScanRequest = this.tryGetPayload<ApiContracts.WebsiteScanRequest>();
         this.logger.setCommonProperties({ websiteId: websiteScanRequest.websiteId });
 
-        if (!(await this.websiteExists(websiteScanRequest.websiteId))) {
+        let website: StorageDocuments.Website;
+        try {
+            website = await this.websiteProvider.readWebsite(websiteScanRequest.websiteId);
+        } catch (e) {
             this.logger.logError('Unable to create websiteScan because website does not exist');
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
 
@@ -43,8 +53,8 @@ export class SubmitWebsiteScanController extends ApiController {
         const websiteScanDocument = await this.websiteScanProvider.createScanDocumentForWebsite(
             websiteScanRequest.websiteId,
             websiteScanRequest.scanType,
-            websiteScanRequest.scanFrequency, // add default to serviceConfig for each scan type
-            websiteScanRequest.priority,
+            await this.getScanFrequency(websiteScanRequest),
+            websiteScanRequest.priority ?? website.priority,
         );
 
         const responseBody = await this.convertWebsiteScanDocumentToResponse(websiteScanDocument);
@@ -57,13 +67,18 @@ export class SubmitWebsiteScanController extends ApiController {
         this.logger.logInfo('Website metadata successfully posted to storage.');
     }
 
-    private async websiteExists(websiteId: string): Promise<boolean> {
-        try {
-            await this.websiteProvider.readWebsite(websiteId);
-        } catch (e) {
-            return false;
+    private async getScanFrequency(websiteScanRequest: ApiContracts.WebsiteScanRequest): Promise<string> {
+        if (websiteScanRequest.scanFrequency !== undefined) {
+            return websiteScanRequest.scanFrequency;
+        }
+        const restApiConfig = await this.getRestApiConfig();
+        const configKey = defaultFrequencyKeys[websiteScanRequest.scanType];
+
+        if (configKey === undefined) {
+            this.logger.logError(`No default scan frequency is implemented for scan type: ${websiteScanRequest.scanType}`);
+            throw new Error(`No default scan frequency is implemented for scan type: ${websiteScanRequest.scanType}`);
         }
 
-        return true;
+        return restApiConfig[configKey] as string;
     }
 }

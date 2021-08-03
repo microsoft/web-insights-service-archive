@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import * as ApiContracts from 'api-contracts';
 import { IMock, Mock } from 'typemoq';
 import { Logger } from 'logger';
-import { ServiceConfiguration } from 'common';
+import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Context } from '@azure/functions';
 import { HttpResponse, WebApiErrorCodes, WebsiteProvider, WebsiteScanProvider } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
@@ -25,6 +25,13 @@ describe(SubmitWebsiteScanController, () => {
         id: 'website scan id',
         scanStatus: 'pending',
     } as ApiContracts.WebsiteScan;
+    const websiteStub = {
+        id: websiteId,
+        priority: 10,
+    } as StorageDocuments.Website;
+    const restApiConfigStub = {
+        defaultA11yScanFrequency: 'default a11y scan frequency',
+    } as RestApiConfig;
 
     let loggerMock: IMock<Logger>;
     let requestValidatorMock: IMock<SubmitWebsiteScanRequestValidator>;
@@ -55,6 +62,8 @@ describe(SubmitWebsiteScanController, () => {
             req: {},
         });
 
+        serviceConfigMock.setup((sc) => sc.getConfigValue('restApiConfig')).returns(async () => restApiConfigStub);
+
         testSubject = new SubmitWebsiteScanController(
             serviceConfigMock.object,
             loggerMock.object,
@@ -79,20 +88,34 @@ describe(SubmitWebsiteScanController, () => {
 
     it('creates new website scan document with specified frequency and priority', async () => {
         websiteScanRequest.scanFrequency = 'scan frequency expression';
+        websiteScanRequest.priority = 10;
         context.req.rawBody = JSON.stringify(websiteScanRequest);
 
-        websiteProviderMock.setup((wp) => wp.readWebsite(websiteId)).returns(async () => ({} as StorageDocuments.Website));
-        websiteScanProviderMock
-            .setup((wsp) =>
-                wsp.createScanDocumentForWebsite(websiteId, websiteScanRequest.scanType, websiteScanRequest.scanFrequency, undefined),
-            )
-            .returns(async () => websiteScanDocument)
-            .verifiable();
-        convertWebsiteScanMock.setup((c) => c(websiteScanDocument)).returns(async () => websiteScanResponse);
+        setupSubmitScanRequest(websiteScanRequest.scanFrequency, websiteScanRequest.priority);
 
         await testSubject.handleRequest();
 
         expect(context.res.status).toBe(201);
         expect(context.res.body).toEqual(websiteScanResponse);
     });
+
+    it('creates new website scan document with default frequency and priority', async () => {
+        context.req.rawBody = JSON.stringify(websiteScanRequest);
+
+        setupSubmitScanRequest(restApiConfigStub.defaultA11yScanFrequency, websiteStub.priority);
+
+        await testSubject.handleRequest();
+
+        expect(context.res.status).toBe(201);
+        expect(context.res.body).toEqual(websiteScanResponse);
+    });
+
+    function setupSubmitScanRequest(frequency: string, priority: number): void {
+        websiteProviderMock.setup((wp) => wp.readWebsite(websiteId)).returns(async () => websiteStub);
+        websiteScanProviderMock
+            .setup((wsp) => wsp.createScanDocumentForWebsite(websiteId, websiteScanRequest.scanType, frequency, priority))
+            .returns(async () => websiteScanDocument)
+            .verifiable();
+        convertWebsiteScanMock.setup((c) => c(websiteScanDocument)).returns(async () => websiteScanResponse);
+    }
 });

@@ -26,7 +26,7 @@ export abstract class ApiRequestValidator implements WebRequestValidator {
         }
 
         if (!this.hasPayload(context)) {
-            context.res = {
+            context.res = context.res || {
                 status: 204, // No Content
             };
 
