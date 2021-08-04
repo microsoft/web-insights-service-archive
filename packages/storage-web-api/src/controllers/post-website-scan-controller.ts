@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, WebApiErrorCodes, WebsiteProvider, WebsiteScanProvider } from 'service-library';
 import { createWebsiteScanApiResponse, WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
-import { SubmitWebsiteScanRequestValidator } from '../request-validators/submit-website-scan-request-validator';
+import { PostWebsiteScanRequestValidator } from '../request-validators/post-website-scan-request-validator';
 
 const defaultFrequencyKeys: { [key in StorageDocuments.ScanType]: keyof RestApiConfig } = {
     a11y: 'defaultA11yScanFrequency',
@@ -18,15 +18,15 @@ const defaultFrequencyKeys: { [key in StorageDocuments.ScanType]: keyof RestApiC
 };
 
 @injectable()
-export class SubmitWebsiteScanController extends ApiController {
+export class PostWebsiteScanController extends ApiController {
     public readonly apiVersion = '1.0';
 
-    public readonly apiName = 'storage-web-api-submit-website-scan';
+    public readonly apiName = 'storage-web-api-post-website-scan';
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(SubmitWebsiteScanRequestValidator) requestValidator: SubmitWebsiteScanRequestValidator,
+        @inject(PostWebsiteScanRequestValidator) requestValidator: PostWebsiteScanRequestValidator,
         @inject(WebsiteProvider) private readonly websiteProvider: WebsiteProvider,
         @inject(WebsiteScanProvider) private readonly websiteScanProvider: WebsiteScanProvider,
         private readonly convertWebsiteScanDocumentToResponse: WebsiteScanDocumentResponseConverter = createWebsiteScanApiResponse,
@@ -35,7 +35,7 @@ export class SubmitWebsiteScanController extends ApiController {
     }
 
     public async handleRequest(): Promise<void> {
-        this.logger.setCommonProperties({ source: 'submitWebsiteScanRESTApi' });
+        this.logger.setCommonProperties({ source: 'postWebsiteScanRESTApi' });
 
         const websiteScanRequest = this.tryGetPayload<ApiContracts.WebsiteScanRequest>();
         this.logger.setCommonProperties({ websiteId: websiteScanRequest.websiteId });

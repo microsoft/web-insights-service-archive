@@ -14,5 +14,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../submit-website-scan-func/index.js"
+    "scriptFile": "../post-website-scan-func/index.js"
 }

@@ -10,7 +10,7 @@ import { ApiRequestValidator, HttpResponse, WebApiErrorCodes } from 'service-lib
 import * as cronParser from 'cron-parser';
 
 @injectable()
-export class SubmitWebsiteScanRequestValidator extends ApiRequestValidator {
+export class PostWebsiteScanRequestValidator extends ApiRequestValidator {
     protected readonly apiVersions = ['1.0'];
 
     constructor(

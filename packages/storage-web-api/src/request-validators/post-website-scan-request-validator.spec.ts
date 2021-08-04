@@ -9,9 +9,9 @@ import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import * as cronParser from 'cron-parser';
 import { Context } from '@azure/functions';
 import { HttpResponse, WebApiErrorCodes } from 'service-library';
-import { SubmitWebsiteScanRequestValidator } from './submit-website-scan-request-validator';
+import { PostWebsiteScanRequestValidator } from './post-website-scan-request-validator';
 
-describe(SubmitWebsiteScanRequestValidator, () => {
+describe(PostWebsiteScanRequestValidator, () => {
     const restApiConfig = {
         maxScanPriorityValue: 1000,
         minScanPriorityValue: -1000,
@@ -23,7 +23,7 @@ describe(SubmitWebsiteScanRequestValidator, () => {
     let isValidWebsiteScanRequestMock: IMock<typeof ApiContracts.isValidWebsiteScanRequestObject>;
     let cronParserMock: IMock<typeof cronParser>;
 
-    let testSubject: SubmitWebsiteScanRequestValidator;
+    let testSubject: PostWebsiteScanRequestValidator;
 
     beforeEach(() => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
@@ -38,7 +38,7 @@ describe(SubmitWebsiteScanRequestValidator, () => {
             scanType: 'a11y',
         };
 
-        testSubject = new SubmitWebsiteScanRequestValidator(
+        testSubject = new PostWebsiteScanRequestValidator(
             guidGeneratorMock.object,
             serviceConfigMock.object,
             isValidWebsiteScanRequestMock.object,

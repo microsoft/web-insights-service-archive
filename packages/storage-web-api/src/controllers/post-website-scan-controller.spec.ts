@@ -10,11 +10,11 @@ import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Context } from '@azure/functions';
 import { HttpResponse, WebApiErrorCodes, WebsiteProvider, WebsiteScanProvider } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
-import { SubmitWebsiteScanRequestValidator } from '../request-validators/submit-website-scan-request-validator';
+import { PostWebsiteScanRequestValidator } from '../request-validators/post-website-scan-request-validator';
 import { WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
-import { SubmitWebsiteScanController } from './submit-website-scan-controller';
+import { PostWebsiteScanController } from './post-website-scan-controller';
 
-describe(SubmitWebsiteScanController, () => {
+describe(PostWebsiteScanController, () => {
     const websiteId = 'website id';
     const websiteScanDocument = {
         id: 'website scan id',
@@ -34,7 +34,7 @@ describe(SubmitWebsiteScanController, () => {
     } as RestApiConfig;
 
     let loggerMock: IMock<Logger>;
-    let requestValidatorMock: IMock<SubmitWebsiteScanRequestValidator>;
+    let requestValidatorMock: IMock<PostWebsiteScanRequestValidator>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let websiteProviderMock: IMock<WebsiteProvider>;
     let websiteScanProviderMock: IMock<WebsiteScanProvider>;
@@ -43,11 +43,11 @@ describe(SubmitWebsiteScanController, () => {
     let websiteScanRequest: ApiContracts.WebsiteScanRequest;
     let context: Context;
 
-    let testSubject: SubmitWebsiteScanController;
+    let testSubject: PostWebsiteScanController;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<Logger>();
-        requestValidatorMock = Mock.ofType<SubmitWebsiteScanRequestValidator>();
+        requestValidatorMock = Mock.ofType<PostWebsiteScanRequestValidator>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         websiteProviderMock = Mock.ofType<WebsiteProvider>();
         websiteScanProviderMock = Mock.ofType<WebsiteScanProvider>();
@@ -64,7 +64,7 @@ describe(SubmitWebsiteScanController, () => {
 
         serviceConfigMock.setup((sc) => sc.getConfigValue('restApiConfig')).returns(async () => restApiConfigStub);
 
-        testSubject = new SubmitWebsiteScanController(
+        testSubject = new PostWebsiteScanController(
             serviceConfigMock.object,
             loggerMock.object,
             requestValidatorMock.object,
@@ -91,7 +91,7 @@ describe(SubmitWebsiteScanController, () => {
         websiteScanRequest.priority = 10;
         context.req.rawBody = JSON.stringify(websiteScanRequest);
 
-        setupSubmitScanRequest(websiteScanRequest.scanFrequency, websiteScanRequest.priority);
+        setupPostScanRequest(websiteScanRequest.scanFrequency, websiteScanRequest.priority);
 
         await testSubject.handleRequest();
 
@@ -102,7 +102,7 @@ describe(SubmitWebsiteScanController, () => {
     it('creates new website scan document with default frequency and priority', async () => {
         context.req.rawBody = JSON.stringify(websiteScanRequest);
 
-        setupSubmitScanRequest(restApiConfigStub.defaultA11yScanFrequency, websiteStub.priority);
+        setupPostScanRequest(restApiConfigStub.defaultA11yScanFrequency, websiteStub.priority);
 
         await testSubject.handleRequest();
 
@@ -110,7 +110,7 @@ describe(SubmitWebsiteScanController, () => {
         expect(context.res.body).toEqual(websiteScanResponse);
     });
 
-    function setupSubmitScanRequest(frequency: string, priority: number): void {
+    function setupPostScanRequest(frequency: string, priority: number): void {
         websiteProviderMock.setup((wp) => wp.readWebsite(websiteId)).returns(async () => websiteStub);
         websiteScanProviderMock
             .setup((wsp) => wsp.createScanDocumentForWebsite(websiteId, websiteScanRequest.scanType, frequency, priority))
