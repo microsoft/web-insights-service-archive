@@ -10,4 +10,5 @@ export const newWebsiteScan: WebsiteScan = {
     scanFrequency: '0 0 0 ? * 1#1 *',
     scanStatus: 'pending',
     priority: 0,
+    notificationUrl: 'https://notify.com',
 };

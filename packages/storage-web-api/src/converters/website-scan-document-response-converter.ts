@@ -21,6 +21,7 @@ export const createWebsiteScanApiResponse = async (
         scanFrequency: websiteScanDocument.scanFrequency,
         scanStatus: websiteScanDocument.scanStatus,
         priority: websiteScanDocument.priority,
+        notificationUrl: websiteScanDocument.notificationUrl,
         reports: websiteScanDocument.reports,
     };
 

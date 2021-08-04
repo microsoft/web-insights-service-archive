@@ -15,6 +15,7 @@ export interface WebsiteScan extends StorageDocument {
     scanType: ScanType;
     scanFrequency: string; // cron expression
     scanStatus: ScanStatus;
+    notificationUrl?: string;
     priority?: number;
     reports?: ReportData[];
 }

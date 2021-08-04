@@ -10,6 +10,7 @@ export interface WebsiteScan {
     scanType: ScanType;
     scanFrequency: string;
     scanStatus: ScanStatus;
+    notificationUrl: string;
     priority: number;
     reports?: ReportData[];
     pageScans?: PageScan[];
