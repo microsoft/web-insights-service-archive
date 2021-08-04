@@ -3,7 +3,6 @@
 
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider } from 'service-library';
 import { client } from 'azure-services';
@@ -30,13 +29,6 @@ export class GetWebsiteController extends ApiController {
     public async handleRequest(): Promise<void> {
         const websiteId = <string>this.context.bindingData.websiteId;
         this.logger.setCommonProperties({ source: 'getWebsiteRESTApi', websiteId });
-
-        if (isEmpty(websiteId)) {
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
-            this.logger.logError('The client request website id is malformed.');
-
-            return;
-        }
 
         const websiteResponse = await this.websiteProvider.readWebsite(websiteId, false);
         if (websiteResponse.statusCode === 404) {

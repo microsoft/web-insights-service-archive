@@ -53,14 +53,6 @@ describe(GetWebsiteController, () => {
         testSubject.context = context;
     });
 
-    it.each([undefined, ''])('Returns invalidResourceId response if websiteId=%s', async (websiteIdValue) => {
-        context.bindingData.websiteId = websiteIdValue;
-
-        await testSubject.handleRequest();
-
-        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
-    });
-
     it('return resourceNotFound response if website doc does not exist', async () => {
         const errorResponse: CosmosOperationResponse<StorageDocuments.Website> = {
             statusCode: 404,
