@@ -43,7 +43,7 @@
     "dependencies": {
         "@azure/cosmos": "^3.11.5",
         "@azure/identity": "^1.2.4",
-        "@azure/keyvault-secrets": "^4.2.0",
+        "@azure/keyvault-secrets": "^4.3.0",
         "@azure/ms-rest-nodeauth": "^3.0.9",
         "@azure/storage-blob": "^12.6.0",
         "@azure/storage-queue": "^12.5.0",
