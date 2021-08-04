@@ -7,7 +7,7 @@ export const newWebsiteScan: WebsiteScan = {
     id: 'pending website scan id',
     websiteId: 'website id',
     scanType: 'a11y',
-    scanFrequency: '0 0 0 ? * 2#1 *',
+    scanFrequency: '0 0 0 ? * 1#1 *',
     scanStatus: 'pending',
     priority: 0,
 };

@@ -114,7 +114,7 @@ export class ServiceConfiguration {
                 },
                 defaultA11yScanFrequency: {
                     format: String,
-                    default: '0 0 17 ? * 2#1 *',
+                    default: '0 0 17 ? * 1#1',
                     doc: 'A cron expression describing the default scheduling for accessibility scans. By default, accessibility scans will run at\
                     5pm UTC (10am PST) on the first Monday of every month.',
                 },
