@@ -75,7 +75,7 @@ fi
 subscription=$(az account show --query "id" -o tsv)
 
 # Get AKS cluster credentials
-az aks get-credentials --resource-group "${resourceGroupName}" --name "${kubernetesService}" 1>/dev/null
+az aks get-credentials --resource-group "${resourceGroupName}" --name "${kubernetesService}" --overwrite-existing
 
 # Switch to AKS cluster
 kubectl config use-context "${kubernetesService}" 1>/dev/null

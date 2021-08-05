@@ -46,7 +46,19 @@ subscription=$(az account show --query "id" -o tsv)
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group ${resourceGroupName}"
 az aks create --resource-group "${resourceGroupName}" --name "${kubernetesService}" --location "${location}" \
-    --no-ssh-key --enable-managed-identity --enable-addons monitoring \
+    --no-ssh-key \
+    --enable-managed-identity \
+    --network-plugin azure \
+    --enable-addons monitoring \
+    --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
+    --kubernetes-version 1.19.11 \
+    1>/dev/null
+
+# Enable Application Gateway Ingress Controller addon
+az aks enable-addons --resource-group "${resourceGroupName}" --name "${kubernetesService}" \
+    --addons ingress-appgw \
+    --appgw-name "${appGateway}" \
+    --appgw-subnet-cidr "10.2.0.0/16" \
     --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
     1>/dev/null
 

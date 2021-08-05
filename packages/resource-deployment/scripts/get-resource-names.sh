@@ -37,7 +37,7 @@ if [[ -z ${resourceName} ]]; then
 fi
 
 # Remove app insights name prefix
-resourceNameSuffix=${resourceName:14}
+export resourceNameSuffix=${resourceName:14}
 
 export kubernetesService="wiskube${resourceNameSuffix}"
 export containerRegistry="wisregistry${resourceNameSuffix}"
@@ -46,3 +46,4 @@ export storageAccount="wisstorage${resourceNameSuffix}"
 export cosmosDbAccount="wisscosmosdb${resourceNameSuffix}"
 export appInsights="wisappinsights${resourceNameSuffix}"
 export monitorWorkspace="wismonitorworkspace${resourceNameSuffix}"
+export appGateway="wisappgateway${resourceNameSuffix}"
