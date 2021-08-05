@@ -9,14 +9,14 @@ import { Context } from '@azure/functions';
 import { GuidGenerator } from 'common';
 import { HttpResponse, WebApiErrorCodes } from 'service-library';
 import _ from 'lodash';
-import { UpdatePageRequestValidator } from './update-page-request-validator';
+import { PostPageRequestValidator } from './post-page-request-validator';
 
-describe(UpdatePageRequestValidator, () => {
+describe(PostPageRequestValidator, () => {
     let pageUpdate: ApiContracts.PageUpdate;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let isValidPageUpdateMock: IMock<typeof ApiContracts.isValidPageUpdateObject>;
 
-    let testSubject: UpdatePageRequestValidator;
+    let testSubject: PostPageRequestValidator;
 
     beforeEach(() => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
@@ -26,7 +26,7 @@ describe(UpdatePageRequestValidator, () => {
             disabledScans: ['a11y'],
         };
 
-        testSubject = new UpdatePageRequestValidator(guidGeneratorMock.object, isValidPageUpdateMock.object);
+        testSubject = new PostPageRequestValidator(guidGeneratorMock.object, isValidPageUpdateMock.object);
     });
 
     it('rejects invalid api version', async () => {

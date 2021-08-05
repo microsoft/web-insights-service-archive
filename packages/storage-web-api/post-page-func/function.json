@@ -14,5 +14,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../update-page-func/index.js"
+    "scriptFile": "../post-page-func/index.js"
 }

@@ -5,8 +5,8 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { processWebRequest } from '../src/process-web-request';
-import { UpdatePageController } from '../src/controllers/update-page-controller';
+import { PostPageController } from '../src/controllers/post-page-controller';
 
 export async function run(context: Context): Promise<void> {
-    await processWebRequest(context, UpdatePageController);
+    await processWebRequest(context, PostPageController);
 }

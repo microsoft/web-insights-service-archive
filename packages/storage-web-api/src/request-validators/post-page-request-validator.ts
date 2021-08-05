@@ -8,7 +8,7 @@ import { GuidGenerator } from 'common';
 import { Context } from '@azure/functions';
 
 @injectable()
-export class UpdatePageRequestValidator extends ApiRequestValidator {
+export class PostPageRequestValidator extends ApiRequestValidator {
     protected readonly apiVersions = ['1.0'];
 
     constructor(
