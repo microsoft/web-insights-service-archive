@@ -14,19 +14,25 @@ export class PostWebsiteRequestValidator extends ApiRequestValidator {
 
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-        private readonly isValidWebsiteObject: typeof ApiContracts.isValidWebsiteObject = ApiContracts.isValidWebsiteObject,
+        private readonly isValidWebsiteObject: ApiContracts.ApiObjectValidator<ApiContracts.Website> = ApiContracts.isValidWebsiteObject,
     ) {
         super();
     }
 
-    public validateRequest(context: Context): boolean {
-        if (!super.validateRequest(context)) {
+    public async validateRequest(context: Context): Promise<boolean> {
+        if (!(await super.validateRequest(context))) {
             return false;
         }
 
         const payload = this.tryGetPayload<ApiContracts.Website>(context);
-        if (!this.isValidWebsiteObject(payload) || this.hasInvalidId(payload) || this.hasDisallowedProperties(payload)) {
+        if (!this.isValidWebsiteObject(payload) || this.hasDisallowedProperties(payload)) {
             context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
+
+            return false;
+        }
+
+        if (this.hasInvalidId(payload)) {
+            context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
 
             return false;
         }

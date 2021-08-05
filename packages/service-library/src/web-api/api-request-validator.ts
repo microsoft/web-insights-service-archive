@@ -12,7 +12,7 @@ import { WebRequestValidator } from './web-request-validator';
 export abstract class ApiRequestValidator implements WebRequestValidator {
     protected abstract readonly apiVersions: string[];
 
-    public validateRequest(context: Context): boolean {
+    public async validateRequest(context: Context): Promise<boolean> {
         if (!this.validateApiVersion(context) || !this.validateContentType(context)) {
             return false;
         }

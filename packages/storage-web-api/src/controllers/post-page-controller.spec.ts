@@ -11,11 +11,10 @@ import { ContextAwareLogger } from 'logger';
 import { HttpResponse, PageProvider, WebApiErrorCodes } from 'service-library';
 import { Context } from '@azure/functions';
 import { PageDocumentResponseConverter } from '../converters/page-document-response-converter';
-import { UpdatePageRequestValidator } from '../request-validators/update-page-request-validator';
-import { UpdatePageController } from './update-page-controller';
+import { PostPageRequestValidator } from '../request-validators/post-page-request-validator';
+import { PostPageController } from './post-page-controller';
 
-describe(UpdatePageController, () => {
-    const apiVersion = '1.0';
+describe(PostPageController, () => {
     const pageId = 'page';
     const pageDocument: StorageDocuments.Page = {
         id: pageId,
@@ -36,17 +35,17 @@ describe(UpdatePageController, () => {
 
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<ContextAwareLogger>;
-    let requestValidatorMock: IMock<UpdatePageRequestValidator>;
+    let requestValidatorMock: IMock<PostPageRequestValidator>;
     let pageProviderMock: IMock<PageProvider>;
     let pageDocumentResponseConverterMock: IMock<PageDocumentResponseConverter>;
     let context: Context;
 
-    let testSubject: UpdatePageController;
+    let testSubject: PostPageController;
 
     beforeEach(() => {
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
         loggerMock = Mock.ofType<ContextAwareLogger>();
-        requestValidatorMock = Mock.ofType<UpdatePageRequestValidator>();
+        requestValidatorMock = Mock.ofType<PostPageRequestValidator>();
         pageProviderMock = Mock.ofType<PageProvider>();
         pageDocumentResponseConverterMock = Mock.ofType<PageDocumentResponseConverter>();
 
@@ -54,19 +53,11 @@ describe(UpdatePageController, () => {
 
         context = <Context>(<unknown>{
             req: {
-                url: 'baseUrl/pages',
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                },
-                query: {
-                    'api-version': apiVersion,
-                },
                 rawBody: JSON.stringify(pageUpdate),
             },
         });
 
-        testSubject = new UpdatePageController(
+        testSubject = new PostPageController(
             serviceConfigMock.object,
             loggerMock.object,
             requestValidatorMock.object,

@@ -8,7 +8,7 @@ import { GuidGenerator } from 'common';
 import { Context } from '@azure/functions';
 
 @injectable()
-export class UpdatePageRequestValidator extends ApiRequestValidator {
+export class PostPageRequestValidator extends ApiRequestValidator {
     protected readonly apiVersions = ['1.0'];
 
     constructor(
@@ -18,14 +18,20 @@ export class UpdatePageRequestValidator extends ApiRequestValidator {
         super();
     }
 
-    public validateRequest(context: Context): boolean {
-        if (!super.validateRequest(context)) {
+    public async validateRequest(context: Context): Promise<boolean> {
+        if (!(await super.validateRequest(context))) {
             return false;
         }
 
         const payload = this.tryGetPayload<ApiContracts.PageUpdate>(context);
-        if (!this.isValidPageUpdateObject(payload) || !this.hasValidId(payload)) {
+        if (!this.isValidPageUpdateObject(payload)) {
             context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
+
+            return false;
+        }
+
+        if (!this.hasValidId(payload)) {
+            context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
 
             return false;
         }

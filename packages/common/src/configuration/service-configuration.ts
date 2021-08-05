@@ -18,6 +18,7 @@ export interface LogRuntimeConfig {
 export interface RestApiConfig {
     minScanPriorityValue: number;
     maxScanPriorityValue: number;
+    defaultA11yScanFrequency: string;
 }
 
 export interface RuntimeConfig {
@@ -110,6 +111,12 @@ export class ServiceConfiguration {
                     default: 1000,
                     doc: 'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
                         This range correlates with Azure Batch pool task priority range.',
+                },
+                defaultA11yScanFrequency: {
+                    format: String,
+                    default: '0 0 17 ? * 1#1',
+                    doc: 'A cron expression describing the default scheduling for accessibility scans. By default, accessibility scans will run at\
+                    5pm UTC (10am PST) on the first Monday of every month.',
                 },
             },
         };

@@ -16,7 +16,6 @@ import { PostWebsiteRequestValidator } from '../request-validators/post-website-
 import { PostWebsiteController } from './post-website-controller';
 
 describe(PostWebsiteController, () => {
-    const apiVersion = '1.0';
     const websiteId = 'websiteId';
     const websiteDocument: StorageDocuments.Website = {
         ...ApiContracts.websiteWithRequiredProperties,
@@ -60,17 +59,7 @@ describe(PostWebsiteController, () => {
             .returns(async () => convertedWebsiteDoc);
 
         context = <Context>(<unknown>{
-            req: {
-                url: 'baseUrl/websites',
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json',
-                },
-                query: {
-                    'api-version': apiVersion,
-                },
-                rawBody: JSON.stringify(ApiContracts.websiteWithRequiredProperties),
-            },
+            req: {},
         });
         convertedWebsiteDoc = {
             id: websiteId,

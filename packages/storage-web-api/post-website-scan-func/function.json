@@ -5,7 +5,7 @@
             "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "route": "pages",
+            "route": "scans/websites",
             "methods": ["post"]
         },
         {
@@ -14,5 +14,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../update-page-func/index.js"
+    "scriptFile": "../post-website-scan-func/index.js"
 }

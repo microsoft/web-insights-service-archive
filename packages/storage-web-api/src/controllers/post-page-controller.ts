@@ -8,18 +8,18 @@ import { HttpResponse, WebApiErrorCodes, ApiController, PageProvider } from 'ser
 import * as StorageDocuments from 'storage-documents';
 import * as ApiContracts from 'api-contracts';
 import { createPageApiResponse, PageDocumentResponseConverter } from '../converters/page-document-response-converter';
-import { UpdatePageRequestValidator } from '../request-validators/update-page-request-validator';
+import { PostPageRequestValidator } from '../request-validators/post-page-request-validator';
 
 @injectable()
-export class UpdatePageController extends ApiController {
+export class PostPageController extends ApiController {
     public readonly apiVersion = '1.0';
 
-    public readonly apiName = 'storage-web-api-update-page';
+    public readonly apiName = 'storage-web-api-post-page';
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(UpdatePageRequestValidator) requestValidator: UpdatePageRequestValidator,
+        @inject(PostPageRequestValidator) requestValidator: PostPageRequestValidator,
         @inject(PageProvider) private readonly pageProvider: PageProvider,
         private readonly convertPageDocumentToResponse: PageDocumentResponseConverter = createPageApiResponse,
     ) {
@@ -29,7 +29,7 @@ export class UpdatePageController extends ApiController {
     public async handleRequest(): Promise<void> {
         const { pageId, ...pageUpdateData } = this.tryGetPayload<ApiContracts.PageUpdate>();
 
-        this.logger.setCommonProperties({ source: 'updatePageRESTApi', websiteId: pageId });
+        this.logger.setCommonProperties({ source: 'postPageRESTApi', websiteId: pageId });
 
         let pageDoc: StorageDocuments.Page;
         try {
