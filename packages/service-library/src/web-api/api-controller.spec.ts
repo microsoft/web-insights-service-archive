@@ -48,7 +48,7 @@ describe(ApiController, () => {
     let isValidRequest: boolean;
     let loggerMock: IMock<MockableLogger>;
     const requestValidatorStub: WebRequestValidator = {
-        validateRequest: () => isValidRequest,
+        validateRequest: async () => isValidRequest,
     };
 
     beforeEach(() => {
@@ -166,10 +166,10 @@ describe(ApiController, () => {
     describe('getRestApiConfig()', () => {
         it('should get config value', async () => {
             const context = <Context>(<unknown>{});
-            const configStub: RestApiConfig = {
+            const configStub = {
                 minScanPriorityValue: -1,
                 maxScanPriorityValue: 1,
-            };
+            } as RestApiConfig;
 
             const serviceConfigMock = Mock.ofType(ServiceConfiguration);
             serviceConfigMock

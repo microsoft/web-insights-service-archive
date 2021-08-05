@@ -29,10 +29,10 @@ describe(GetWebsiteRequestValidator, () => {
         testSubject = new GetWebsiteRequestValidator();
     });
 
-    it('rejects invalid api version', () => {
+    it('rejects invalid api version', async () => {
         context.req.query['api-version'] = 'invalid api version';
 
-        const isValidRequest = testSubject.validateRequest(context);
+        const isValidRequest = await testSubject.validateRequest(context);
 
         expect(isValidRequest).toBeFalsy();
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));

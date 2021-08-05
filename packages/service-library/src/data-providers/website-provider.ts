@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
+import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { DocumentDataOnly, itemTypes, PartitionKey, Website } from 'storage-documents';
 import { GuidGenerator } from 'common';
@@ -41,11 +41,8 @@ export class WebsiteProvider {
         return response.item as Website;
     }
 
-    public async readWebsite(id: string): Promise<Website> {
-        const response = await this.cosmosContainerClient.readDocument<Website>(id, PartitionKey.websiteDocuments);
-        client.ensureSuccessStatusCode(response);
-
-        return response.item;
+    public async readWebsite(id: string, throwIfNotSuccess: boolean = true): Promise<CosmosOperationResponse<Website>> {
+        return this.cosmosContainerClient.readDocument<Website>(id, PartitionKey.websiteDocuments, throwIfNotSuccess);
     }
 
     private normalizeDbDocument(website: Partial<Website>, id?: string): Partial<Website> {

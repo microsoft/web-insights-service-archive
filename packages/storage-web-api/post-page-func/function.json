@@ -1,0 +1,18 @@
+{
+    "bindings": [
+        {
+            "authLevel": "anonymous",
+            "name": "request",
+            "type": "httpTrigger",
+            "direction": "in",
+            "route": "pages",
+            "methods": ["post"]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "response"
+        }
+    ],
+    "scriptFile": "../post-page-func/index.js"
+}

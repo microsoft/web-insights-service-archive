@@ -29,7 +29,7 @@ export abstract class WebController {
             this.logger.setCommonProperties(this.getBaseTelemetryProperties());
 
             let result: unknown;
-            if (this.requestValidator.validateRequest(this.context)) {
+            if (await this.requestValidator.validateRequest(this.context)) {
                 result = await this.handleRequest(...args);
             }
 
