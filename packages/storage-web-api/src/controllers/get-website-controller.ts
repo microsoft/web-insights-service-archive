@@ -47,7 +47,7 @@ export class GetWebsiteController extends ApiController {
         }
         if (!client.isSuccessStatusCode(websiteResponse)) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
-            this.logger.logError('Website document not found');
+            this.logger.logError('Unable to read website');
 
             return;
         }
