@@ -140,4 +140,13 @@ export class WebApiErrorCodes {
             message: 'The frequency is not a valid cron expression.',
         },
     };
+
+    public static internalError: WebApiErrorCode = {
+        statusCode: 500,
+        error: {
+            code: 'InternalError',
+            codeId: 5001,
+            message: 'The server encountered an internal error. Please retry the request.',
+        },
+    };
 }

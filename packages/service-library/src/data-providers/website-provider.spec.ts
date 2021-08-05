@@ -126,34 +126,22 @@ describe(WebsiteProvider, () => {
     });
 
     describe('readWebsite', () => {
-        it('reads website with id', async () => {
-            const expectedWebsite = {
+        it.each([true, false])('reads website with throwIfNotSuccess=%s', async (throwIfNotSuccess) => {
+            const websiteDocument = {
                 name: 'test website',
             } as Website;
-            const response = {
+            const expectedResponse = {
                 statusCode: 200,
-                item: expectedWebsite,
+                item: websiteDocument,
             } as CosmosOperationResponse<Website>;
             cosmosContainerClientMock
-                .setup((c) => c.readDocument(websiteId, PartitionKey.websiteDocuments))
-                .returns(async () => response)
+                .setup((c) => c.readDocument(websiteId, PartitionKey.websiteDocuments, throwIfNotSuccess))
+                .returns(async () => expectedResponse)
                 .verifiable();
 
-            const actualWebsite = await testSubject.readWebsite(websiteId);
+            const actualResponse = await testSubject.readWebsite(websiteId, throwIfNotSuccess);
 
-            expect(actualWebsite).toBe(expectedWebsite);
-        });
-
-        it('throws if unsuccessful status code', async () => {
-            const response = {
-                statusCode: 404,
-            } as CosmosOperationResponse<Website>;
-            cosmosContainerClientMock
-                .setup((c) => c.readDocument(websiteId, PartitionKey.websiteDocuments))
-                .returns(async () => response)
-                .verifiable();
-
-            expect(testSubject.readWebsite(websiteId)).rejects.toThrow();
+            expect(actualResponse).toEqual(expectedResponse);
         });
     });
 

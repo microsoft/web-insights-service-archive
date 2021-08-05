@@ -8,6 +8,7 @@ import { inject, injectable } from 'inversify';
 import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, WebApiErrorCodes, WebsiteProvider, WebsiteScanProvider } from 'service-library';
+import { client } from 'azure-services';
 import { createWebsiteScanApiResponse, WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 import { PostWebsiteScanRequestValidator } from '../request-validators/post-website-scan-request-validator';
 
@@ -40,13 +41,8 @@ export class PostWebsiteScanController extends ApiController {
         const websiteScanRequest = this.tryGetPayload<ApiContracts.WebsiteScanRequest>();
         this.logger.setCommonProperties({ websiteId: websiteScanRequest.websiteId });
 
-        let website: StorageDocuments.Website;
-        try {
-            website = await this.websiteProvider.readWebsite(websiteScanRequest.websiteId);
-        } catch (e) {
-            this.logger.logError('Unable to create websiteScan because website does not exist');
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-
+        const website = await this.tryReadWebsite(websiteScanRequest.websiteId);
+        if (website === null) {
             return;
         }
 
@@ -56,6 +52,7 @@ export class PostWebsiteScanController extends ApiController {
             await this.getScanFrequency(websiteScanRequest),
             websiteScanRequest.priority ?? website.priority,
         );
+        this.logger.logInfo('Successfully created websiteScanDocument', { websiteScanId: websiteScanDocument.id });
 
         const responseBody = await this.convertWebsiteScanDocumentToResponse(websiteScanDocument);
 
@@ -65,6 +62,24 @@ export class PostWebsiteScanController extends ApiController {
         };
 
         this.logger.logInfo('Website metadata successfully posted to storage.');
+    }
+
+    private async tryReadWebsite(websiteId: string): Promise<StorageDocuments.Website | null> {
+        const websiteResponse = await this.websiteProvider.readWebsite(websiteId, false);
+        if (websiteResponse.statusCode === 404) {
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+            this.logger.logError('Website document not found');
+
+            return null;
+        }
+        if (!client.isSuccessStatusCode(websiteResponse)) {
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
+            this.logger.logError('Unable to read website document');
+
+            return null;
+        }
+
+        return websiteResponse.item;
     }
 
     private async getScanFrequency(websiteScanRequest: ApiContracts.WebsiteScanRequest): Promise<string> {

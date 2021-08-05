@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import * as ApiContracts from 'api-contracts';
-import { IMock, Mock } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { Logger } from 'logger';
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Context } from '@azure/functions';
@@ -76,14 +76,25 @@ describe(PostWebsiteScanController, () => {
     });
 
     it('returns 404 if requested website does not exist', async () => {
-        const testError = new Error('test error');
+        const websiteReadResponse = { statusCode: 404 };
         context.req.rawBody = JSON.stringify(websiteScanRequest);
 
-        websiteProviderMock.setup((wp) => wp.readWebsite(websiteId)).throws(testError);
+        websiteProviderMock.setup((wp) => wp.readWebsite(websiteId, It.isAny())).returns(async () => websiteReadResponse);
 
         await testSubject.handleRequest();
 
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+    });
+
+    it('returns 500 if cosmos read fails for another reason', async () => {
+        const websiteReadResponse = { statusCode: 400 };
+        context.req.rawBody = JSON.stringify(websiteScanRequest);
+
+        websiteProviderMock.setup((wp) => wp.readWebsite(websiteId, It.isAny())).returns(async () => websiteReadResponse);
+
+        await testSubject.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.internalError));
     });
 
     it('creates new website scan document with specified frequency and priority', async () => {
@@ -111,7 +122,11 @@ describe(PostWebsiteScanController, () => {
     });
 
     function setupPostScanRequest(frequency: string, priority: number): void {
-        websiteProviderMock.setup((wp) => wp.readWebsite(websiteId)).returns(async () => websiteStub);
+        const websiteReadResponse = {
+            statusCode: 200,
+            item: websiteStub,
+        };
+        websiteProviderMock.setup((wp) => wp.readWebsite(websiteId, It.isAny())).returns(async () => websiteReadResponse);
         websiteScanProviderMock
             .setup((wsp) => wsp.createScanDocumentForWebsite(websiteId, websiteScanRequest.scanType, frequency, priority))
             .returns(async () => websiteScanDocument)

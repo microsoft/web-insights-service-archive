@@ -4,12 +4,13 @@
 import 'reflect-metadata';
 
 import * as ApiContracts from 'api-contracts';
-import { IMock, Mock } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { ServiceConfiguration } from 'common';
 import { ContextAwareLogger } from 'logger';
 import { CosmosQueryResultsIterable, HttpResponse, PageProvider, WebApiErrorCodes, WebsiteProvider } from 'service-library';
 import { Context } from '@azure/functions';
 import * as StorageDocuments from 'storage-documents';
+import { CosmosOperationResponse } from 'azure-services';
 import { WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 import { GetWebsiteRequestValidator } from '../request-validators/get-website-request-validator';
 import { GetWebsiteController } from './get-website-controller';
@@ -61,12 +62,25 @@ describe(GetWebsiteController, () => {
     });
 
     it('return resourceNotFound response if website doc does not exist', async () => {
-        const testError = new Error('test errors');
-        websiteProviderMock.setup((w) => w.readWebsite(websiteId)).throws(testError);
+        const errorResponse: CosmosOperationResponse<StorageDocuments.Website> = {
+            statusCode: 404,
+        };
+        websiteProviderMock.setup((w) => w.readWebsite(websiteId, It.isAny())).returns(async () => errorResponse);
 
         await testSubject.handleRequest();
 
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+    });
+
+    it('return internalError response if cosmos returns a different error code', async () => {
+        const errorResponse: CosmosOperationResponse<StorageDocuments.Website> = {
+            statusCode: 500,
+        };
+        websiteProviderMock.setup((w) => w.readWebsite(websiteId, It.isAny())).returns(async () => errorResponse);
+
+        await testSubject.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.internalError));
     });
 
     it('return 200 if documents were successfully fetched', async () => {
@@ -74,6 +88,10 @@ describe(GetWebsiteController, () => {
             baseUrl: 'baseUrl',
             name: 'test website',
         } as StorageDocuments.Website;
+        const websiteResponse: CosmosOperationResponse<StorageDocuments.Website> = {
+            statusCode: 200,
+            item: websiteStub,
+        };
         const pageIterableMock = Mock.ofType<CosmosQueryResultsIterable<StorageDocuments.Page>>();
         const expectedResponseBody = {
             ...websiteStub,
@@ -81,7 +99,7 @@ describe(GetWebsiteController, () => {
             pages: [],
         } as ApiContracts.Website;
 
-        websiteProviderMock.setup((w) => w.readWebsite(websiteId)).returns(async () => websiteStub);
+        websiteProviderMock.setup((w) => w.readWebsite(websiteId, It.isAny())).returns(async () => websiteResponse);
         pageProviderMock.setup((p) => p.getPagesForWebsite(websiteId)).returns(() => pageIterableMock.object);
         websiteDocumentResponseConverterMock
             .setup((c) => c(websiteStub, pageIterableMock.object))

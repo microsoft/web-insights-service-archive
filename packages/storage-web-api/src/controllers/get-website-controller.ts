@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider } from 'service-library';
-import * as StorageDocuments from 'storage-documents';
+import { client } from 'azure-services';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 import { GetWebsiteRequestValidator } from '../request-validators/get-website-request-validator';
 
@@ -38,18 +38,22 @@ export class GetWebsiteController extends ApiController {
             return;
         }
 
-        let websiteDoc: StorageDocuments.Website;
-        try {
-            websiteDoc = await this.websiteProvider.readWebsite(websiteId);
-        } catch (e) {
+        const websiteResponse = await this.websiteProvider.readWebsite(websiteId, false);
+        if (websiteResponse.statusCode === 404) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-            this.logger.logError('Error reading website document', { error: JSON.stringify(e) });
+            this.logger.logError('Website document not found');
+
+            return;
+        }
+        if (!client.isSuccessStatusCode(websiteResponse)) {
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
+            this.logger.logError('Website document not found');
 
             return;
         }
 
         const websitePagesIterable = this.pageProvider.getPagesForWebsite(websiteId);
-        const websiteResponseBody = await this.convertWebsiteDocumentToResponse(websiteDoc, websitePagesIterable);
+        const websiteResponseBody = await this.convertWebsiteDocumentToResponse(websiteResponse.item, websitePagesIterable);
 
         this.context.res = {
             status: 200,
