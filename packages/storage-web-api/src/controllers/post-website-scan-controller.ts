@@ -90,8 +90,9 @@ export class PostWebsiteScanController extends ApiController {
         const configKey = defaultFrequencyKeys[websiteScanRequest.scanType];
 
         if (configKey === undefined) {
-            this.logger.logError(`No default scan frequency is implemented for scan type: ${websiteScanRequest.scanType}`);
-            throw new Error(`No default scan frequency is implemented for scan type: ${websiteScanRequest.scanType}`);
+            const errorMessage = `No default scan frequency is implemented for scan type: ${websiteScanRequest.scanType}`;
+            this.logger.logError(errorMessage);
+            throw new Error(errorMessage);
         }
 
         return restApiConfig[configKey] as string;
