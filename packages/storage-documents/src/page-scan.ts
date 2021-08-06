@@ -5,6 +5,7 @@ import { ReportData } from './report-data';
 import { ScanStatus } from './scan-types';
 import { StorageDocument } from './storage-document';
 import { ItemTypes } from './item-type';
+import { BlobResultData } from './blob-result-data';
 
 /*
  * Represents a scan/crawl of a single URL for one scan type.
@@ -17,7 +18,7 @@ export interface PageScan extends StorageDocument {
     priority: number;
     scanStatus: ScanStatus;
     completedTimestamp?: number;
-    resultsBlobId?: string;
+    results?: BlobResultData[];
     reports?: ReportData[];
     retryCount: number;
     scanError?: string;

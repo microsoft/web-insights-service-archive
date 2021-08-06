@@ -24,7 +24,12 @@ export const passedPageScan: PageScan = {
     priority: 1,
     scanStatus: 'pass',
     completedTimestamp: 123456,
-    resultsBlobId: 'passed page results blod id',
+    results: [
+        {
+            blobId: 'results blob id',
+            resultType: 'result type',
+        },
+    ],
     reports: [
         {
             reportId: 'passed page html report id',
