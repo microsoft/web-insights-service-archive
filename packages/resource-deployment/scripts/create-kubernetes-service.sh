@@ -20,6 +20,19 @@ attachContainerRegistry() {
     . "${0%/*}/role-assign-for-sp.sh"
 }
 
+waitForAppGatewayUpdate() {
+    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
+    if [[ -n ${nodeResourceGroup} ]]; then
+        if az network application-gateway show --resource-group "${nodeResourceGroup}" --name "${appGateway}" -o tsv --query "name" >/dev/null 2>&1; then
+            echo "Waiting for application gateway configuration update"
+            az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated
+        else
+            echo "Waiting for application gateway deployment"
+            az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --created
+        fi
+    fi
+}
+
 # Read script arguments
 while getopts ":r:c:l:d:" option; do
     case ${option} in
@@ -49,18 +62,15 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
     --no-ssh-key \
     --enable-managed-identity \
     --network-plugin azure \
-    --enable-addons monitoring \
+    --appgw-name "${appGateway}" \
+    --appgw-subnet-cidr "10.2.0.0/16" \
+    --enable-addons monitoring,ingress-appgw \
     --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
     --kubernetes-version 1.19.11 \
     1>/dev/null
+echo ""
 
-# Enable Application Gateway Ingress Controller addon
-az aks enable-addons --resource-group "${resourceGroupName}" --name "${kubernetesService}" \
-    --addons ingress-appgw \
-    --appgw-name "${appGateway}" \
-    --appgw-subnet-cidr "10.2.0.0/16" \
-    --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
-    1>/dev/null
+waitForAppGatewayUpdate
 
 principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
 
