@@ -140,21 +140,9 @@ describe(WebsiteScanProvider, () => {
                 .returns(async () => response)
                 .verifiable();
 
-            const actualWebsiteScan = await testSubject.readWebsiteScan(websiteScanId);
+            const actualresponse = await testSubject.readWebsiteScan(websiteScanId);
 
-            expect(actualWebsiteScan).toBe(websiteScanDoc);
-        });
-
-        it('throws if unsuccessful status code', async () => {
-            const response = {
-                statusCode: 404,
-            } as CosmosOperationResponse<WebsiteScan>;
-            cosmosContainerClientMock
-                .setup((c) => c.readDocument(websiteScanId, partitionKey))
-                .returns(async () => response)
-                .verifiable();
-
-            expect(testSubject.readWebsiteScan(websiteScanId)).rejects.toThrow();
+            expect(actualresponse).toBe(response);
         });
     });
 

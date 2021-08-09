@@ -7,14 +7,14 @@ import * as ApiContracts from 'api-contracts';
 import * as StorageDocuments from 'storage-documents';
 import _ from 'lodash';
 import { IMock, Mock } from 'typemoq';
-import { CosmosQueryResultsIterable, PageProvider } from 'service-library';
+import { CosmosQueryResultsIterable } from 'service-library';
 import { mockCosmosQueryResults } from '../test-utilities/cosmos-query-results-iterable-mock';
 import { createWebsiteScanApiResponse } from './website-scan-document-response-converter';
 import { PageScanDocumentResponseConverter } from './page-scan-document-response-converter';
 
 describe(createWebsiteScanApiResponse, () => {
     let websiteScanDocument: StorageDocuments.WebsiteScan;
-    let pageProviderMock: IMock<PageProvider>;
+    let getPageForScanMock: IMock<(pageScan: StorageDocuments.PageScan) => Promise<StorageDocuments.Page>>;
     let createPageScanObjectMock: IMock<PageScanDocumentResponseConverter>;
 
     beforeEach(() => {
@@ -24,7 +24,7 @@ describe(createWebsiteScanApiResponse, () => {
             partitionKey: 'partition key',
         };
 
-        pageProviderMock = Mock.ofType<PageProvider>();
+        getPageForScanMock = Mock.ofInstance(() => null);
         createPageScanObjectMock = Mock.ofType<PageScanDocumentResponseConverter>();
     });
 
@@ -48,8 +48,8 @@ describe(createWebsiteScanApiResponse, () => {
             expect(
                 await createWebsiteScanApiResponse(
                     websiteScanDocument,
-                    pageProviderMock.object,
                     pageScansIterable.object,
+                    getPageForScanMock.object,
                     createPageScanObjectMock.object,
                 ),
             ).toEqual(expectedResponse);
@@ -61,8 +61,8 @@ describe(createWebsiteScanApiResponse, () => {
             expect(
                 await createWebsiteScanApiResponse(
                     websiteScanDocument,
-                    pageProviderMock.object,
                     pageScansIterable.object,
+                    getPageForScanMock.object,
                     createPageScanObjectMock.object,
                 ),
             ).toEqual(expectedResponse);
@@ -91,7 +91,7 @@ describe(createWebsiteScanApiResponse, () => {
                     itemType: StorageDocuments.itemTypes.page,
                 } as StorageDocuments.Page;
 
-                pageProviderMock.setup((pp) => pp.readPage(page.id)).returns(async () => pageDocument);
+                getPageForScanMock.setup((gp) => gp(pageScanDocument)).returns(async () => pageDocument);
                 createPageScanObjectMock.setup((c) => c(pageScanDocument, pageDocument)).returns(() => pageScanObject);
             });
 

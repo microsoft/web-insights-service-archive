@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
+import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { DocumentDataOnly, itemTypes, ScanType, WebsiteScan } from 'storage-documents';
 import { GuidGenerator } from 'common';
@@ -46,11 +46,8 @@ export class WebsiteScanProvider {
         return response.item as WebsiteScan;
     }
 
-    public async readWebsiteScan(id: string): Promise<WebsiteScan> {
-        const response = await this.cosmosContainerClient.readDocument<WebsiteScan>(id, this.getWebsiteScanPartitionKey(id));
-        client.ensureSuccessStatusCode(response);
-
-        return response.item;
+    public async readWebsiteScan(id: string): Promise<CosmosOperationResponse<WebsiteScan>> {
+        return this.cosmosContainerClient.readDocument<WebsiteScan>(id, this.getWebsiteScanPartitionKey(id));
     }
 
     public getScansForWebsite(websiteId: string): CosmosQueryResultsIterable<WebsiteScan> {
