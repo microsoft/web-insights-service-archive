@@ -64,6 +64,7 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
     --network-plugin azure \
     --appgw-name "${appGateway}" \
     --appgw-subnet-cidr "10.2.0.0/16" \
+    --zones 1 2 3 \
     --enable-addons monitoring,ingress-appgw \
     --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
     --kubernetes-version 1.19.11 \
