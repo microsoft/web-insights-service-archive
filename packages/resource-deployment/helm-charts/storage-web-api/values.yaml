@@ -8,28 +8,40 @@
 replicaCount: 1
 
 image:
-    name: storage-web-api-func
-    repository: ''
-    pullPolicy: Always
-    tag: latest
+  name: storage-web-api-func
+  repository: ''
+  pullPolicy: Always
+  tag: latest
 
 nameOverride: ''
 fullnameOverride: ''
 
 podAnnotations:
-    release: dev
-    releaseId: ''
+  release: dev
+  releaseId: ''
 
 service:
-    type: LoadBalancer
-    port: 80
+  type: LoadBalancer
+  port: 80
 
 autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+ingress:
+  enabled: true
+  className: ''
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/backend-path-prefix: /
+  hosts:
+    - paths:
+        - path: /storage/*
+          pathType: Exact
+  tls: []
 
 env:
   - name: APPINSIGHTS_INSTRUMENTATIONKEY

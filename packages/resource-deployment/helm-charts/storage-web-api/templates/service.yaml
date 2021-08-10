@@ -8,10 +8,9 @@ metadata:
   labels:
     {{- include "storage-web-api.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - name: http 
       protocol: TCP
-      name: http
+      port: {{ .Values.service.port }}
+      targetPort: 80
   selector: {{- include "storage-web-api.selectorLabels" . | nindent 4 }}

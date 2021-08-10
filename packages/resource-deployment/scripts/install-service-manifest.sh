@@ -36,6 +36,14 @@ getInstallAction() {
     fi
 }
 
+waitForAppGatewayUpdate() {
+    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
+    if [[ -n ${nodeResourceGroup} ]]; then
+        echo "Waiting for application gateway configuration update"
+        az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated
+    fi
+}
+
 # Read script arguments
 while getopts ":r:s:c:e:v:f:d" option; do
     case ${option} in
@@ -75,7 +83,7 @@ fi
 subscription=$(az account show --query "id" -o tsv)
 
 # Get AKS cluster credentials
-az aks get-credentials --resource-group "${resourceGroupName}" --name "${kubernetesService}" 1>/dev/null
+az aks get-credentials --resource-group "${resourceGroupName}" --name "${kubernetesService}" --overwrite-existing
 
 # Switch to AKS cluster
 kubectl config use-context "${kubernetesService}" 1>/dev/null
@@ -99,5 +107,7 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
     ${flags}
+
+waitForAppGatewayUpdate
 
 echo "Kubernetes Service manifest ${serviceName} successfully installed."
