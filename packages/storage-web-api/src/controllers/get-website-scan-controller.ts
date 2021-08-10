@@ -7,7 +7,6 @@ import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, PageProvider, PageScanProvider, WebApiErrorCodes, WebsiteScanProvider } from 'service-library';
 import { client } from 'azure-services';
-import { GetWebsiteRequestValidator } from '../request-validators/get-website-request-validator';
 import { GetWebsiteScanRequestValidator, latestScanTarget } from '../request-validators/get-website-scan-request-validator';
 import { createWebsiteScanApiResponse, WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 
@@ -20,10 +19,10 @@ export class GetWebsiteScanController extends ApiController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        @inject(GetWebsiteRequestValidator) requestValidator: GetWebsiteScanRequestValidator,
+        @inject(GetWebsiteScanRequestValidator) requestValidator: GetWebsiteScanRequestValidator,
         @inject(WebsiteScanProvider) private readonly websiteScanProvider: WebsiteScanProvider,
         @inject(PageScanProvider) private readonly pageScanProvider: PageScanProvider,
-        @inject(PageProvider) private readonly pageProvider: PageProvider, // TODO: make converter an object and inject this into that
+        @inject(PageProvider) private readonly pageProvider: PageProvider,
         private readonly convertWebsiteScanDocumentToResponse: WebsiteScanDocumentResponseConverter = createWebsiteScanApiResponse,
     ) {
         super(logger, requestValidator);
@@ -34,7 +33,7 @@ export class GetWebsiteScanController extends ApiController {
         const scanTarget = this.context.bindingData.scanTarget;
         const scanType = this.context.bindingData.scanType as StorageDocuments.ScanType;
 
-        this.logger.setCommonProperties({ source: 'getWebsiteRESTApi', websiteId });
+        this.logger.setCommonProperties({ source: 'getWebsiteScanRESTApi', websiteId });
 
         let websiteScanDocument: StorageDocuments.WebsiteScan | null;
         if (scanTarget === latestScanTarget) {
@@ -65,14 +64,17 @@ export class GetWebsiteScanController extends ApiController {
     }
 
     private async getScanWithId(scanId: string): Promise<StorageDocuments.WebsiteScan | null> {
-        const websiteDocumentResponse = await this.websiteScanProvider.readWebsiteScan(scanId);
+        const websiteDocumentResponse = await this.websiteScanProvider.readWebsiteScan(scanId, false);
         if (!client.isSuccessStatusCode(websiteDocumentResponse)) {
             if (websiteDocumentResponse.statusCode === 404) {
                 this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-                this.logger.logError('Website scan document not found');
+                this.logger.logError('Website scan document not found', { websiteScanId: scanId });
             } else {
                 this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
-                this.logger.logError('Error reading websiteScan document', { statusCode: `${websiteDocumentResponse.statusCode}` });
+                this.logger.logError('Error reading websiteScan document', {
+                    statusCode: `${websiteDocumentResponse.statusCode}`,
+                    websiteScanId: scanId,
+                });
             }
 
             return null;
@@ -85,6 +87,14 @@ export class GetWebsiteScanController extends ApiController {
         websiteId: string,
         scanType: StorageDocuments.ScanType,
     ): Promise<StorageDocuments.WebsiteScan | null> {
-        return null; //TODO: implement
+        const websiteDocument = await this.websiteScanProvider.getLatestScanForWebsite(websiteId, scanType);
+        if (!websiteDocument) {
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+            this.logger.logError(`No scan of type ${scanType} was found for this website`);
+
+            return null;
+        }
+
+        return websiteDocument;
     }
 }

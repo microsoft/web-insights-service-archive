@@ -147,7 +147,7 @@ export class WebApiErrorCodes {
         error: {
             code: 'InvalidScanType',
             codeId: 4013,
-            message: 'The scan type must be one of "a11y", "privacy", or "security".',
+            message: 'The scan type must be either a11y, privacy, or security.',
         },
     };
 

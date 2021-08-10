@@ -10,7 +10,7 @@ import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { HttpResponse, PageProvider, PageScanProvider, WebApiErrorCodes, WebsiteScanProvider } from 'service-library';
 import { Context } from '@azure/functions';
-import { GetWebsiteScanRequestValidator } from '../request-validators/get-website-scan-request-validator';
+import { GetWebsiteScanRequestValidator, latestScanTarget } from '../request-validators/get-website-scan-request-validator';
 import { WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 import { mockCosmosQueryResults } from '../test-utilities/cosmos-query-results-iterable-mock';
 import { GetWebsiteScanController } from './get-website-scan-controller';
@@ -63,7 +63,6 @@ describe(GetWebsiteScanController, () => {
         context = {
             bindingData: {
                 websiteId: websiteId,
-                scanTarget: websiteScanId,
                 scanType: scanType,
             },
         } as unknown as Context;
@@ -80,39 +79,89 @@ describe(GetWebsiteScanController, () => {
         testSubject.context = context;
     });
 
-    it('returns resourceNotFound if cosmos returns 404 for specific scan id', async () => {
-        const cosmosResponse = { statusCode: 404 };
-
-        websiteScanProviderMock.setup((wsp) => wsp.readWebsiteScan(websiteScanId)).returns(async () => cosmosResponse);
-
-        await testSubject.handleRequest();
-
-        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+    afterEach(() => {
+        websiteScanProviderMock.verifyAll();
+        pageScanProviderMock.verifyAll();
+        convertWebsiteScanDocumentMock.verifyAll();
     });
 
-    it('returns internalError if cosmos returns a different error code for specific scan id', async () => {
-        const cosmosResponse = { statusCode: 500 };
+    describe('With specific scan id', () => {
+        beforeEach(() => {
+            context.bindingData.scanTarget = websiteScanId;
+        });
 
-        websiteScanProviderMock.setup((wsp) => wsp.readWebsiteScan(websiteScanId)).returns(async () => cosmosResponse);
+        it('returns resourceNotFound if cosmos returns 404', async () => {
+            const cosmosResponse = { statusCode: 404 };
 
-        await testSubject.handleRequest();
+            websiteScanProviderMock.setup((wsp) => wsp.readWebsiteScan(websiteScanId, false)).returns(async () => cosmosResponse);
 
-        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.internalError));
+            await testSubject.handleRequest();
+
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+        });
+
+        it('returns internalError if cosmos returns a different error code', async () => {
+            const cosmosResponse = { statusCode: 500 };
+
+            websiteScanProviderMock.setup((wsp) => wsp.readWebsiteScan(websiteScanId, false)).returns(async () => cosmosResponse);
+
+            await testSubject.handleRequest();
+
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.internalError));
+        });
+
+        it('returns website scan if it exists', async () => {
+            const pageScansIterableMock = mockCosmosQueryResults<StorageDocuments.PageScan>([]);
+            const cosmosResponse = { statusCode: 200, item: websiteScanDocument };
+
+            websiteScanProviderMock.setup((wsp) => wsp.readWebsiteScan(websiteScanId, false)).returns(async () => cosmosResponse);
+            pageScanProviderMock
+                .setup((psp) => psp.getAllPageScansForWebsiteScan(websiteScanId))
+                .returns(() => pageScansIterableMock.object);
+            convertWebsiteScanDocumentMock
+                .setup((c) => c(websiteScanDocument, pageScansIterableMock.object, It.isAny()))
+                .returns(async () => websiteScanResponse);
+
+            await testSubject.handleRequest();
+
+            expect(context.res.statusCode).toBe(200);
+            expect(context.res.body).toEqual(websiteScanResponse);
+        });
     });
 
-    it('returns website scan with specific id', async () => {
-        const pageScansIterableMock = mockCosmosQueryResults<StorageDocuments.PageScan>([]);
-        const cosmosResponse = { statusCode: 200, item: websiteScanDocument };
+    describe('with scanTarget=latest', () => {
+        beforeEach(() => {
+            context.bindingData.scanTarget = latestScanTarget;
+        });
 
-        websiteScanProviderMock.setup((wsp) => wsp.readWebsiteScan(websiteScanId)).returns(async () => cosmosResponse);
-        pageScanProviderMock.setup((psp) => psp.getAllPageScansForWebsiteScan(websiteScanId)).returns(() => pageScansIterableMock.object);
-        convertWebsiteScanDocumentMock
-            .setup((c) => c(websiteScanDocument, pageScansIterableMock.object, It.isAny()))
-            .returns(async () => websiteScanResponse);
+        it('returns resourceNotFound if no scan is found', async () => {
+            websiteScanProviderMock
+                .setup((wsp) => wsp.getLatestScanForWebsite(websiteId, scanType))
+                .returns(async () => null)
+                .verifiable();
 
-        await testSubject.handleRequest();
+            await testSubject.handleRequest();
 
-        expect(context.res.statusCode).toBe(200);
-        expect(context.res.body).toEqual(websiteScanResponse);
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+        });
+
+        it('returns latest scan of specified type', async () => {
+            const pageScansIterableMock = mockCosmosQueryResults<StorageDocuments.PageScan>([]);
+
+            websiteScanProviderMock
+                .setup((wsp) => wsp.getLatestScanForWebsite(websiteId, scanType))
+                .returns(async () => websiteScanDocument);
+            pageScanProviderMock
+                .setup((psp) => psp.getAllPageScansForWebsiteScan(websiteScanId))
+                .returns(() => pageScansIterableMock.object);
+            convertWebsiteScanDocumentMock
+                .setup((c) => c(websiteScanDocument, pageScansIterableMock.object, It.isAny()))
+                .returns(async () => websiteScanResponse);
+
+            await testSubject.handleRequest();
+
+            expect(context.res.statusCode).toBe(200);
+            expect(context.res.body).toEqual(websiteScanResponse);
+        });
     });
 });
