@@ -18,7 +18,7 @@ export const createPageScanApiObject = (
         priority: pageScanDocument.priority,
         scanStatus: pageScanDocument.scanStatus,
         completedTimestamp: pageScanDocument.completedTimestamp,
-        resultsBlobId: pageScanDocument.resultsBlobId,
+        results: pageScanDocument.results,
         reports: pageScanDocument.reports,
         scanError: pageScanDocument.scanError,
     };

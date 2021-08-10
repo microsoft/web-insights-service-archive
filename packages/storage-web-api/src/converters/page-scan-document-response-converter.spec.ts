@@ -28,6 +28,9 @@ describe(createPageScanApiObject, () => {
         websiteScanId: 'website scan id',
         priority: 0,
         retryCount: 1,
+        completedTimestamp: 1234,
+        results: [{ blobId: 'blob id', resultType: 'test result type' }],
+        reports: [{ reportId: 'report id', format: 'html', href: 'href' }],
         itemType: StorageDocuments.itemTypes.pageScan,
         partitionKey: 'partition key',
     };
@@ -44,6 +47,9 @@ describe(createPageScanApiObject, () => {
             id: pageScanDoc.id,
             page: pageObject,
             scanStatus: pageScanDoc.scanStatus,
+            completedTimestamp: pageScanDoc.completedTimestamp,
+            results: pageScanDoc.results,
+            reports: pageScanDoc.reports,
             priority: 0,
         };
 
