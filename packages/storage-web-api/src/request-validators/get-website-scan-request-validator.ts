@@ -9,7 +9,7 @@ import { ApiRequestValidator, HttpResponse, WebApiErrorCodes } from 'service-lib
 import _ from 'lodash';
 import { GuidGenerator } from 'common';
 
-export const latestScanTarget = 'latest';
+export const latestScanTag = 'latest';
 
 @injectable()
 export class GetWebsiteScanRequestValidator extends ApiRequestValidator {
@@ -28,10 +28,10 @@ export class GetWebsiteScanRequestValidator extends ApiRequestValidator {
         }
 
         const websiteId = <string>context.bindingData.websiteId;
-        const scanTarget = <string>context.bindingData.scanTarget;
+        const scanIdOrLatest = <string>context.bindingData.scanIdOrLatest;
         const scanType = <StorageDocuments.ScanType>context.bindingData.scanType;
 
-        if (this.isInvalidWebsiteId(websiteId) || this.isInvalidScanTarget(scanTarget)) {
+        if (this.isInvalidWebsiteId(websiteId) || this.isInvalidScanTarget(scanIdOrLatest)) {
             context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
 
             return false;
@@ -50,7 +50,7 @@ export class GetWebsiteScanRequestValidator extends ApiRequestValidator {
         return _.isEmpty(websiteId) || !this.guidGenerator.isValidV6Guid(websiteId);
     }
 
-    private isInvalidScanTarget(scanTarget: string): boolean {
-        return _.isEmpty(scanTarget) || (!this.guidGenerator.isValidV6Guid(scanTarget) && scanTarget !== latestScanTarget);
+    private isInvalidScanTarget(scanIdOrLatest: string): boolean {
+        return _.isEmpty(scanIdOrLatest) || (!this.guidGenerator.isValidV6Guid(scanIdOrLatest) && scanIdOrLatest !== latestScanTag);
     }
 }

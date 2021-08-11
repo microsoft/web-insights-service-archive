@@ -7,7 +7,7 @@ import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, PageProvider, PageScanProvider, WebApiErrorCodes, WebsiteScanProvider } from 'service-library';
 import { client } from 'azure-services';
-import { GetWebsiteScanRequestValidator, latestScanTarget } from '../request-validators/get-website-scan-request-validator';
+import { GetWebsiteScanRequestValidator, latestScanTag } from '../request-validators/get-website-scan-request-validator';
 import { createWebsiteScanApiResponse, WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 
 @injectable()
@@ -30,23 +30,21 @@ export class GetWebsiteScanController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         const websiteId = this.context.bindingData.websiteId;
-        const scanTarget = this.context.bindingData.scanTarget;
+        const scanIdOrLatest = this.context.bindingData.scanIdOrLatest;
         const scanType = this.context.bindingData.scanType as StorageDocuments.ScanType;
 
-        this.logger.setCommonProperties({ source: 'getWebsiteScanRESTApi', websiteId, scanType, scanTarget });
+        this.logger.setCommonProperties({ source: 'getWebsiteScanRESTApi', websiteId, scanType });
 
         let websiteScanDocument: StorageDocuments.WebsiteScan | null;
-        if (scanTarget === latestScanTarget) {
+        if (scanIdOrLatest === latestScanTag) {
             websiteScanDocument = await this.getLatestWebsiteScan(websiteId, scanType);
         } else {
-            websiteScanDocument = await this.getScanWithId(scanTarget);
+            websiteScanDocument = await this.getScanWithId(scanIdOrLatest);
         }
 
         if (websiteScanDocument === null) {
             return;
         }
-
-        this.logger.setCommonProperties({ websiteScanId: websiteScanDocument.id });
 
         const pageScanIterable = this.pageScanProvider.getAllPageScansForWebsiteScan(websiteScanDocument.id);
 
@@ -64,16 +62,18 @@ export class GetWebsiteScanController extends ApiController {
     }
 
     private async getScanWithId(scanId: string): Promise<StorageDocuments.WebsiteScan | null> {
+        this.logger.setCommonProperties({ websiteScanId: scanId });
+        this.logger.logInfo('Retrieving website scan from storage');
+
         const websiteDocumentResponse = await this.websiteScanProvider.readWebsiteScan(scanId, false);
         if (!client.isSuccessStatusCode(websiteDocumentResponse)) {
             if (websiteDocumentResponse.statusCode === 404) {
                 this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-                this.logger.logError('Website scan document not found', { websiteScanId: scanId });
+                this.logger.logError('Website scan document not found');
             } else {
                 this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
                 this.logger.logError('Error reading websiteScan document', {
                     statusCode: `${websiteDocumentResponse.statusCode}`,
-                    websiteScanId: scanId,
                 });
             }
 
@@ -87,6 +87,8 @@ export class GetWebsiteScanController extends ApiController {
         websiteId: string,
         scanType: StorageDocuments.ScanType,
     ): Promise<StorageDocuments.WebsiteScan | null> {
+        this.logger.logInfo('Querying storage for latest website scan');
+
         const websiteDocument = await this.websiteScanProvider.getLatestScanForWebsite(websiteId, scanType);
         if (!websiteDocument) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
@@ -94,6 +96,8 @@ export class GetWebsiteScanController extends ApiController {
 
             return null;
         }
+
+        this.logger.setCommonProperties({ websiteScanId: websiteDocument.id });
 
         return websiteDocument;
     }

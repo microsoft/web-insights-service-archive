@@ -10,7 +10,7 @@ import { HttpResponse, WebApiErrorCodes } from 'service-library';
 import { GuidGenerator } from 'common';
 import { IMock, Mock } from 'typemoq';
 import { ScanType } from 'storage-documents';
-import { GetWebsiteScanRequestValidator, latestScanTarget } from './get-website-scan-request-validator';
+import { GetWebsiteScanRequestValidator, latestScanTag } from './get-website-scan-request-validator';
 
 describe(GetWebsiteScanRequestValidator, () => {
     const apiVersion = '1.0';
@@ -43,7 +43,7 @@ describe(GetWebsiteScanRequestValidator, () => {
             bindingData: {
                 websiteId: websiteId,
                 scanType: scanType,
-                scanTarget: scanId,
+                scanIdOrLatest: scanId,
             },
         });
         websiteIdIsValid = true;
@@ -84,7 +84,7 @@ describe(GetWebsiteScanRequestValidator, () => {
     });
 
     it('rejects empty scan id', async () => {
-        context.bindingData.scanTarget = '';
+        context.bindingData.scanIdOrLatest = '';
 
         const isValidRequest = await testSubject.validateRequest(context);
 
@@ -117,7 +117,7 @@ describe(GetWebsiteScanRequestValidator, () => {
     });
 
     it('accepts request with scan target="latest" and valid scan type', async () => {
-        context.bindingData.scanTarget = latestScanTarget;
+        context.bindingData.scanIdOrLatest = latestScanTag;
 
         const isValidRequest = await testSubject.validateRequest(context);
 

@@ -5,7 +5,7 @@
             "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "route": "websites/{websiteId}/scans/{scanType}/{scanTarget}",
+            "route": "websites/{websiteId}/scans/{scanType}/{scanIdOrLatest}",
             "methods": ["get"]
         },
         {

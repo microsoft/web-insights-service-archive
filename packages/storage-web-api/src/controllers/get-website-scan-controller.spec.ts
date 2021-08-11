@@ -10,7 +10,7 @@ import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { HttpResponse, PageProvider, PageScanProvider, WebApiErrorCodes, WebsiteScanProvider } from 'service-library';
 import { Context } from '@azure/functions';
-import { GetWebsiteScanRequestValidator, latestScanTarget } from '../request-validators/get-website-scan-request-validator';
+import { GetWebsiteScanRequestValidator, latestScanTag } from '../request-validators/get-website-scan-request-validator';
 import { WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 import { mockCosmosQueryResults } from '../test-utilities/cosmos-query-results-iterable-mock';
 import { GetWebsiteScanController } from './get-website-scan-controller';
@@ -87,7 +87,7 @@ describe(GetWebsiteScanController, () => {
 
     describe('With specific scan id', () => {
         beforeEach(() => {
-            context.bindingData.scanTarget = websiteScanId;
+            context.bindingData.scanIdOrLatest = websiteScanId;
         });
 
         it('returns resourceNotFound if cosmos returns 404', async () => {
@@ -129,9 +129,9 @@ describe(GetWebsiteScanController, () => {
         });
     });
 
-    describe('with scanTarget=latest', () => {
+    describe('with scanIdOrLatest=latest', () => {
         beforeEach(() => {
-            context.bindingData.scanTarget = latestScanTarget;
+            context.bindingData.scanIdOrLatest = latestScanTag;
         });
 
         it('returns resourceNotFound if no scan is found', async () => {
