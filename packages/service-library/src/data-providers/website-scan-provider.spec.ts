@@ -130,31 +130,19 @@ describe(WebsiteScanProvider, () => {
     });
 
     describe('readWebsiteScan', () => {
-        it('reads websiteScan with id', async () => {
+        it.each([true, false])('reads websiteScan when throwIfNotSuccess=%s', async (throwIfNotSuccess) => {
             const response = {
                 statusCode: 200,
                 item: websiteScanDoc,
             } as CosmosOperationResponse<WebsiteScan>;
             cosmosContainerClientMock
-                .setup((c) => c.readDocument(websiteScanId, partitionKey))
+                .setup((c) => c.readDocument<WebsiteScan>(websiteScanId, partitionKey, throwIfNotSuccess))
                 .returns(async () => response)
                 .verifiable();
 
-            const actualWebsiteScan = await testSubject.readWebsiteScan(websiteScanId);
+            const actualresponse = await testSubject.readWebsiteScan(websiteScanId, throwIfNotSuccess);
 
-            expect(actualWebsiteScan).toBe(websiteScanDoc);
-        });
-
-        it('throws if unsuccessful status code', async () => {
-            const response = {
-                statusCode: 404,
-            } as CosmosOperationResponse<WebsiteScan>;
-            cosmosContainerClientMock
-                .setup((c) => c.readDocument(websiteScanId, partitionKey))
-                .returns(async () => response)
-                .verifiable();
-
-            expect(testSubject.readWebsiteScan(websiteScanId)).rejects.toThrow();
+            expect(actualresponse).toBe(response);
         });
     });
 
@@ -187,6 +175,74 @@ describe(WebsiteScanProvider, () => {
             const actualIterable = testSubject.getScansForWebsite(websiteId);
 
             expect(actualIterable).toBe(iterableStub);
+        });
+    });
+
+    describe('getLatestScanForWebsite', () => {
+        const scanType = 'a11y';
+        const expectedQuery = {
+            query:
+                'SELECT TOP 1 * FROM c ' +
+                'WHERE c.partitionKey = @partitionKey and c.websiteId = @websiteId and c.itemType = @itemType and c.scanType = @scanType ' +
+                'ORDER BY c._ts DESC',
+            parameters: [
+                {
+                    name: '@websiteId',
+                    value: websiteId,
+                },
+                {
+                    name: '@partitionKey',
+                    value: partitionKey,
+                },
+                {
+                    name: '@itemType',
+                    value: itemTypes.websiteScan,
+                },
+                {
+                    name: '@scanType',
+                    value: scanType,
+                },
+            ],
+        };
+
+        beforeEach(() => {
+            partitionKeyFactoryMock
+                .setup((p) => p.createPartitionKeyForDocument(itemTypes.websiteScan, websiteId))
+                .returns(() => partitionKey);
+        });
+
+        it('returns first result from cosmos query', async () => {
+            const queryResponse: CosmosOperationResponse<WebsiteScan[]> = {
+                statusCode: 200,
+                item: [websiteScanDoc],
+            };
+            cosmosContainerClientMock.setup((c) => c.queryDocuments<WebsiteScan>(expectedQuery)).returns(async () => queryResponse);
+
+            const result = await testSubject.getLatestScanForWebsite(websiteId, scanType);
+
+            expect(result).toEqual(websiteScanDoc);
+        });
+
+        it('returns null if query yields no results', async () => {
+            const queryResponse: CosmosOperationResponse<WebsiteScan[]> = {
+                statusCode: 200,
+                item: [],
+            };
+            cosmosContainerClientMock.setup((c) => c.queryDocuments<WebsiteScan>(expectedQuery)).returns(async () => queryResponse);
+
+            const result = await testSubject.getLatestScanForWebsite(websiteId, scanType);
+
+            expect(result).toBeNull();
+        });
+
+        it('Throws if query fails', () => {
+            const queryResponse: CosmosOperationResponse<WebsiteScan[]> = {
+                statusCode: 500,
+                item: [],
+            };
+            cosmosContainerClientMock.setup((c) => c.queryDocuments<WebsiteScan>(expectedQuery)).returns(async () => queryResponse);
+
+            expect(testSubject.getLatestScanForWebsite(websiteId, scanType)).rejects.toThrow();
         });
     });
 });

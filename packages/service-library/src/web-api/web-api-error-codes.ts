@@ -16,7 +16,8 @@ export declare type WebApiErrorCodeName =
     | 'UnsupportedApiVersion'
     | 'InvalidFrequencyExpression'
     | 'OutOfRangePriority'
-    | 'MalformedBody';
+    | 'MalformedBody'
+    | 'InvalidScanType';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -138,6 +139,15 @@ export class WebApiErrorCodes {
             code: 'InvalidFrequencyExpression',
             codeId: 4012,
             message: 'The frequency is not a valid cron expression.',
+        },
+    };
+
+    public static invalidScanType: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'InvalidScanType',
+            codeId: 4013,
+            message: 'The scan type must be either a11y, privacy, or security.',
         },
     };
 

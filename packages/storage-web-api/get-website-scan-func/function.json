@@ -5,8 +5,8 @@
             "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "route": "websites/scans",
-            "methods": ["post"]
+            "route": "websites/{websiteId}/scans/{scanType}/{scanIdOrLatest}",
+            "methods": ["get"]
         },
         {
             "type": "http",
@@ -14,5 +14,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../post-website-scan-func/index.js"
+    "scriptFile": "../get-website-scan-func/index.js"
 }

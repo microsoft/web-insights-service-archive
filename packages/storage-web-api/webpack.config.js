@@ -18,6 +18,10 @@ module.exports = (env) => {
         externals: ['@azure/functions'],
         entry: {
             ['get-website-func']: path.resolve('./get-website-func/index.ts'),
+            ['post-website-func']: path.resolve('./post-website-func/index.ts'),
+            ['post-page-func']: path.resolve('./post-page-func/index.ts'),
+            ['get-website-scan-func']: path.resolve('./get-website-scan-func/index.ts'),
+            ['post-website-scan-func']: path.resolve('./post-website-scan-func/index.ts'),
         },
         mode: 'development',
         module: {
