@@ -33,7 +33,7 @@ export class GetWebsiteScanController extends ApiController {
         const scanTarget = this.context.bindingData.scanTarget;
         const scanType = this.context.bindingData.scanType as StorageDocuments.ScanType;
 
-        this.logger.setCommonProperties({ source: 'getWebsiteScanRESTApi', websiteId });
+        this.logger.setCommonProperties({ source: 'getWebsiteScanRESTApi', websiteId, scanType, scanTarget });
 
         let websiteScanDocument: StorageDocuments.WebsiteScan | null;
         if (scanTarget === latestScanTarget) {
