@@ -52,7 +52,7 @@
         "prettier": "2.3.1",
         "shellcheck": "^1.0.0",
         "simple-git": "^2.42.0",
-        "syncpack": "^5.8.14",
+        "syncpack": "^5.8.15",
         "tslint": "^6.1.3",
         "typescript": "^4.3.4",
         "lerna-audit": "^1.3.2"
