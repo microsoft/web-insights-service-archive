@@ -33,6 +33,22 @@ waitForAppGatewayUpdate() {
     fi
 }
 
+grantAccessToCluster() {
+    echo "Granting access to cluster"
+    principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
+    # Grant access to container registry
+    attachContainerRegistry
+    # Grant access to key vault
+    . "${0%/*}/enable-msi-for-key-vault.sh"
+}
+
+grantAccessToAppGateway() {
+    echo "Granting access to application gateway"
+    az network application-gateway identity assign --gateway-name "${appGateway}" --resource-group "${nodeResourceGroup}" --identity "${appGatewayIdentity}" 1>/dev/null
+    identityId=$(az identity show --resource-group "${nodeResourceGroup}" --name "${appGatewayIdentity}" -o tsv --query "principalId")
+    az keyvault set-policy --name "${keyVault}" --object-id "${identityId}" --secret-permissions get 1>/dev/null
+}
+
 # Read script arguments
 while getopts ":r:c:l:d:" option; do
     case ${option} in
@@ -72,13 +88,7 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
 echo ""
 
 waitForAppGatewayUpdate
-
-principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
-
-# Grant access to container registry
-attachContainerRegistry
-
-# Grant access to key vault
-. "${0%/*}/enable-msi-for-key-vault.sh"
+grantAccessToCluster
+grantAccessToAppGateway
 
 echo "Azure Kubernetes Service successfully created."
