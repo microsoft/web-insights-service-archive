@@ -44,7 +44,7 @@ ingress:
           pathType: Exact
   tls:
     - hosts:
-        - wisapi2er42dkuox5sc.westus2.cloudapp.azure.com
+        - ''
       secretName: front-end-public-ssl
 
 env:
