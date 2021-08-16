@@ -37,11 +37,15 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/backend-path-prefix: /
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: front-end-public-ssl
   hosts:
     - paths:
         - path: /storage/*
           pathType: Exact
-  tls: []
+  tls:
+    - hosts:
+        - ''
+      secretName: front-end-public-ssl
 
 env:
   - name: APPINSIGHTS_INSTRUMENTATIONKEY

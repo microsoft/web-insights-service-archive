@@ -38,7 +38,7 @@ fi
 
 # Remove app insights name prefix
 export resourceNameSuffix=${resourceName:14}
-
+export frontEndPublicCertificate="front-end-public-ssl"
 export kubernetesService="wiskube${resourceNameSuffix}"
 export containerRegistry="wisregistry${resourceNameSuffix}"
 export keyVault="wiskeyvault${resourceNameSuffix}"
@@ -47,3 +47,6 @@ export cosmosDbAccount="wisscosmosdb${resourceNameSuffix}"
 export appInsights="wisappinsights${resourceNameSuffix}"
 export monitorWorkspace="wismonitorworkspace${resourceNameSuffix}"
 export appGateway="wisappgateway${resourceNameSuffix}"
+export appGatewayPublicIP="wisappgateway${resourceNameSuffix}-appgwpip"
+export appGatewayPublicDNSPrefix="wisapi${resourceNameSuffix}"
+export appGatewayIdentity="ingressapplicationgateway-${kubernetesService}"

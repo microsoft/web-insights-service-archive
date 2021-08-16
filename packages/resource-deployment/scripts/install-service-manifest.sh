@@ -44,6 +44,11 @@ waitForAppGatewayUpdate() {
     fi
 }
 
+getPublicDNS() {
+    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
+    fqdn=$(az network public-ip show --resource-group "${nodeResourceGroup}" --name "${appGatewayPublicIP}" -o tsv --query "dnsSettings.fqdn")
+}
+
 # Read script arguments
 while getopts ":r:s:c:e:v:f:d" option; do
     case ${option} in
@@ -63,10 +68,6 @@ if [[ -z ${resourceGroupName} ]] || [[ -z ${serviceName} ]]; then
     exitWithUsageInfo
 fi
 
-if [[ -z ${kubernetesService} ]]; then
-    . "${0%/*}/get-resource-names.sh"
-fi
-
 if [[ -z ${environment} ]]; then
     environment="dev"
 fi
@@ -79,6 +80,8 @@ if [[ -n ${debug} ]]; then
     flags="${flags} --debug --dry-run"
 fi
 
+. "${0%/*}/get-resource-names.sh"
+
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
@@ -90,6 +93,7 @@ kubectl config use-context "${kubernetesService}" 1>/dev/null
 
 getAppInsightKey
 getValuesManifest
+getPublicDNS
 releaseName="${serviceName}-service"
 repository="${containerRegistry}.azurecr.io"
 keyVaultUrl="https://${keyVault}.vault.azure.net/"
@@ -106,6 +110,7 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     --set podAnnotations.releaseId="${releaseVersion}" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
+    --set ingress.tls[0].hosts[0]=${fqdn} \
     ${flags}
 
 waitForAppGatewayUpdate

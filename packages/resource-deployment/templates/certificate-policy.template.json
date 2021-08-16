@@ -1,0 +1,39 @@
+{
+    "issuerParameters": {
+        "certificateTransparency": null,
+        "certificateType": null,
+        "name": "Self"
+    },
+    "keyProperties": {
+        "curve": null,
+        "exportable": true,
+        "keySize": 2048,
+        "keyType": "RSA",
+        "reuseKey": false
+    },
+    "lifetimeActions": [
+        {
+            "action": {
+                "actionType": "AutoRenew"
+            },
+            "trigger": {
+                "daysBeforeExpiry": null,
+                "lifetimePercentage": 24
+            }
+        }
+    ],
+    "secretProperties": {
+        "contentType": "application/x-pkcs12"
+    },
+    "x509CertificateProperties": {
+        "ekus": ["1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.2"],
+        "keyUsage": ["digitalSignature", "keyEncipherment"],
+        "subject": "<SUBJECT>",
+        "subjectAlternativeNames": {
+            "dnsNames": ["<DNSNAME>"],
+            "emails": null,
+            "upns": null
+        },
+        "validityInMonths": 12
+    }
+}
