@@ -39,8 +39,7 @@ createCertificatePolicyFile() {
 }
 
 createAppGatewaySslCertificate() {
-    # Remove certificate version
-    unversionedSecretId=$(az keyvault certificate show --name "${frontEndPublicCertificate}" --vault-name "${keyVault}" -o tsv --query "sid" | cut -d'/' -f-5)
+    unversionedSecretId="https://${keyVault}.vault.azure.net/secrets/${frontEndPublicCertificate}"
     az network application-gateway ssl-cert create --name "${frontEndPublicCertificate}" --gateway-name "${appGateway}" --resource-group "${nodeResourceGroup}" --key-vault-secret-id "${unversionedSecretId}" 1>/dev/null
 }
 
