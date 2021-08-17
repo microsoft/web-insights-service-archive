@@ -154,7 +154,6 @@ describe(registerAzureServicesToContainer, () => {
     describe('CosmosClientProvider', () => {
         let secretProviderMock: IMock<SecretProvider>;
         const cosmosDbUrl = 'db url';
-        const cosmosDbArmUrl = 'db arm url';
         const cosmosDbKey = 'db key';
         const expectedOptions = { endpoint: cosmosDbUrl, key: cosmosDbKey };
         let cosmosKeyProviderMock: IMock<CosmosKeyProvider>;
@@ -167,12 +166,6 @@ describe(registerAzureServicesToContainer, () => {
                 .setup(async (s) => s.getSecret(secretNames.cosmosDbUrl))
                 .returns(async () => Promise.resolve(cosmosDbUrl))
                 .verifiable();
-            secretProviderMock
-                .setup(async (s) => s.getSecret(secretNames.cosmosDbArmUrl))
-                .returns(async () => Promise.resolve(cosmosDbArmUrl))
-                .verifiable();
-
-            cosmosKeyProviderMock.setup((ckp) => ckp.getCosmosKey(cosmosDbArmUrl)).returns(async () => cosmosDbKey);
         });
 
         afterEach(() => {
@@ -205,7 +198,6 @@ describe(registerAzureServicesToContainer, () => {
         it('use env variables if available', async () => {
             secretProviderMock.reset();
             secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
-            secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbArmUrl)).verifiable(Times.never());
             process.env.COSMOS_DB_URL = cosmosDbUrl;
             process.env.COSMOS_DB_KEY = cosmosDbKey;
 
