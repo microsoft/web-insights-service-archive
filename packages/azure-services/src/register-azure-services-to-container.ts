@@ -8,7 +8,6 @@ import { QueueServiceClient } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { DefaultAzureCredential } from '@azure/identity';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
@@ -85,9 +84,10 @@ async function getStorageAccountName(context: interfaces.Context): Promise<strin
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
-        const defaultAzureCredential = new DefaultAzureCredential();
+        const credentialsProvider = container.get(CredentialsProvider);
+        const azureCredential = credentialsProvider.getDefaultTokenCredential();
 
-        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, defaultAzureCredential);
+        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, azureCredential);
     });
 }
 
@@ -104,7 +104,8 @@ function setupAuthenticationMethod(container: interfaces.Container): void {
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
-        const credentials = new DefaultAzureCredential();
+        const credentialsProvider = container.get(CredentialsProvider);
+        const credentials = credentialsProvider.getDefaultTokenCredential();
 
         return new SecretClient(process.env.KEY_VAULT_URL, credentials);
     });
@@ -113,7 +114,8 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 function setupSingletonQueueServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<QueueServiceClient>(iocTypeNames.QueueServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
-        const credential = new DefaultAzureCredential();
+        const credentialsProvider = container.get(CredentialsProvider);
+        const credential = credentialsProvider.getDefaultTokenCredential();
 
         return new QueueServiceClient(`https://${accountName}.queue.core.windows.net`, credential);
     });
@@ -130,9 +132,10 @@ function setupSingletonCosmosClientProvider(
         } else {
             const secretProvider = context.container.get(SecretProvider);
             cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
-            const defaultAzureCredential = new DefaultAzureCredential();
+            const credentialsProvider = container.get(CredentialsProvider);
+            const credentials = credentialsProvider.getDefaultTokenCredential();
 
-            return cosmosClientFactory({ endpoint: cosmosDbUrl, aadCredentials: defaultAzureCredential });
+            return cosmosClientFactory({ endpoint: cosmosDbUrl, aadCredentials: credentials });
         }
     });
 }
