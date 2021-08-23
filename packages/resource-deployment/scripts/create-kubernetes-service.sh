@@ -49,23 +49,6 @@ grantAccessToAppGateway() {
     az keyvault set-policy --name "${keyVault}" --object-id "${identityId}" --secret-permissions get 1>/dev/null
 }
 
-grantAccessToCosmosDB() {
-    vnet=$(az network vnet list --resource-group ${nodeResourceGroup} --query "[].name" -o tsv)
-    nodeSubnetName="aks-subnet"
-    nodeSubnetId=$(az network vnet subnet list --resource-group ${nodeResourceGroup} --vnet-name ${vnet} --query "[?name=='${nodeSubnetName}'].id" -o tsv)
-    echo "Granting CosmosDB access to subnet ${nodeSubnetName} in vnet ${vnet}"
-
-    az network vnet subnet update \
-        --name ${nodeSubnetName} \
-        --resource-group ${nodeResourceGroup} \
-        --vnet-name ${vnet} \
-        --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
-    az cosmosdb network-rule add --name ${cosmosDbAccount} \
-        --resource-group ${resourceGroupName} \
-        --virtual-network ${vnet} \
-        --subnet "${nodeSubnetId}" 1>/dev/null
-}
-
 # Read script arguments
 while getopts ":r:c:l:d:" option; do
     case ${option} in
@@ -107,6 +90,5 @@ echo ""
 waitForAppGatewayUpdate
 grantAccessToCluster
 grantAccessToAppGateway
-grantAccessToCosmosDB
 
 echo "Azure Kubernetes Service successfully created."

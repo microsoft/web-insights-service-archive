@@ -21,14 +21,13 @@
         {
             "name": "[parameters('name')]",
             "type": "Microsoft.DocumentDB/databaseAccounts",
-            "apiVersion": "2021-04-15",
+            "apiVersion": "2021-01-15",
             "location": "[parameters('location')]",
             "tags": {
                 "defaultExperience": "Core (SQL)"
             },
             "kind": "GlobalDocumentDB",
             "properties": {
-                "isVirtualNetworkFilterEnabled": true,
                 "consistencyPolicy": {
                     "defaultConsistencyLevel": "Session",
                     "maxIntervalInSeconds": 5,

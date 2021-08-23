@@ -64,6 +64,10 @@ getCosmosDbUrl() {
     fi
 }
 
+getCosmosDbArmUrl() {
+    cosmosDbArmUrl="https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/${cosmosDbAccount}"
+}
+
 getStorageAccessKey() {
     storageAccountKey=$(az storage account keys list --account-name "${storageAccount}" --query "[0].value" -o tsv)
 
@@ -108,6 +112,9 @@ pushSecretsToKeyVault() (
 
     getCosmosDbUrl
     pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"
+
+    getCosmosDbArmUrl
+    pushSecretToKeyVault "cosmosDbArmUrl" "${cosmosDbArmUrl}"
 
     getStorageAccessKey
     pushSecretToKeyVault "storageAccountName" "${storageAccount}"
