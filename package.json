@@ -30,7 +30,7 @@
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^4.29.2",
         "@typescript-eslint/eslint-plugin-tslint": "^4.29.2",
-        "@typescript-eslint/parser": "^4.29.1",
+        "@typescript-eslint/parser": "^4.29.3",
         "codecov": "^3.8.1",
         "commander": "^7.2.0",
         "eslint": "^7.32.0",
@@ -64,10 +64,10 @@
     },
     "resolutions": {
         "axe-core": "4.2.1",
+        "normalize-url": "6.1.0",
         "apify-shared": ">=0.5.0",
         "axios": ">=0.21.1",
         "marked": ">=2.0.0",
-        "normalize-url": ">=6.0.1",
         "glob-parent": ">=5.1.2"
     }
 }
