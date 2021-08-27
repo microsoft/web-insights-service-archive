@@ -66,6 +66,29 @@ grantAccessToCosmosDB() {
         --subnet "${nodeSubnetId}" 1>/dev/null
 }
 
+registerEncryptionAtHost() {
+    local end=$((SECONDS + 1800))
+
+    echo "Registering the EncryptionAtHost feature flags on subscription"
+    az feature register --namespace "Microsoft.Compute" --name "EncryptionAtHost" 1>/dev/null
+
+    printf " - Registering .."
+    while [ "${SECONDS}" -le "${end}" ]; do
+        state=$(az feature list -o table --query "[?contains(name, 'Microsoft.Compute/EncryptionAtHost')].{State:properties.state}" -o tsv)
+        if [[ ${state} == "Registered" ]]; then
+            break
+        else
+            printf "."
+        fi
+
+        sleep 20
+    done
+    echo " Registered"
+
+    # Refresh the registration of the Microsoft.Compute resource providers
+    az provider register --namespace Microsoft.Compute 1>/dev/null
+}
+
 # Read script arguments
 while getopts ":r:c:l:d:" option; do
     case ${option} in
@@ -89,11 +112,15 @@ fi
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
+# Enable the EncryptionAtHost feature flags on subscription
+registerEncryptionAtHost
+
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group ${resourceGroupName}"
 az aks create --resource-group "${resourceGroupName}" --name "${kubernetesService}" --location "${location}" \
     --no-ssh-key \
     --enable-managed-identity \
+    --enable-encryption-at-host \
     --network-plugin azure \
     --appgw-name "${appGateway}" \
     --appgw-subnet-cidr "10.2.0.0/16" \
