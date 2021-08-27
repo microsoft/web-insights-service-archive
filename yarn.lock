@@ -2532,7 +2532,7 @@
     "@opentelemetry/semantic-conventions" "0.21.0"
     lodash.merge "^4.6.2"
 
-"@sindresorhus/fnv1a@^2.0.1":
+"@sindresorhus/fnv1a@2.0.1", "@sindresorhus/fnv1a@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@sindresorhus/fnv1a/-/fnv1a-2.0.1.tgz#2aefdfa7eb5b7f29a7936978218e986c70c603fc"
   integrity sha512-suq9tRQ6bkpMukTG5K5z0sPWB7t0zExMzZCdmYm6xTSSIm/yCKNm7VCL36wVeyTsFr597/UhU1OAYdHGMDiHrw==
