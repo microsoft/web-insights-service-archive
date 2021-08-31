@@ -50,19 +50,24 @@ grantAccessToAppGateway() {
 }
 
 grantAccessToCosmosDB() {
-    vnet=$(az network vnet list --resource-group ${nodeResourceGroup} --query "[].name" -o tsv)
-    nodeSubnetName="aks-subnet"
-    nodeSubnetId=$(az network vnet subnet list --resource-group ${nodeResourceGroup} --vnet-name ${vnet} --query "[?name=='${nodeSubnetName}'].id" -o tsv)
-    echo "Granting CosmosDB access to subnet ${nodeSubnetName} in vnet ${vnet}"
+    local nodeSubnetName="aks-subnet"
 
-    az network vnet subnet update \
-        --name ${nodeSubnetName} \
-        --resource-group ${nodeResourceGroup} \
-        --vnet-name ${vnet} \
-        --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
-    az cosmosdb network-rule add --name ${cosmosDbAccount} \
-        --resource-group ${resourceGroupName} \
-        --virtual-network ${vnet} \
+    echo "Granting CosmosDB access to subnet ${nodeSubnetName} in vnet ${vnet}"
+    vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
+    service=$(az network vnet subnet show --resource-group "${nodeResourceGroup}" --name "${nodeSubnetName}" --vnet-name "${vnet}" --query "serviceEndpoints[?service=='Microsoft.AzureCosmosDB'].service" -o tsv)
+    nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${nodeSubnetName}'].id" -o tsv)
+
+    if [[ -z ${service} ]]; then
+        az network vnet subnet update \
+            --resource-group "${nodeResourceGroup}" \
+            --name "${nodeSubnetName}" \
+            --vnet-name "${vnet}" \
+            --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
+    fi
+
+    az cosmosdb network-rule add --name "${cosmosDbAccount}" \
+        --resource-group "${resourceGroupName}" \
+        --virtual-network "${vnet}" \
         --subnet "${nodeSubnetId}" 1>/dev/null
 }
 
