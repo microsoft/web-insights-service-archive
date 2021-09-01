@@ -13,7 +13,7 @@
         "build": "npx lerna run build --stream",
         "test": "npx jest",
         "publish-code-coverage": "npx codecov",
-        "lint:check": "npx lerna run lint --stream && npx shellcheck -x **/*.sh",
+        "lint:check": "npx lerna run lint --stream && npx shellcheck --source-path=./packages/resource-deployment/scripts/ ./packages/resource-deployment/scripts/*.sh",
         "lint:fix": "npx lerna run lint:fix --stream",
         "precheckin": "npm-run-all --serial format:check lint:check copyright:check cbuild test",
         "format:fix": "npx prettier --write \"**/*\"",

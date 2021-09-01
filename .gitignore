@@ -8,6 +8,7 @@ test-results/
 **/.secrets
 **/.env
 **/*.generated.template.json
+**/*.generated.json
 **/*.DS_Store
 **/bin
 **/obj

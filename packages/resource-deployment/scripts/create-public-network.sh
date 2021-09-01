@@ -32,7 +32,7 @@ setPublicDNSPrefix() {
 }
 
 createCertificatePolicyFile() {
-    certificatePolicyFile="${0%/*}/certificate-policy.${frontEndPublicCertificate}.json"
+    certificatePolicyFile="${0%/*}/certificate-policy.${frontEndPublicCertificate}.generated.json"
     certificatePolicyTemplateFile="${0%/*}/../templates/certificate-policy.template.json"
 
     sed -e "s@<SUBJECT>@CN=${fqdn}@" -e "s@<DNSNAME>@${fqdn}@" "${certificatePolicyTemplateFile}" >"${certificatePolicyFile}"
