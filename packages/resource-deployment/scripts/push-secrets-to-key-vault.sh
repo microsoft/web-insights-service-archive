@@ -48,6 +48,16 @@ revokePermissionsToKeyVault() {
     fi
 }
 
+turnOffKeyVaultFirewall() {
+    echo "Disable key vault firewall"
+    az keyvault update --name "${keyVault}" --resource-group "${resourceGroupName}" --default-action allow 1>/dev/null
+}
+
+turnOnKeyVaultFirewall() {
+    echo "Enable key vault firewall"
+    az keyvault update --name "${keyVault}" --resource-group "${resourceGroupName}" --default-action deny 1>/dev/null
+}
+
 pushSecretToKeyVault() {
     local secretName=$1
     local secretValue=$2
@@ -107,8 +117,10 @@ pushSecretsToKeyVault() (
     echo "Pushing secrets to key vault ${keyVault}"
     getLoggedInUserCredentials
 
-    trap 'revokePermissionsToKeyVault' EXIT
+    trap 'revokePermissionsToKeyVault; turnOnKeyVaultFirewall' EXIT
     grantWritePermissionToKeyVault
+
+    turnOffKeyVaultFirewall
 
     getCosmosDbUrl
     pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"
