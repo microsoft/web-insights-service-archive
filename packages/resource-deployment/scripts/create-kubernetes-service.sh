@@ -21,9 +21,10 @@ attachContainerRegistry() {
 }
 
 waitForAppGatewayUpdate() {
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
+    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[?name=='${kubernetesService}'].name" -o tsv)
     if [[ -n ${nodeResourceGroup} ]]; then
-        if az network application-gateway show --resource-group "${nodeResourceGroup}" --name "${appGateway}" -o tsv --query "name" >/dev/null 2>&1; then
+        currentAppGateway=$(az network application-gateway list --resource-group "${nodeResourceGroup}" --query "[?name=='${appGateway}'].name" -o tsv)
+        if [[ -n ${currentAppGateway} ]]; then
             echo "Waiting for application gateway configuration update"
             az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated
         else
@@ -50,17 +51,16 @@ grantAccessToAppGateway() {
 }
 
 grantAccessToCosmosDB() {
-    local nodeSubnetName="aks-subnet"
+    local subnet="aks-subnet"
 
-    echo "Granting CosmosDB access to subnet ${nodeSubnetName} in vnet ${vnet}"
+    echo "Granting CosmosDB access to subnet ${subnet} in vnet ${vnet}"
     vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
-    service=$(az network vnet subnet show --resource-group "${nodeResourceGroup}" --name "${nodeSubnetName}" --vnet-name "${vnet}" --query "serviceEndpoints[?service=='Microsoft.AzureCosmosDB'].service" -o tsv)
-    nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${nodeSubnetName}'].id" -o tsv)
-
+    nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
+    service=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].serviceEndpoints[].service" -o tsv)
     if [[ -z ${service} ]]; then
         az network vnet subnet update \
             --resource-group "${nodeResourceGroup}" \
-            --name "${nodeSubnetName}" \
+            --name "${subnet}" \
             --vnet-name "${vnet}" \
             --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
     fi
