@@ -37,7 +37,7 @@ getInstallAction() {
 }
 
 waitForAppGatewayUpdate() {
-    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[?name=='${kubernetesService}'].name" -o tsv)
+    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
     if [[ -n ${nodeResourceGroup} ]]; then
         echo "Waiting for application gateway configuration update"
         az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated

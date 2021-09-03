@@ -21,7 +21,7 @@ attachContainerRegistry() {
 }
 
 waitForAppGatewayUpdate() {
-    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[?name=='${kubernetesService}'].name" -o tsv)
+    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
     if [[ -n ${nodeResourceGroup} ]]; then
         currentAppGateway=$(az network application-gateway list --resource-group "${nodeResourceGroup}" --query "[?name=='${appGateway}'].name" -o tsv)
         if [[ -n ${currentAppGateway} ]]; then
