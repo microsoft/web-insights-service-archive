@@ -56,14 +56,12 @@ grantAccessToCosmosDB() {
     echo "Granting CosmosDB access to subnet ${subnet} in vnet ${vnet}"
     vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
     nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
-    service=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].serviceEndpoints[].service" -o tsv)
-    if [[ -z ${service} ]]; then
-        az network vnet subnet update \
-            --resource-group "${nodeResourceGroup}" \
-            --name "${subnet}" \
-            --vnet-name "${vnet}" \
-            --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
-    fi
+
+    az network vnet subnet update \
+        --resource-group "${nodeResourceGroup}" \
+        --name "${subnet}" \
+        --vnet-name "${vnet}" \
+        --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
 
     az cosmosdb network-rule add --name "${cosmosDbAccount}" \
         --resource-group "${resourceGroupName}" \
