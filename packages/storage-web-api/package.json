@@ -50,7 +50,7 @@
         "applicationinsights-native-metrics": "^0.0.6",
         "azure-services": "1.0.0",
         "common": "^1.0.0",
-        "cron-parser": "^3.5.0",
+        "cron-parser": "^4.0.0",
         "inversify": "^5.1.1",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
