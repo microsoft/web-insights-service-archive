@@ -134,9 +134,6 @@ if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
-
 . "${0%/*}/get-resource-names.sh"
 
 pushSecretsToKeyVault

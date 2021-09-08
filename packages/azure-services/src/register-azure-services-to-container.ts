@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
-import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { QueueServiceClient } from '@azure/storage-queue';
 import { IoC } from 'common';
@@ -14,21 +13,15 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { AuthenticationMethod, CredentialType, MSICredentialsProvider } from './credentials/msi-credential-provider';
 import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
-import { CosmosKeyProvider } from './azure-cosmos/cosmos-key-provider';
 
 export function registerAzureServicesToContainer(
     container: Container,
-    credentialType: CredentialType = CredentialType.VM,
     cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient = defaultCosmosClientFactory,
 ): void {
-    setupAuthenticationMethod(container);
-
-    container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
     container.bind(CredentialsProvider).toSelf().inSingletonScope();
 
     setupSingletonAzureKeyVaultClientProvider(container);
@@ -37,12 +30,9 @@ export function registerAzureServicesToContainer(
 
     container.bind(StorageConfig).toSelf().inSingletonScope();
 
-    container.bind(CosmosKeyProvider).toSelf().inSingletonScope();
-
     setupSingletonCosmosClientProvider(container, cosmosClientFactory);
 
     container.bind(CosmosClientWrapper).toSelf();
-    container.bind(MSICredentialsProvider).toSelf().inSingletonScope();
 
     setupSingletonQueueServiceClientProvider(container);
 
@@ -53,8 +43,6 @@ export function registerAzureServicesToContainer(
     container.bind(cosmosContainerClientTypes.scanMetadataRepoContainerClient).toDynamicValue((context) => {
         return createCosmosContainerClient(context.container, 'WebInsights', 'scanMetadata');
     });
-
-    container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);
     container.bind(StorageContainerSASUrlProvider).toSelf().inSingletonScope();
@@ -93,13 +81,6 @@ function setupBlobServiceClientProvider(container: interfaces.Container): void {
 
 function createCosmosContainerClient(container: interfaces.Container, dbName: string, collectionName: string): CosmosContainerClient {
     return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(ContextAwareLogger));
-}
-
-function setupAuthenticationMethod(container: interfaces.Container): void {
-    const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
-    container
-        .bind(iocTypeNames.AuthenticationMethod)
-        .toConstantValue(isDebugEnabled ? AuthenticationMethod.servicePrincipal : AuthenticationMethod.managedIdentity);
 }
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
