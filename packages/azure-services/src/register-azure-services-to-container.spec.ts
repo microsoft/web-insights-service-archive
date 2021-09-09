@@ -11,11 +11,10 @@ import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { QueueServiceClient } from '@azure/storage-queue';
-import { TokenCredential } from '@azure/identity';
+import { DefaultAzureCredential } from '@azure/identity';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
-import { CredentialsProvider } from './credentials/credentials-provider';
 import {
     AzureKeyVaultClientProvider,
     BlobServiceClientProvider,
@@ -48,7 +47,7 @@ describe(registerAzureServicesToContainer, () => {
 
         verifySingletonDependencyResolution(container, StorageConfig);
         verifySingletonDependencyResolution(container, SecretProvider);
-        verifySingletonDependencyResolution(container, CredentialsProvider);
+        verifySingletonDependencyResolution(container, iocTypeNames.DefaultAzureCredential);
     });
 
     it('verify non-singleton resolution', () => {
@@ -150,13 +149,12 @@ describe(registerAzureServicesToContainer, () => {
 
     describe('CosmosClientProvider', () => {
         let secretProviderMock: IMock<SecretProvider>;
-        let credentialsProviderMock: IMock<CredentialsProvider>;
         const cosmosDbUrl = 'db url';
         const cosmosDbKey = 'db key';
+        const credentialStub = {} as DefaultAzureCredential;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
-            credentialsProviderMock = Mock.ofType(CredentialsProvider);
 
             secretProviderMock
                 .setup(async (s) => s.getSecret(secretNames.cosmosDbUrl))
@@ -169,13 +167,10 @@ describe(registerAzureServicesToContainer, () => {
         });
 
         it('verify CosmosClientProvider resolution', async () => {
-            const testCredential = {} as TokenCredential;
-            const expectedOptions = { endpoint: cosmosDbUrl, aadCredentials: testCredential };
-
-            credentialsProviderMock.setup((cp) => cp.getDefaultTokenCredential()).returns(() => testCredential);
+            const expectedOptions = { endpoint: cosmosDbUrl, aadCredentials: credentialStub };
 
             runCosmosClientTest(container, secretProviderMock);
-            stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
+            stubBinding(container, iocTypeNames.DefaultAzureCredential, credentialStub);
 
             const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
             const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
