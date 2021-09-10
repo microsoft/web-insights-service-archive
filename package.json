@@ -49,7 +49,7 @@
         "lerna": "^4.0.0",
         "license-check-and-add": "^4.0.2",
         "npm-run-all": "^4.1.5",
-        "prettier": "2.3.1",
+        "prettier": "2.4.0",
         "shellcheck": "^1.0.0",
         "simple-git": "^2.45.1",
         "syncpack": "^5.8.15",
