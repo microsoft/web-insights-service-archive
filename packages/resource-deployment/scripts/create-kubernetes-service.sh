@@ -5,6 +5,8 @@
 
 set -eo pipefail
 
+export resourceGroupName
+
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
@@ -71,15 +73,18 @@ grantAccessToCosmosDB() {
         --subnet "${nodeSubnetId}" 1>/dev/null
 }
 
-registerEncryptionAtHost() {
+registerPreviewFeature() {
+    featureName=$1
+    featureNamespace=$2
+
     local end=$((SECONDS + 1800))
 
-    echo "Registering the EncryptionAtHost feature flags on subscription"
-    az feature register --namespace "Microsoft.Compute" --name "EncryptionAtHost" 1>/dev/null
+    echo "Registering the ${featureName} feature flags on subscription"
+    az feature register --namespace "${featureNamespace}" --name "${featureName}" 1>/dev/null
 
     printf " - Registering .."
     while [ "${SECONDS}" -le "${end}" ]; do
-        state=$(az feature list -o table --query "[?contains(name, 'Microsoft.Compute/EncryptionAtHost')].{State:properties.state}" -o tsv)
+        state=$(az feature list -o table --query "[?contains(name, '${featureNamespace}/${featureName}')].{State:properties.state}" -o tsv)
         if [[ ${state} == "Registered" ]]; then
             break
         else
@@ -89,6 +94,14 @@ registerEncryptionAtHost() {
         sleep 20
     done
     echo " Registered"
+}
+
+registerPreviewFeatures() {
+    echo "Adding the aks-preview extension"
+    az extension add --name aks-preview
+
+    registerPreviewFeature "EncryptionAtHost" "Microsoft.Compute"
+    registerPreviewFeature "EnablePodIdentityPreview" "Microsoft.ContainerService"
 
     # Refresh the registration of the Microsoft.Compute resource providers
     az provider register --namespace Microsoft.Compute 1>/dev/null
@@ -117,14 +130,15 @@ fi
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
-# Enable the EncryptionAtHost feature flags on subscription
-registerEncryptionAtHost
+# Enable necessary feature flags on subscription
+registerPreviewFeatures
 
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group ${resourceGroupName}"
 az aks create --resource-group "${resourceGroupName}" --name "${kubernetesService}" --location "${location}" \
     --no-ssh-key \
     --enable-managed-identity \
+    --enable-pod-identity \
     --enable-encryption-at-host \
     --network-plugin azure \
     --appgw-name "${appGateway}" \
@@ -142,3 +156,5 @@ grantAccessToAppGateway
 grantAccessToCosmosDB
 
 echo "Azure Kubernetes Service successfully created."
+
+. "${0%/*}/setup-pod-identity.sh"
