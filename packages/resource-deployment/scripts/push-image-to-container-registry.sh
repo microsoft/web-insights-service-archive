@@ -30,7 +30,7 @@ getPackagesLocation() {
 
     if [ ! -d "${packagesLocation}" ]; then
         # Path when script runs from a source folder
-        packagesLocation="${0%/*}/../../../../packages/"
+        packagesLocation="${0%/*}/../../../packages/"
 
         if [ ! -d "${packagesLocation}" ]; then
             echo "Cannot find '${packagesLocation}' folder to prepare docker images."

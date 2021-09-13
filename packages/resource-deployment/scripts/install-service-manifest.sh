@@ -8,7 +8,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <service name> [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-d debug]
+Usage: ${BASH_SOURCE} -r <resource group> -s <service name> -i <user-assigned identity client id> [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-d debug]
 "
     exit 1
 }
@@ -50,7 +50,7 @@ getPublicDNS() {
 }
 
 # Read script arguments
-while getopts ":r:s:c:e:v:f:d" option; do
+while getopts ":r:s:c:e:v:f:i:d" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) serviceName=${OPTARG} ;;
@@ -59,12 +59,13 @@ while getopts ":r:s:c:e:v:f:d" option; do
     v) releaseVersion=${OPTARG} ;;
     f) flags=${OPTARG} ;;
     d) debug="debug" ;;
+    i) clientId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]] || [[ -z ${serviceName} ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${serviceName} ]] || [[ -z ${clientId} ]]; then
     exitWithUsageInfo
 fi
 
@@ -110,7 +111,8 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     --set podAnnotations.releaseId="${releaseVersion}" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
-    --set ingress.tls[0].hosts[0]=${fqdn} \
+    --set env[2].name=IDENTITY_CLIENT_ID,env[2].value="${clientId}" \
+    --set ingress.tls[0].hosts[0]="${fqdn}" \
     ${flags}
 
 waitForAppGatewayUpdate
