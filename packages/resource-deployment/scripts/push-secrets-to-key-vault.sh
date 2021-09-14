@@ -64,10 +64,6 @@ getCosmosDbUrl() {
     fi
 }
 
-getCosmosDbArmUrl() {
-    cosmosDbArmUrl="https://management.azure.com/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/${cosmosDbAccount}"
-}
-
 getStorageAccessKey() {
     storageAccountKey=$(az storage account keys list --account-name "${storageAccount}" --query "[0].value" -o tsv)
 
@@ -113,9 +109,6 @@ pushSecretsToKeyVault() (
     getCosmosDbUrl
     pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"
 
-    getCosmosDbArmUrl
-    pushSecretToKeyVault "cosmosDbArmUrl" "${cosmosDbArmUrl}"
-
     getStorageAccessKey
     pushSecretToKeyVault "storageAccountName" "${storageAccount}"
     pushSecretToKeyVault "storageAccountKey" "${storageAccountKey}"
@@ -140,9 +133,6 @@ done
 if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
-
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
 
 . "${0%/*}/get-resource-names.sh"
 
