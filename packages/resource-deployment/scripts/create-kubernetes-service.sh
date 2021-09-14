@@ -20,6 +20,28 @@ attachContainerRegistry() {
     . "${0%/*}/role-assign-for-sp.sh"
 }
 
+enableCosmosRBAC() {
+    # Create and assign custom RBAC role
+    customRoleName="CosmosDocumentRW"
+    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='$customRoleName'].id" -o tsv)
+    if [[ -z "${RBACRoleId}" ]]; then
+        echo "Creating a custom RBAC role with R/W permissions"
+        RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosDbAccount}" \
+            --resource-group "${resourceGroupName}" \
+            --body @${0%/*}/../templates/cosmos-db-rw-role.json \
+            --query "[?roleName=='${customRoleName}'].id" -o tsv)
+        az cosmosdb sql role definition wait --account-name "${cosmosDbAccount}" \
+            --resource-group "${resourceGroupName}" \
+            --id "${RBACRoleId}" \
+            --exists 1>/dev/null
+    fi
+    az cosmosdb sql role assignment create --account-name "${cosmosDbAccount}" \
+        --resource-group "${resourceGroupName}" \
+        --scope "/" \
+        --principal-id "${principalId}" \
+        --role-definition-id "${RBACRoleId}" 1>/dev/null
+}
+
 waitForAppGatewayUpdate() {
     nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
     if [[ -n ${nodeResourceGroup} ]]; then
@@ -40,6 +62,8 @@ grantAccessToCluster() {
     attachContainerRegistry
     # Grant access to key vault
     . "${0%/*}/enable-msi-for-key-vault.sh"
+    # Grant access to cosmosDB
+    enableCosmosRBAC
 }
 
 grantAccessToAppGateway() {
@@ -58,6 +82,7 @@ grantAccessToCosmosDB() {
     nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${nodeSubnetName}'].id" -o tsv)
 
     if [[ -z ${service} ]]; then
+    echo "adding service endpoint"
         az network vnet subnet update \
             --resource-group "${nodeResourceGroup}" \
             --name "${nodeSubnetName}" \
