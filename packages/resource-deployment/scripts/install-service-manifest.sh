@@ -8,7 +8,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <service name> -i <user-assigned identity client id> [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-d debug]
+Usage: ${BASH_SOURCE} -r <resource group> -s <service name> [-i <user-assigned identity client id>] [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-d debug]
 "
     exit 1
 }
@@ -65,7 +65,7 @@ while getopts ":r:s:c:e:v:f:i:d" option; do
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]] || [[ -z ${serviceName} ]] || [[ -z ${clientId} ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${serviceName} ]]; then
     exitWithUsageInfo
 fi
 
