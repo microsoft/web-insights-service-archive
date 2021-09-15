@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# Workflow ported from https://github.com/hrvey/combine-prs-workflow
+# Source https://github.com/hrvey/combine-prs-workflow
 
 name: 'Combine dependabot PRs'
 
