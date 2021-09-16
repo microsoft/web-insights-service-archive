@@ -82,7 +82,7 @@
     uuid "^8.3.0"
     xml2js "^0.4.19"
 
-"@azure/core-http@^2.2.0":
+"@azure/core-http@^2.0.0", "@azure/core-http@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-2.2.0.tgz#a8edfeb31bbd65172e2455fde3e607fd9300c064"
   integrity sha512-DCXm8OTNhPxErNvwuNgd9r/W+LjMrHHNc9/q4QgIOpCaoBvpJd1O5Nl2gbAhrwfiwmEBNWHMeGoe5+g3Lx2H/A==
@@ -9420,17 +9420,7 @@ pretty-format@^25.2.1, pretty-format@^25.5.0:
     ansi-styles "^4.0.0"
     react-is "^16.12.0"
 
-pretty-format@^27.0.0, pretty-format@^27.0.6, pretty-format@^27.1.1, pretty-format@^27.2.0:
-  version "27.2.0"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-27.2.0.tgz#ee37a94ce2a79765791a8649ae374d468c18ef19"
-  integrity sha512-KyJdmgBkMscLqo8A7K77omgLx5PWPiXJswtTtFV7XgVZv2+qPk6UivpXXO+5k6ZEbWIbLoKdx1pZ6ldINzbwTA==
-  dependencies:
-    "@jest/types" "^27.1.1"
-    ansi-regex "^5.0.0"
-    ansi-styles "^5.0.0"
-    react-is "^17.0.1"
-
-pretty-format@^27.2.0:
+pretty-format@^27.0.0, pretty-format@^27.0.6, pretty-format@^27.2.0:
   version "27.2.0"
   resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-27.2.0.tgz#ee37a94ce2a79765791a8649ae374d468c18ef19"
   integrity sha512-KyJdmgBkMscLqo8A7K77omgLx5PWPiXJswtTtFV7XgVZv2+qPk6UivpXXO+5k6ZEbWIbLoKdx1pZ6ldINzbwTA==
