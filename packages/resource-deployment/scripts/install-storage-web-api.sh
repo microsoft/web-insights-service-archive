@@ -25,6 +25,9 @@ while getopts ":r:s:c:e:v:d" option; do
     esac
 done
 
+. "${0%/*}/get-resource-names.sh"
+
 serviceName="storage-web-api"
+clientId=$(az aks show -n "${kubernetesService}" -g "${resourceGroupName}" --query "identityProfile.kubeletidentity.clientId" -o tsv)
 
 . "${0%/*}/install-service-manifest.sh"
