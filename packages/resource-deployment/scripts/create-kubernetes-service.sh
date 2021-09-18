@@ -29,7 +29,7 @@ enableCosmosRBAC() {
         RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosDbAccount}" \
             --resource-group "${resourceGroupName}" \
             --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
-            --query "[?roleName=='${customRoleName}'].id" -o tsv)
+            --query "id" -o tsv)
         az cosmosdb sql role definition wait --account-name "${cosmosDbAccount}" \
             --resource-group "${resourceGroupName}" \
             --id "${RBACRoleId}" \
