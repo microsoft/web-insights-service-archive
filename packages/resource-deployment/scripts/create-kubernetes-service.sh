@@ -23,18 +23,36 @@ attachContainerRegistry() {
 enableCosmosRBAC() {
     # Create and assign custom RBAC role
     customRoleName="CosmosDocumentRW"
-    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
-    if [[ -z "${RBACRoleId}" ]]; then
-        echo "Creating a custom RBAC role with R/W permissions"
+    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].name" -o tsv)
+
+    if [[ -z ${RBACRoleId} ]]; then
+        echo "Creating a custom RBAC role with read-write permissions"
         RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosDbAccount}" \
             --resource-group "${resourceGroupName}" \
             --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
-            --query "[?roleName=='${customRoleName}'].id" -o tsv)
+            --query "[?roleName=='${customRoleName}'].name" -o tsv)
+
+        printf " - Creating .."
+        local end=$((SECONDS + 300))
+        while [ "${SECONDS}" -le "${end}" ]; do
+            RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].name" -o tsv)
+
+            if [[ -n ${RBACRoleId} ]]; then
+                break
+            else
+                printf "."
+            fi
+
+            sleep 20
+        done
+        echo " Created"
+
         az cosmosdb sql role definition wait --account-name "${cosmosDbAccount}" \
             --resource-group "${resourceGroupName}" \
             --id "${RBACRoleId}" \
             --exists 1>/dev/null
     fi
+
     echo "Assigning custom RBAC role ${customRoleName} to service principal ${principalId}"
     az cosmosdb sql role assignment create --account-name "${cosmosDbAccount}" \
         --resource-group "${resourceGroupName}" \
@@ -95,12 +113,11 @@ grantAccessToCosmosDB() {
 }
 
 registerEncryptionAtHost() {
-    local end=$((SECONDS + 1800))
-
     echo "Registering the EncryptionAtHost feature flags on subscription"
     az feature register --namespace "Microsoft.Compute" --name "EncryptionAtHost" 1>/dev/null
 
     printf " - Registering .."
+    local end=$((SECONDS + 1800))
     while [ "${SECONDS}" -le "${end}" ]; do
         state=$(az feature list -o table --query "[?contains(name, 'Microsoft.Compute/EncryptionAtHost')].{State:properties.state}" -o tsv)
         if [[ ${state} == "Registered" ]]; then
