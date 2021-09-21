@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -95,7 +95,7 @@ setupCosmosDb() {
     )
 
     echo "Creating Cosmos databases in parallel"
-    runCommandsWithoutSecretsInParallel cosmosSetupProcesses
+    waitForCommandsInParallel cosmosSetupProcesses
 
     # Increase autoscale maximum throughput for below collection only in case of prod
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
@@ -113,7 +113,7 @@ setupCosmosDb() {
     fi
 
     echo "Creating Cosmos collections in parallel"
-    runCommandsWithoutSecretsInParallel cosmosSetupProcesses
+    waitForCommandsInParallel cosmosSetupProcesses
 
     echo "Cosmos DB account successfully created."
 }

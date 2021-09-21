@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -71,7 +71,7 @@ pushImagesToRegistry() (
     )
 
     echo "Pushing images to Azure Container Registry."
-    runCommandsWithoutSecretsInParallel imageBuildProcesses
+    waitForCommandsInParallel imageBuildProcesses
 )
 
 # Read script arguments
