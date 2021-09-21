@@ -21,9 +21,15 @@ waitForAppGatewayUpdate() {
     fi
 }
 
+setSslPolicy() {
+    # TLS min allowed version must be 1.2 (see https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-ssl-policy-overview#appgwsslpolicy20170401s)
+    sslPolicyName="AppGwSslPolicy20170401S"
+    echo "Enabling SSL policy ${sslPolicyName}"
+    az network application-gateway ssl-policy set --resource-group "${nodeResourceGroup}" --gateway-name "${appGateway}" --policy-type "Predefined" --name "${sslPolicyName}" 1>/dev/null
+}
+
 setPublicDNSPrefix() {
     echo "Updating service public DNS name"
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
     fqdn=$(az network public-ip update --resource-group "${nodeResourceGroup}" --name "${appGatewayPublicIP}" \
         --dns-name "${appGatewayPublicDNSPrefix}" \
         --allocation-method Static \
@@ -61,6 +67,9 @@ fi
 
 certificateName=${frontEndPublicCertificate}
 
+nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
+
+setSslPolicy
 setPublicDNSPrefix
 createCertificatePolicyFile
 . "${0%/*}/create-certificate.sh"

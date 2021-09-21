@@ -30,23 +30,7 @@ enableCosmosRBAC() {
         RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosDbAccount}" \
             --resource-group "${resourceGroupName}" \
             --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
-            --query "[?roleName=='${customRoleName}'].name" -o tsv)
-
-        printf " - Creating .."
-        local end=$((SECONDS + 300))
-        while [ "${SECONDS}" -le "${end}" ]; do
-            RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].name" -o tsv)
-
-            if [[ -n ${RBACRoleId} ]]; then
-                break
-            else
-                printf "."
-            fi
-
-            sleep 20
-        done
-        echo " Created"
-
+            --query "id" -o tsv)
         az cosmosdb sql role definition wait --account-name "${cosmosDbAccount}" \
             --resource-group "${resourceGroupName}" \
             --id "${RBACRoleId}" \
