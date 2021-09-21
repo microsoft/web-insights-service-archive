@@ -53,6 +53,14 @@ turnOffKeyVaultFirewall() {
     az keyvault update --name "${keyVault}" --resource-group "${resourceGroupName}" --default-action allow 1>/dev/null
 }
 
+deletePrivateEndpointConnection() {
+    endpoints=$(az keyvault show --name ${keyVault} --query "properties.privateEndpointConnections[].id" -o tsv)
+    for endpoint in ${endpoints}; do
+        echo "Deleting private endpoint connection associated with a Key Vault. Id: ${endpoint}"
+        az keyvault private-endpoint-connection delete --id ${endpoint} 1>/dev/null
+    done
+}
+
 pushSecretToKeyVault() {
     local secretName=$1
     local secretValue=$2
@@ -112,6 +120,7 @@ pushSecretsToKeyVault() (
     grantWritePermissionToKeyVault
 
     turnOffKeyVaultFirewall
+    deletePrivateEndpointConnection
 
     getCosmosDbUrl
     pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"
