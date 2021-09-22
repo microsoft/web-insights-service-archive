@@ -99,6 +99,7 @@ getContainerRegistryLogin() {
 }
 
 createAppInsightsApiKey() {
+    echo "Creating App Insights API key"
     apiKeyParams="--app ${appInsights} --resource-group ${resourceGroupName} --api-key ${appInsights}-api-key"
     apiKeyExists=$(az monitor app-insights api-key show ${apiKeyParams})
 
@@ -109,7 +110,7 @@ createAppInsightsApiKey() {
     fi
 
     appInsightsApiKey=$(az monitor app-insights api-key create ${apiKeyParams} --read-properties ReadTelemetry --query "apiKey" -o tsv)
-    echo "App Insights API key successfully created '${appInsightsApiKey}'"
+    echo "App Insights API key successfully created"
 }
 
 # function runs in a subshell to isolate trap handler
