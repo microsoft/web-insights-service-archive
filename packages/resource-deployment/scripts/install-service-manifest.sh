@@ -97,7 +97,7 @@ getValuesManifest
 getPublicDNS
 releaseName="${serviceName}-service"
 repository="${containerRegistry}.azurecr.io"
-keyVaultUrl="https://${keyVault}.vaultcore.azure.net/"
+keyVaultUrl="https://${keyVault}.vault.azure.net/"
 helmChart="${0%/*}/../helm-charts/${serviceName}"
 
 getInstallAction

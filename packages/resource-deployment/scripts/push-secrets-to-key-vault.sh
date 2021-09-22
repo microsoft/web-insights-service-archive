@@ -54,6 +54,7 @@ turnOffKeyVaultFirewall() {
 }
 
 deletePrivateEndpointConnection() {
+    # Existing private endpoint connections will prevent access to Key Vault from an agent machine
     endpoints=$(az keyvault show --name ${keyVault} --query "properties.privateEndpointConnections[].id" -o tsv)
     for endpoint in ${endpoints}; do
         echo "Deleting private endpoint connection associated with a Key Vault. Id: ${endpoint}"

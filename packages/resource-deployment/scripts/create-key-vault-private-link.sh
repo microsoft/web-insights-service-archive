@@ -3,6 +3,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+# Diagnose private links configuration issues on Azure Key Vault
+# https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics
+
 set -eo pipefail
 
 exitWithUsageInfo() {
