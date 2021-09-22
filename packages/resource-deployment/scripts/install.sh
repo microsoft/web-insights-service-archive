@@ -85,29 +85,27 @@ install() {
     . "${0%/*}/create-app-insights.sh"
     . "${0%/*}/get-resource-names.sh"
 
-    # Set of scripts that can be run in parallel without external dependencies
     # shellcheck disable=SC2034
     parallelProcesses=(
         "${0%/*}/create-container-registry.sh"
         "${0%/*}/create-cosmos-db.sh"
         "${0%/*}/create-storage-account.sh"
         "${0%/*}/create-monitor-workspace.sh"
+        "${0%/*}/create-key-vault.sh"
     )
     waitForCommandsInParallel parallelProcesses
 
-    . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/push-secrets-to-key-vault.sh"
 
-    # Set of scripts that can be run in parallel without external dependencies
     # shellcheck disable=SC2034
     parallelProcesses=(
         "${0%/*}/push-image-to-container-registry.sh"
         "${0%/*}/create-kubernetes-service.sh"
-        "${0%/*}/create-public-network.sh"
-        "${0%/*}/create-key-vault-private-link.sh"
     )
     waitForCommandsInParallel parallelProcesses
 
+    . "${0%/*}/create-public-network.sh"
+    . "${0%/*}/create-key-vault-private-link.sh"
     . "${0%/*}/install-storage-web-api.sh"
 }
 

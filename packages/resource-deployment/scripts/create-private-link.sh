@@ -55,6 +55,12 @@ linkPrivateDnsZoneToVNet() {
 }
 
 createPrivateEndpoint() {
+    endpoint=$(az network private-endpoint list --resource-group "${vnetResourceGroup}" --query "[?name=='${privateEndpoint}'].name" -o tsv)
+    if [[ -n ${endpoint} ]]; then
+        echo "Delete old private endpoint ${privateEndpoint}"
+        az network private-endpoint delete --resource-group "${vnetResourceGroup}" --name "${privateEndpoint}" 1>/dev/null
+    fi
+
     echo "Create private endpoint ${privateEndpoint}"
     az network private-endpoint create \
         --resource-group "${vnetResourceGroup}" \
