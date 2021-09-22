@@ -21,7 +21,7 @@
         "copyright:check": "license-check-and-add check -f ./license-check-and-add-config.json",
         "copyright:fix": "license-check-and-add add -f ./license-check-and-add-config.json",
         "audit": "lerna-audit",
-        "pr:combine": "npx combine-dependabot-prs microsoft/web-insights-service"
+        "pr:combine": "git push origin :combined-prs ; npx combine-dependabot-prs microsoft/web-insights-service"
     },
     "author": "Microsoft",
     "license": "MIT",
