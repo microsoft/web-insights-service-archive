@@ -23,8 +23,9 @@ export class PageScanProvider {
             pageId: pageId,
             websiteScanId: websiteScanId,
             priority: priority,
-            scanStatus: 'pending',
-            retryCount: 0,
+            run: {
+                state: 'pending',
+            },
         };
         const pageScanDocument = this.normalizeDbDocument(pageScanData) as PageScan;
         await this.cosmosContainerClient.writeDocument(this.normalizeDbDocument(pageScanDocument));
@@ -75,7 +76,7 @@ export class PageScanProvider {
         let filterConditions =
             'c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId and c.pageId = @pageId';
         if (completed) {
-            filterConditions = `${filterConditions} and c.scanStatus != "pending"`;
+            filterConditions = `${filterConditions} and (c.run.state == "completed" or c.run.state == "failed")`;
         }
         const query = {
             query: `SELECT TOP 1 * FROM c WHERE ${filterConditions} ORDER BY c._ts DESC`,

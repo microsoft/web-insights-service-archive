@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { BlobResultData, ReportData, ScanStatus } from 'storage-documents';
+import { ReportData, ScanResult, ScanRun } from 'storage-documents';
 import { Page } from './page';
 
 export interface PageScan {
@@ -9,9 +9,7 @@ export interface PageScan {
     websiteScanId?: string;
     page: Page;
     priority: number;
-    scanStatus: ScanStatus;
-    completedTimestamp?: number;
-    results?: BlobResultData[];
     reports?: ReportData[];
-    scanError?: string;
+    result?: ScanResult;
+    run: ScanRun;
 }

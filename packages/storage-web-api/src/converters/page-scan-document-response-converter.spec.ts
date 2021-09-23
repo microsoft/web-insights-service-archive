@@ -24,12 +24,15 @@ describe(createPageScanApiObject, () => {
     const pageScanDoc: StorageDocuments.PageScan = {
         id: 'page scan id',
         pageId: 'page id',
-        scanStatus: 'pending',
         websiteScanId: 'website scan id',
         priority: 0,
-        retryCount: 1,
-        completedTimestamp: 1234,
-        results: [{ blobId: 'blob id', resultType: 'test result type' }],
+        run: {
+            state: 'completed',
+            retryCount: 1,
+        },
+        result: {
+            state: 'pass',
+        },
         reports: [{ reportId: 'report id', format: 'html', href: 'href' }],
         itemType: StorageDocuments.itemTypes.pageScan,
         partitionKey: 'partition key',
@@ -46,9 +49,8 @@ describe(createPageScanApiObject, () => {
         const expectedResponse: ApiContracts.PageScan = {
             id: pageScanDoc.id,
             page: pageObject,
-            scanStatus: pageScanDoc.scanStatus,
-            completedTimestamp: pageScanDoc.completedTimestamp,
-            results: pageScanDoc.results,
+            run: pageScanDoc.run,
+            result: pageScanDoc.result,
             reports: pageScanDoc.reports,
             priority: 0,
         };

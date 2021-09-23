@@ -26,8 +26,9 @@ describe(PageScanProvider, () => {
         partitionKey: partitionKey,
         itemType: itemTypes.pageScan,
         priority: priority,
-        scanStatus: 'pending',
-        retryCount: 0,
+        run: {
+            state: 'pending',
+        },
     } as PageScan;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
     let guidGeneratorMock: IMock<GuidGenerator>;
@@ -84,7 +85,12 @@ describe(PageScanProvider, () => {
 
         it('throws if no id', () => {
             const pageScanUpdate: Partial<PageScan> = {
-                scanStatus: 'pass',
+                result: {
+                    state: 'pass',
+                },
+                run: {
+                    state: 'completed',
+                },
             };
 
             expect(testSubject.updatePageScan(pageScanUpdate)).rejects.toThrow();
@@ -93,7 +99,12 @@ describe(PageScanProvider, () => {
         it('Errors if no partition key is provided and the fields needed to compute it are missing', () => {
             const pageScanUpdate: Partial<PageScan> = {
                 id: pageScanId,
-                scanStatus: 'pass',
+                result: {
+                    state: 'pass',
+                },
+                run: {
+                    state: 'completed',
+                },
             };
 
             expect(testSubject.updatePageScan(pageScanUpdate)).rejects.toThrow();
@@ -101,7 +112,12 @@ describe(PageScanProvider, () => {
 
         it('updates doc with normalized properties when pageId is present', async () => {
             const updatedScanData: Partial<PageScan> = {
-                scanStatus: 'pass',
+                result: {
+                    state: 'pass',
+                },
+                run: {
+                    state: 'completed',
+                },
                 id: pageScanId,
                 pageId: pageId,
             };
@@ -123,7 +139,12 @@ describe(PageScanProvider, () => {
 
         it('updates doc with normalized properties when websiteScanId is present', async () => {
             const updatedScanData: Partial<PageScan> = {
-                scanStatus: 'pass',
+                result: {
+                    state: 'pass',
+                },
+                run: {
+                    state: 'completed',
+                },
                 id: pageScanId,
                 websiteScanId: websiteScanId,
             };
@@ -145,7 +166,12 @@ describe(PageScanProvider, () => {
 
         it('uses partitionKey if one is provided', async () => {
             const updatedScanData: Partial<PageScan> = {
-                scanStatus: 'pass',
+                result: {
+                    state: 'pass',
+                },
+                run: {
+                    state: 'completed',
+                },
                 id: pageScanId,
                 partitionKey: 'provided partition key',
             };
@@ -262,7 +288,7 @@ describe(PageScanProvider, () => {
 
         it('queries db with expected query when completed=true', async () => {
             const expectedFilterConditions =
-                'c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId and c.pageId = @pageId and c.scanStatus != "pending"';
+                'c.partitionKey = @partitionKey and c.itemType = @itemType and c.websiteScanId = @websiteScanId and c.pageId = @pageId and (c.run.state == "completed" or c.run.state == "failed")';
             const expectedQuery = getExpectedQueryWithConditions(expectedFilterConditions);
             const response = {
                 statusCode: 200,

@@ -11,7 +11,9 @@ export const pendingPageScan: PageScan = {
         url: 'https://pending-page.com',
     },
     priority: 1,
-    scanStatus: 'pending',
+    run: {
+        state: 'pending',
+    },
 };
 
 export const passedPageScan: PageScan = {
@@ -22,14 +24,14 @@ export const passedPageScan: PageScan = {
         url: 'https://passed-page.com',
     },
     priority: 1,
-    scanStatus: 'pass',
-    completedTimestamp: 123456,
-    results: [
-        {
-            blobId: 'results blob id',
-            resultType: 'result type',
-        },
-    ],
+    run: {
+        state: 'completed',
+        timestamp: 123456,
+        retryCount: 1,
+    },
+    result: {
+        state: 'pass',
+    },
     reports: [
         {
             reportId: 'passed page html report id',
