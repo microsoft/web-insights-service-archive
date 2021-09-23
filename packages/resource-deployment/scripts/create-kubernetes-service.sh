@@ -101,6 +101,8 @@ grantAccessToCosmosDB() {
     echo "Granting CosmosDB access to subnet ${subnet} in vnet ${vnet}"
     nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
 
+    updateSubnetsProvisioningState
+
     az network vnet subnet update \
         --resource-group "${nodeResourceGroup}" \
         --name "${subnet}" \
@@ -178,7 +180,6 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
 echo ""
 
 waitForAppGatewayUpdate
-updateSubnetsProvisioningState
 grantAccessToCluster
 grantAccessToAppGateway
 grantAccessToCosmosDB
