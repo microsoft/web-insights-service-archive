@@ -59,14 +59,30 @@ waitForAppGatewayUpdate() {
     fi
 }
 
+updateSubnetsProvisioningState() {
+    vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
+    echo "Validating subnets provision state in vnet ${vnet}"
+
+    subnets=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[].name" -o tsv)
+    for subnet in ${subnets}; do
+        provisioningState=$(az network vnet subnet show --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --name "${subnet}" --query "provisioningState" -o tsv)
+        echo "Subnet ${subnet} provision state ${provisioningState}"
+
+        if [[ ${provisioningState} != "Succeeded" ]]; then
+            echo "Updating subnet ${subnet} to recover from ${provisioningState} provisioning state"
+            az network vnet subnet update --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --name "${subnet}" 1>/dev/null
+        fi
+    done
+}
+
 grantAccessToCluster() {
-    echo "Granting access to cluster"
+    echo "Granting access to AKS cluster"
     principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
     # Grant access to container registry
     attachContainerRegistry
     # Grant access to key vault
     . "${0%/*}/enable-msi-for-key-vault.sh"
-    # Grant access to cosmosDB
+    # Grant access to Cosmos DB
     enableCosmosRBAC
 }
 
@@ -80,8 +96,8 @@ grantAccessToAppGateway() {
 grantAccessToCosmosDB() {
     local subnet="aks-subnet"
 
-    echo "Granting CosmosDB access to subnet ${subnet} in vnet ${vnet}"
     vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
+    echo "Granting CosmosDB access to subnet ${subnet} in vnet ${vnet}"
     nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
 
     az network vnet subnet update \
@@ -161,6 +177,7 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
 echo ""
 
 waitForAppGatewayUpdate
+updateSubnetsProvisioningState
 grantAccessToCluster
 grantAccessToAppGateway
 grantAccessToCosmosDB
