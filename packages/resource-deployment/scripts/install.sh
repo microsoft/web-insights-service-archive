@@ -105,8 +105,8 @@ install() {
     waitForCommandsInParallel parallelProcesses
 
     . "${0%/*}/create-public-network.sh"
-    . "${0%/*}/create-key-vault-private-link.sh"
     . "${0%/*}/install-storage-web-api.sh"
+    . "${0%/*}/create-key-vault-private-link.sh"
 }
 
 # Read script arguments

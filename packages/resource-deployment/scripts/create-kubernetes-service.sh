@@ -60,13 +60,14 @@ waitForAppGatewayUpdate() {
 }
 
 updateSubnetsProvisioningState() {
+    # Subnet may fail deployment with Failed provisioning state. Retrying subnet update will fix provisioning state.
     vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
-    echo "Validating subnets provision state in vnet ${vnet}"
+    echo "Validating subnets provisioning state in vnet ${vnet}"
 
     subnets=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[].name" -o tsv)
     for subnet in ${subnets}; do
         provisioningState=$(az network vnet subnet show --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --name "${subnet}" --query "provisioningState" -o tsv)
-        echo "Subnet ${subnet} provision state ${provisioningState}"
+        echo "Subnet ${subnet} provisioning state: ${provisioningState}"
 
         if [[ ${provisioningState} != "Succeeded" ]]; then
             echo "Updating subnet ${subnet} to recover from ${provisioningState} provisioning state"
