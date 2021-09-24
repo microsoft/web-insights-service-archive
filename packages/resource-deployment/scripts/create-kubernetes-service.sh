@@ -59,7 +59,7 @@ waitForAppGatewayUpdate() {
     fi
 }
 
-updateSubnetsProvisioningState() {
+validateSubnetsProvisioningState() {
     # Subnet may fail deployment with Failed provisioning state. Retrying subnet update will fix provisioning state.
     vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
     echo "Validating subnets provisioning state in vnet ${vnet}"
@@ -97,22 +97,17 @@ grantAccessToAppGateway() {
 grantAccessToCosmosDB() {
     local subnet="aks-subnet"
 
+    echo "Granting access to Cosmos DB service"
     vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
-    echo "Granting CosmosDB access to subnet ${subnet} in vnet ${vnet}"
     nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
 
-    updateSubnetsProvisioningState
+    validateSubnetsProvisioningState
 
-    az network vnet subnet update \
-        --resource-group "${nodeResourceGroup}" \
-        --name "${subnet}" \
-        --vnet-name "${vnet}" \
-        --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
+    echo "Executing: az network vnet subnet update --resource-group ${nodeResourceGroup} --vnet-name ${vnet} --name ${subnet} --service-endpoints Microsoft.AzureCosmosDB"
+    az network vnet subnet update --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --name "${subnet}" --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
 
-    az cosmosdb network-rule add --name "${cosmosDbAccount}" \
-        --resource-group "${resourceGroupName}" \
-        --virtual-network "${vnet}" \
-        --subnet "${nodeSubnetId}" 1>/dev/null
+    echo "Executing: az cosmosdb network-rule add --name ${cosmosDbAccount} --resource-group ${resourceGroupName} --virtual-network ${vnet} --subnet ${nodeSubnetId}"
+    az cosmosdb network-rule add --name "${cosmosDbAccount}" --resource-group "${resourceGroupName}"--virtual-network "${vnet}" --subnet "${nodeSubnetId}" 1>/dev/null
 }
 
 registerEncryptionAtHost() {
