@@ -46,32 +46,30 @@ enableCosmosRBAC() {
 }
 
 waitForAppGatewayUpdate() {
-    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
-    if [[ -n ${nodeResourceGroup} ]]; then
-        currentAppGateway=$(az network application-gateway list --resource-group "${nodeResourceGroup}" --query "[?name=='${appGateway}'].name" -o tsv)
-        if [[ -n ${currentAppGateway} ]]; then
-            echo "Waiting for application gateway configuration update"
-            az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated
-        else
-            echo "Waiting for application gateway deployment"
-            az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --created
-        fi
+    currentAppGateway=$(az network application-gateway list --resource-group "${vnetResourceGroup}" --query "[?name=='${appGateway}'].name" -o tsv)
+    if [[ -n ${currentAppGateway} ]]; then
+        echo "Waiting for application gateway configuration update"
+        az network application-gateway wait --resource-group "${vnetResourceGroup}" --name "${appGateway}" --updated
+    else
+        echo "Waiting for application gateway deployment"
+        az network application-gateway wait --resource-group "${vnetResourceGroup}" --name "${appGateway}" --created
     fi
 }
 
-validateSubnetsProvisioningState() {
-    # Subnet may fail deployment with Failed provisioning state. Retrying subnet update will fix provisioning state.
-    vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
-    echo "Validating subnets provisioning state in vnet ${vnet}"
+updateSubnetServiceEndpoints() {
+    local command="az network vnet subnet update --resource-group ${vnetResourceGroup} --vnet-name ${vnet} --name ${subnet} --service-endpoints Microsoft.AzureActiveDirectory Microsoft.AzureCosmosDB"
 
-    subnets=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[].name" -o tsv)
-    for subnet in ${subnets}; do
-        provisioningState=$(az network vnet subnet show --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --name "${subnet}" --query "provisioningState" -o tsv)
-        echo "Subnet ${subnet} provisioning state: ${provisioningState}"
+    echo "Updating subnet service endpoints"
 
+    # Subnet update may fail with Azure internal error. Retrying update will mitigate the failure.
+    for ((i = 1; i <= 3; i++)); do
+        provisioningState=$(eval "${command}") && provisioningState="Succeeded"
         if [[ ${provisioningState} != "Succeeded" ]]; then
-            echo "Updating subnet ${subnet} to recover from ${provisioningState} provisioning state"
-            az network vnet subnet update --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --name "${subnet}" 1>/dev/null
+            echo "Subnet service endpoints update failed. Retrying update."
+            sleep 15
+        else
+            echo "Subnet service endpoints update succeeded"
+            break
         fi
     done
 }
@@ -89,25 +87,15 @@ grantAccessToCluster() {
 
 grantAccessToAppGateway() {
     echo "Granting access to application gateway"
-    az network application-gateway identity assign --gateway-name "${appGateway}" --resource-group "${nodeResourceGroup}" --identity "${appGatewayIdentity}" 1>/dev/null
-    identityId=$(az identity show --resource-group "${nodeResourceGroup}" --name "${appGatewayIdentity}" -o tsv --query "principalId")
+    az network application-gateway identity assign --gateway-name "${appGateway}" --resource-group "${vnetResourceGroup}" --identity "${appGatewayIdentity}" 1>/dev/null
+    identityId=$(az identity show --resource-group "${vnetResourceGroup}" --name "${appGatewayIdentity}" -o tsv --query "principalId")
     az keyvault set-policy --name "${keyVault}" --object-id "${identityId}" --secret-permissions get 1>/dev/null
 }
 
 grantAccessToCosmosDB() {
-    local subnet="aks-subnet"
-
     echo "Granting access to Cosmos DB service"
-    vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
-    nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
-
-    validateSubnetsProvisioningState
-
-    echo "Executing: az network vnet subnet update --resource-group ${nodeResourceGroup} --vnet-name ${vnet} --name ${subnet} --service-endpoints Microsoft.AzureCosmosDB"
-    az network vnet subnet update --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --name "${subnet}" --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
-
-    echo "Executing: az cosmosdb network-rule add --name ${cosmosDbAccount} --resource-group ${resourceGroupName} --virtual-network ${vnet} --subnet ${nodeSubnetId}"
-    az cosmosdb network-rule add --name "${cosmosDbAccount}" --resource-group "${resourceGroupName}"--virtual-network "${vnet}" --subnet "${nodeSubnetId}" 1>/dev/null
+    nodeSubnetId=$(az network vnet subnet list --resource-group "${vnetResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
+    az cosmosdb network-rule add --name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --virtual-network "${vnet}" --subnet "${nodeSubnetId}" 1>/dev/null
 }
 
 registerEncryptionAtHost() {
@@ -174,7 +162,13 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
     1>/dev/null
 echo ""
 
+# Get the service network configuration
+vnetResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
+vnet=$(az network vnet list --resource-group "${vnetResourceGroup}" --query "[].name" -o tsv)
+subnet="aks-subnet"
+
 waitForAppGatewayUpdate
+updateSubnetServiceEndpoints
 grantAccessToCluster
 grantAccessToAppGateway
 grantAccessToCosmosDB
