@@ -114,6 +114,7 @@ subscription=$(az account show --query "id" -o tsv)
 # Enable feature flags on subscription
 registerPreviewFeature "EncryptionAtHost" "Microsoft.Compute"
 registerPreviewFeature "EnablePodIdentityPreview" "Microsoft.ContainerService"
+az extension add --name aks-preview
 
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group ${resourceGroupName}"
