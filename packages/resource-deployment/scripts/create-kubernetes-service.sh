@@ -16,6 +16,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -l <location> [-c <aks cluster name>] 
 attachContainerRegistry() {
     role="AcrPull"
     containerRegistryId=$(az acr show --resource-group "${resourceGroupName}" --name "${containerRegistry}" --query id -o tsv)
+    principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
     scope="--scope ${containerRegistryId}"
     . "${0%/*}/role-assign-for-sp.sh"
 }

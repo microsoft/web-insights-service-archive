@@ -27,14 +27,14 @@ assignCosmosRBAC() {
 
 createPodIdentity() {
     echo "Creating a pod identity for the ${principalId} service principal"
-    identityResourceId=$(az identity list --resource-group "${resourceGroupName}" --query "[?clientId=='${principalId}'].id" -o -tsv)
-    principalName=$(az identity list --resource-group "${resourceGroupName}" --query "[?clientId=='${principalId}'].name" -o -tsv)
+    identityResourceId=$(az identity list --resource-group "${resourceGroupName}" --query "[?principalId=='${principalId}'].id" -o tsv)
+    principalName=$(az identity list --resource-group "${resourceGroupName}" --query "[?principalId=='${principalId}'].name" -o tsv)
 
     az aks pod-identity add --resource-group "${resourceGroupName}" \
         --cluster-name "${kubernetesService}" \
         --namespace default \
         --name "${principalName}" \
-        --identity-resource-id "${identityResourceId}"
+        --identity-resource-id "${identityResourceId}" 1>/dev/null
 }
 
 # Read script arguments

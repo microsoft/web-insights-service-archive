@@ -35,6 +35,6 @@ fi
 
 # Create or update service principal object
 echo "Creating managed identity ${principalName}"
-principalId=$(az identity create --resource-group "${resourceGroupName}" --name "${principalName}" --query "clientId" -o tsv)
+principalId=$(az identity create --resource-group "${resourceGroupName}" --name "${principalName}" --query "principalId" -o tsv)
 
 echo "The managed identity ${principalName} successfully created."
