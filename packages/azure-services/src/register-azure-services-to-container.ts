@@ -24,7 +24,7 @@ export function registerAzureServicesToContainer(
 ): void {
     container
         .bind(iocTypeNames.DefaultAzureCredential)
-        .toDynamicValue((context) => new DefaultAzureCredential({ managedIdentityClientId: process.env.IDENTITY_CLIENT_ID }))
+        .toDynamicValue(() => new DefaultAzureCredential())
         .inSingletonScope();
 
     setupSingletonAzureKeyVaultClientProvider(container);

@@ -99,8 +99,10 @@ repository="${containerRegistry}.azurecr.io"
 keyVaultUrl="https://${keyVault}.vault.azure.net/"
 helmChart="${0%/*}/../helm-charts/${serviceName}"
 
+# Create service managed identity
 principalName="${serviceName}-sp"
 . "${0%/*}/create-managed-identity.sh"
+clientId=$(az identity create --resource-group "${resourceGroupName}" --name "${principalName}" --query "clientId" -o tsv)
 
 getInstallAction
 
@@ -113,7 +115,7 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     --set podAnnotations.releaseId="${releaseVersion}" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
-    --set env[2].name=IDENTITY_CLIENT_ID,env[2].value="${principalId}" \
+    --set env[2].name=AZURE_CLIENT_ID,env[2].value="${clientId}" \
     --set ingress.tls[0].hosts[0]="${fqdn}" \
     ${flags}
 
