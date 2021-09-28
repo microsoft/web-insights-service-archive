@@ -94,7 +94,7 @@ setupCosmosDb() {
         "createCosmosDatabase \"${webInsightsDbName}\""
     )
 
-    echo "Creating Cosmos databases in parallel"
+    echo "Creating Cosmos DB databases in parallel"
     waitForCommandsInParallel cosmosSetupProcesses
 
     # Increase autoscale maximum throughput for below collection only in case of prod
@@ -112,7 +112,7 @@ setupCosmosDb() {
         )
     fi
 
-    echo "Creating Cosmos collections in parallel"
+    echo "Creating Cosmos DB collections in parallel"
     waitForCommandsInParallel cosmosSetupProcesses
 }
 
