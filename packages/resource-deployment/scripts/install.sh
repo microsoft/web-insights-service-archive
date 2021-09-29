@@ -82,19 +82,20 @@ install() {
 
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
+    # Create App Insights first to infer auto-generated unique resource suffix
     . "${0%/*}/create-app-insights.sh"
     . "${0%/*}/get-resource-names.sh"
 
     # shellcheck disable=SC2034
     parallelProcesses=(
-        "${0%/*}/create-container-registry.sh"
-        "${0%/*}/create-cosmos-db.sh"
         "${0%/*}/create-storage-account.sh"
+        "${0%/*}/create-cosmos-db.sh"
+        "${0%/*}/create-container-registry.sh"
         "${0%/*}/create-monitor-workspace.sh"
-        "${0%/*}/create-key-vault.sh"
     )
     waitForCommandsInParallel parallelProcesses
 
+    . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/push-secrets-to-key-vault.sh"
 
     # shellcheck disable=SC2034
