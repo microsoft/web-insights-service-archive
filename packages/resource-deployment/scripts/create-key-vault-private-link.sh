@@ -3,8 +3,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# Diagnose private links configuration issues on Azure Key Vault
-# https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-diagnostics
+# Integrate Key Vault with Azure Private Link
+# https://docs.microsoft.com/en-us/azure/key-vault/general/private-link-service
 
 set -eo pipefail
 
@@ -32,13 +32,13 @@ done
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "Creating private link for key vault ${keyVault}"
+echo "Creating private link for Key Vault ${keyVault}"
 resourceName=${keyVault}
 resourceId=$(az keyvault show --resource-group "${resourceGroupName}" --name "${keyVault}" --query "id" -o tsv)
+resourceGroupId="vault"
 privateLinkResourceId="vault"
-privateDnsZone="privatelink.vaultcore.azure.net"
 
 turnOnKeyVaultFirewall
 
 . "${0%/*}/create-private-link.sh"
-echo "Private link successfully created."
+echo "Private link for Key Vault successfully created."

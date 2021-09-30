@@ -8,7 +8,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -l <location> -n <resource name> -i <resource ID> -g <private link resource ID> -z <private DNS zone>
+Usage: ${BASH_SOURCE} -r <resource group> -l <location> -n <resource name> -i <resource id> -g <resource group id> -p <private link resource ID>
 "
     exit 1
 }
@@ -42,7 +42,7 @@ linkPrivateDnsZoneToVNet() {
             --virtual-network "${vnet}" \
             --zone-name "${privateDnsZone}" \
             --name "${privateDnsZoneToVNetLink}" \
-            --registration-enabled true 1>/dev/null
+            --registration-enabled false 1>/dev/null
 
         az network private-dns link vnet wait \
             --resource-group "${vnetResourceGroup}" \
@@ -68,42 +68,40 @@ createPrivateEndpoint() {
         --subnet "${subnet}" \
         --name "${privateEndpoint}" \
         --private-connection-resource-id "${resourceId}" \
-        --group-id "${privateLinkResourceId}" \
+        --group-id "${resourceGroupId}" \
         --connection-name "${privateDnsZoneToVNetLink}" \
         --location "${location}" 1>/dev/null
 }
 
-addPrivateDnsRecord() {
-    echo "Add private A DNS record ${resourceName}"
+createDnsRecord() {
+    echo "Add private DNS record for ${resourceName}"
     currentRecord=$(az network private-dns record-set a list --resource-group "${vnetResourceGroup}" --zone-name "${privateDnsZone}" --query "[?name=='${resourceName}'].name" -o tsv)
     if [[ -z ${currentRecord} ]]; then
-        networkInterfaceId=$(az network private-endpoint show --resource-group "${vnetResourceGroup}" --name "${privateEndpoint}" --query "networkInterfaces[].id" -o tsv)
-        privateIpAddress=$(az network nic show --ids "${networkInterfaceId}" --query "ipConfigurations[].privateIpAddress" -o tsv)
-        az network private-dns record-set a add-record \
-            --resource-group "${vnetResourceGroup}" \
-            --zone-name "${privateDnsZone}" \
-            --record-set-name "${resourceName}" \
-            --ipv4-address "${privateIpAddress}" 1>/dev/null
+        az network private-endpoint dns-zone-group create --resource-group "${vnetResourceGroup}" \
+            --endpoint-name "${privateEndpoint}" \
+            --name "${privateDnsZoneGroup}" \
+            --private-dns-zone "${privateDnsZone}" \
+            --zone-name "${privateDnsZone}" 1>/dev/null
     else
-        echo "Private A DNS record ${resourceName} already exists"
+        echo "Private DNS record for ${resourceName} already exists"
     fi
 }
 
 # Read script arguments
-while getopts ":r:l:n:i:g:z:" option; do
+while getopts ":r:l:n:i:g:p:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     l) location=${OPTARG} ;;
     n) resourceName=${OPTARG} ;;
     i) resourceId=${OPTARG} ;;
-    g) privateLinkResourceId=${OPTARG} ;;
-    z) privateDnsZone=${OPTARG} ;;
+    g) resourceGroupId=${OPTARG} ;;
+    p) privateLinkResourceId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]] || [[ -z ${location} ]] || [[ -z ${resourceName} ]] || [[ -z ${resourceId} ]] || [[ -z ${privateLinkResourceId} ]] || [[ -z ${privateDnsZone} ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${location} ]] || [[ -z ${resourceName} ]] || [[ -z ${resourceId} ]] || [[ -z ${privateLinkResourceId} ]] || [[ -z ${resourceGroupId} ]]; then
     exitWithUsageInfo
 fi
 
@@ -112,13 +110,16 @@ fi
 vnetResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
 vnet=$(az network vnet list --resource-group "${vnetResourceGroup}" --query "[].name" -o tsv)
 subnet="aks-subnet"
-privateDnsZoneToVNetLink="${privateLinkResourceId}-dns-privatelink"
+privateDnsZone="privatelink.${privateLinkResourceId}.azure.net"
+privateDnsZoneToVNetLink="${privateLinkResourceId}-dns-private-link"
 privateEndpoint="${privateLinkResourceId}-private-endpoint"
+privateDnsZoneGroup="${privateLinkResourceId}-private-dns-zone-group"
 
 echo "Private ${privateLinkResourceId} link configuration:
     privateLinkResourceId: ${privateLinkResourceId}
     resourceName: ${resourceName}
     resourceId: ${resourceId}
+    resourceGroupId: ${resourceGroupId}
     vnetResourceGroup: ${vnetResourceGroup}
     vnet: ${vnet}
     subnet: ${subnet}
@@ -130,4 +131,4 @@ disableNetworkPolicy
 createPrivateDnsZone
 linkPrivateDnsZoneToVNet
 createPrivateEndpoint
-addPrivateDnsRecord
+createDnsRecord

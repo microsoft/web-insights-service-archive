@@ -32,35 +32,11 @@ waitForAppGatewayUpdate() {
     fi
 }
 
-updateSubnetServiceEndpoints() {
-    local command="az network vnet subnet update --resource-group ${vnetResourceGroup} --vnet-name ${vnet} --name ${subnet} --service-endpoints Microsoft.AzureCosmosDB"
-
-    echo "Updating subnet service endpoints"
-
-    # Subnet update may fail with Azure internal error. Retrying update will mitigate the failure.
-    for ((i = 1; i <= 5; i++)); do
-        provisioningState=$(eval "${command}") && provisioningState="Succeeded"
-        if [[ ${provisioningState} != "Succeeded" ]]; then
-            echo "Subnet service endpoints update failed. Retrying update."
-            sleep 30
-        else
-            echo "Subnet service endpoints update succeeded"
-            break
-        fi
-    done
-}
-
 grantAccessToAppGateway() {
     echo "Granting access to application gateway"
     az network application-gateway identity assign --gateway-name "${appGateway}" --resource-group "${vnetResourceGroup}" --identity "${appGatewayIdentity}" 1>/dev/null
     identityId=$(az identity show --resource-group "${vnetResourceGroup}" --name "${appGatewayIdentity}" -o tsv --query "principalId")
     az keyvault set-policy --name "${keyVault}" --object-id "${identityId}" --secret-permissions get 1>/dev/null
-}
-
-grantAccessToCosmosDB() {
-    echo "Granting access to Cosmos DB service"
-    nodeSubnetId=$(az network vnet subnet list --resource-group "${vnetResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${subnet}'].id" -o tsv)
-    az cosmosdb network-rule add --name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --virtual-network "${vnet}" --subnet "${nodeSubnetId}" 1>/dev/null
 }
 
 registerPreviewFeature() {
@@ -135,13 +111,9 @@ echo ""
 
 # Get the service network configuration
 vnetResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
-vnet=$(az network vnet list --resource-group "${vnetResourceGroup}" --query "[].name" -o tsv)
-subnet="aks-subnet"
 
 waitForAppGatewayUpdate
-updateSubnetServiceEndpoints
 attachContainerRegistry
 grantAccessToAppGateway
-grantAccessToCosmosDB
 
 echo "Azure Kubernetes Service successfully created."

@@ -28,7 +28,7 @@
             },
             "kind": "GlobalDocumentDB",
             "properties": {
-                "isVirtualNetworkFilterEnabled": true,
+                "publicNetworkAccess": "Disabled",
                 "consistencyPolicy": {
                     "defaultConsistencyLevel": "Session",
                     "maxIntervalInSeconds": 5,

@@ -108,6 +108,7 @@ install() {
     . "${0%/*}/create-public-network.sh"
     . "${0%/*}/install-storage-web-api.sh"
     . "${0%/*}/create-key-vault-private-link.sh"
+    . "${0%/*}/create-cosmos-db-private-link.sh"
 }
 
 # Read script arguments
