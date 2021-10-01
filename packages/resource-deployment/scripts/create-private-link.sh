@@ -5,6 +5,8 @@
 
 set -eo pipefail
 
+export kubernetesIpAddress
+
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
@@ -17,8 +19,8 @@ disableNetworkPolicy() {
     echo "Disable virtual network policies for ${privateLinkResourceId} ${resourceName}"
     az network vnet subnet update \
         --resource-group "${vnetResourceGroup}" \
-        --name "${subnet}" \
         --vnet-name "${vnet}" \
+        --name "${subnet}" \
         --disable-private-endpoint-network-policies true 1>/dev/null
 }
 
@@ -55,27 +57,26 @@ linkPrivateDnsZoneToVNet() {
 }
 
 createPrivateEndpoint() {
-    endpoint=$(az network private-endpoint list --resource-group "${vnetResourceGroup}" --query "[?name=='${privateEndpoint}'].name" -o tsv)
-    if [[ -n ${endpoint} ]]; then
-        echo "Delete old private endpoint ${privateEndpoint}"
-        az network private-endpoint delete --resource-group "${vnetResourceGroup}" --name "${privateEndpoint}" 1>/dev/null
-    fi
-
     echo "Create private endpoint ${privateEndpoint}"
-    az network private-endpoint create \
-        --resource-group "${vnetResourceGroup}" \
-        --vnet-name "${vnet}" \
-        --subnet "${subnet}" \
-        --name "${privateEndpoint}" \
-        --private-connection-resource-id "${resourceId}" \
-        --group-id "${resourceGroupId}" \
-        --connection-name "${privateDnsZoneToVNetLink}" \
-        --location "${location}" 1>/dev/null
+    endpoint=$(az network private-endpoint list --resource-group "${vnetResourceGroup}" --query "[?name=='${privateEndpoint}'].name" -o tsv)
+    if [[ -z ${endpoint} ]]; then
+        az network private-endpoint create \
+            --resource-group "${vnetResourceGroup}" \
+            --vnet-name "${vnet}" \
+            --subnet "${subnet}" \
+            --name "${privateEndpoint}" \
+            --private-connection-resource-id "${resourceId}" \
+            --group-id "${resourceGroupId}" \
+            --connection-name "${privateDnsZoneToVNetLink}" \
+            --location "${location}" 1>/dev/null
+    else
+        echo "Private endpoint ${privateEndpoint} already exists"
+    fi
 }
 
 createDnsRecord() {
     echo "Add private DNS record for ${resourceName}"
-    currentRecord=$(az network private-dns record-set a list --resource-group "${vnetResourceGroup}" --zone-name "${privateDnsZone}" --query "[?name=='${resourceName}'].name" -o tsv)
+    currentRecord=$(az network private-endpoint dns-zone-group list --resource-group "${vnetResourceGroup}" --endpoint-name "${privateEndpoint}" --query "[].name" -o tsv)
     if [[ -z ${currentRecord} ]]; then
         az network private-endpoint dns-zone-group create --resource-group "${vnetResourceGroup}" \
             --endpoint-name "${privateEndpoint}" \
@@ -85,6 +86,11 @@ createDnsRecord() {
     else
         echo "Private DNS record for ${resourceName} already exists"
     fi
+}
+
+getKubernetesIpAddress() {
+    outboundIp=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "networkProfile.loadBalancerProfile.effectiveOutboundIPs[].id" -o tsv)
+    kubernetesIpAddress=$(az network public-ip show --ids "${outboundIp}" --query "ipAddress" -o tsv)
 }
 
 # Read script arguments
@@ -132,3 +138,4 @@ createPrivateDnsZone
 linkPrivateDnsZoneToVNet
 createPrivateEndpoint
 createDnsRecord
+getKubernetesIpAddress

@@ -16,6 +16,14 @@ Usage: ${BASH_SOURCE} -r <resource group> -l <location>
     exit 1
 }
 
+updateFirewallRules() {
+    echo "Updating Cosmos DB firewall rules"
+    ipAddress=$(az cosmosdb show --resource-group "${resourceGroupName}" --name "${cosmosDbAccount}" --query "ipRules[?contains(ipAddressOrRange,'${kubernetesIpAddress}')]|[0].ipAddressOrRange" -o tsv)
+    if [[ -z ${ipAddress} ]]; then
+        az cosmosdb update --resource-group "${resourceGroupName}" --name "${cosmosDbAccount}" --ip-range-filter "${kubernetesIpAddress}" 1>/dev/null
+    fi
+}
+
 # Read script arguments
 while getopts ":r:l:" option; do
     case ${option} in
@@ -34,4 +42,6 @@ resourceGroupId="sql"
 privateLinkResourceId="documents"
 
 . "${0%/*}/create-private-link.sh"
+updateFirewallRules
+
 echo "Private link for Cosmos DB service successfully created."

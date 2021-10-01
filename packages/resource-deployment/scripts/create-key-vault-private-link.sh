@@ -21,6 +21,14 @@ turnOnKeyVaultFirewall() {
     az keyvault update --name "${keyVault}" --resource-group "${resourceGroupName}" --default-action deny 1>/dev/null
 }
 
+updateFirewallRules() {
+    echo "Updating Key Vault firewall rules"
+    ipAddress=$(az keyvault network-rule list --resource-group "${resourceGroupName}" --name "${keyVault}" --query "ipRules[?contains(value,'${kubernetesIpAddress}')]|[0].value" -o tsv)
+    if [[ -z ${ipAddress} ]]; then
+        az keyvault network-rule add --resource-group "${resourceGroupName}" --name "${keyVault}" --ip-address "${kubernetesIpAddress}" 1>/dev/null
+    fi
+}
+
 # Read script arguments
 while getopts ":r:l:" option; do
     case ${option} in
@@ -39,6 +47,7 @@ resourceGroupId="vault"
 privateLinkResourceId="vault"
 
 turnOnKeyVaultFirewall
-
 . "${0%/*}/create-private-link.sh"
+updateFirewallRules
+
 echo "Private link for Key Vault successfully created."

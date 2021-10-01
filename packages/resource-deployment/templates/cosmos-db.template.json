@@ -28,7 +28,6 @@
             },
             "kind": "GlobalDocumentDB",
             "properties": {
-                "publicNetworkAccess": "Disabled",
                 "consistencyPolicy": {
                     "defaultConsistencyLevel": "Session",
                     "maxIntervalInSeconds": 5,
