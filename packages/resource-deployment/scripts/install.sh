@@ -109,6 +109,8 @@ install() {
     . "${0%/*}/install-storage-web-api.sh"
     . "${0%/*}/create-key-vault-private-link.sh"
     . "${0%/*}/create-cosmos-db-private-link.sh"
+
+    . "${0%/*}/restart-kubernetes-services.sh"
 }
 
 # Read script arguments
