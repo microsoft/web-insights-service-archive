@@ -8,7 +8,7 @@ import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { SecretClient } from '@azure/keyvault-secrets';
-import { TokenCredential, DefaultAzureCredential } from '@azure/identity';
+import { TokenCredential } from '@azure/identity';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -17,6 +17,7 @@ import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
+import { AzureManagedCredential } from './credentials/azure-managed-credential';
 
 export function registerAzureServicesToContainer(
     container: Container,
@@ -24,7 +25,7 @@ export function registerAzureServicesToContainer(
 ): void {
     container
         .bind(iocTypeNames.AzureCredential)
-        .toDynamicValue(() => new DefaultAzureCredential())
+        .toDynamicValue(() => new AzureManagedCredential())
         .inSingletonScope();
 
     setupSingletonAzureKeyVaultClientProvider(container);
