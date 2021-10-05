@@ -8,6 +8,8 @@ FROM mcr.microsoft.com/azure-functions/node:3.0-node12
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
+RUN apt-get update && curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
 COPY . /home/site/wwwroot
 
 RUN cd /home/site/wwwroot 
