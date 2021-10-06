@@ -6,7 +6,6 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { QueueServiceClient } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
-import { ContextAwareLogger } from 'logger';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { TokenCredential } from '@azure/identity';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
