@@ -8,6 +8,7 @@ import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { TokenCredential } from '@azure/identity';
+import { ContextAwareLogger } from 'logger';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
