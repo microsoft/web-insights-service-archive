@@ -2,10 +2,12 @@
 // Licensed under the MIT License.
 
 import { ReportData } from './report-data';
-import { ScanStatus } from './scan-types';
 import { StorageDocument } from './storage-document';
 import { ItemTypes } from './item-type';
-import { BlobResultData } from './blob-result-data';
+import { ScanResult } from './scan-result-types/scan-result';
+import { ScanRun } from './scan-run-types/scan-run';
+import { AccessibilityScanResult } from './scan-result-types/accessibility-scan-result';
+import { AccessibilityScanRun } from './scan-run-types/accessibility-scan-run';
 
 /*
  * Represents a scan/crawl of a single URL for one scan type.
@@ -16,10 +18,12 @@ export interface PageScan extends StorageDocument {
     websiteScanId: string; // maps to a WebsiteScan document
     pageId: string; // maps to a Page document
     priority: number;
-    scanStatus: ScanStatus;
-    completedTimestamp?: number;
-    results?: BlobResultData[];
     reports?: ReportData[];
-    retryCount: number;
-    scanError?: string;
+    result?: ScanResult;
+    run: ScanRun;
+}
+
+export interface AccessibilityPageScan extends PageScan {
+    result: AccessibilityScanResult;
+    run: AccessibilityScanRun;
 }
