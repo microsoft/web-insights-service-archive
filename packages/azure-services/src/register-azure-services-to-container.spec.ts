@@ -47,7 +47,7 @@ describe(registerAzureServicesToContainer, () => {
 
         verifySingletonDependencyResolution(container, StorageConfig);
         verifySingletonDependencyResolution(container, SecretProvider);
-        verifySingletonDependencyResolution(container, iocTypeNames.DefaultAzureCredential);
+        verifySingletonDependencyResolution(container, iocTypeNames.AzureCredential);
     });
 
     it('verify non-singleton resolution', () => {
@@ -170,7 +170,7 @@ describe(registerAzureServicesToContainer, () => {
             const expectedOptions = { endpoint: cosmosDbUrl, aadCredentials: credentialStub };
 
             runCosmosClientTest(container, secretProviderMock);
-            stubBinding(container, iocTypeNames.DefaultAzureCredential, credentialStub);
+            stubBinding(container, iocTypeNames.AzureCredential, credentialStub);
 
             const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
             const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -28,6 +28,8 @@ done
 . "${0%/*}/get-resource-names.sh"
 
 serviceName="storage-web-api"
-clientId=$(az aks show -n "${kubernetesService}" -g "${resourceGroupName}" --query "identityProfile.kubeletidentity.clientId" -o tsv)
 
 . "${0%/*}/install-service-manifest.sh"
+. "${0%/*}/grant-service-principal-access.sh"
+
+echo "The Storage Web API service successfully installed."

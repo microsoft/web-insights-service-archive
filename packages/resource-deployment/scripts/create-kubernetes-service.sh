@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -16,95 +16,40 @@ Usage: ${BASH_SOURCE} -r <resource group> -l <location> [-c <aks cluster name>] 
 attachContainerRegistry() {
     role="AcrPull"
     containerRegistryId=$(az acr show --resource-group "${resourceGroupName}" --name "${containerRegistry}" --query id -o tsv)
+    principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
     scope="--scope ${containerRegistryId}"
     . "${0%/*}/role-assign-for-sp.sh"
 }
 
-enableCosmosRBAC() {
-    # Create and assign custom RBAC role
-    customRoleName="CosmosDocumentRW"
-    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].id" -o tsv)
-    if [[ -z "${RBACRoleId}" ]]; then
-        echo "Creating a custom RBAC role with R/W permissions"
-        RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosDbAccount}" \
-            --resource-group "${resourceGroupName}" \
-            --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
-            --query "id" -o tsv)
-        az cosmosdb sql role definition wait --account-name "${cosmosDbAccount}" \
-            --resource-group "${resourceGroupName}" \
-            --id "${RBACRoleId}" \
-            --exists 1>/dev/null
-    fi
-    echo "Assigning custom RBAC role ${customRoleName} to service principal ${principalId}"
-    az cosmosdb sql role assignment create --account-name "${cosmosDbAccount}" \
-        --resource-group "${resourceGroupName}" \
-        --scope "/" \
-        --principal-id "${principalId}" \
-        --role-definition-id "${RBACRoleId}" 1>/dev/null
-}
-
 waitForAppGatewayUpdate() {
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
-    if [[ -n ${nodeResourceGroup} ]]; then
-        if az network application-gateway show --resource-group "${nodeResourceGroup}" --name "${appGateway}" -o tsv --query "name" >/dev/null 2>&1; then
-            echo "Waiting for application gateway configuration update"
-            az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated
-        else
-            echo "Waiting for application gateway deployment"
-            az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --created
-        fi
+    currentAppGateway=$(az network application-gateway list --resource-group "${vnetResourceGroup}" --query "[?name=='${appGateway}'].name" -o tsv)
+    if [[ -n ${currentAppGateway} ]]; then
+        echo "Waiting for application gateway configuration update"
+        az network application-gateway wait --resource-group "${vnetResourceGroup}" --name "${appGateway}" --updated
+    else
+        echo "Waiting for application gateway deployment"
+        az network application-gateway wait --resource-group "${vnetResourceGroup}" --name "${appGateway}" --created
     fi
-}
-
-grantAccessToCluster() {
-    echo "Granting access to cluster"
-    principalId=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" --query "identityProfile.kubeletidentity.objectId" -o tsv)
-    # Grant access to container registry
-    attachContainerRegistry
-    # Grant access to key vault
-    . "${0%/*}/enable-msi-for-key-vault.sh"
-    # Grant access to cosmosDB
-    enableCosmosRBAC
 }
 
 grantAccessToAppGateway() {
     echo "Granting access to application gateway"
-    az network application-gateway identity assign --gateway-name "${appGateway}" --resource-group "${nodeResourceGroup}" --identity "${appGatewayIdentity}" 1>/dev/null
-    identityId=$(az identity show --resource-group "${nodeResourceGroup}" --name "${appGatewayIdentity}" -o tsv --query "principalId")
+    az network application-gateway identity assign --gateway-name "${appGateway}" --resource-group "${vnetResourceGroup}" --identity "${appGatewayIdentity}" 1>/dev/null
+    identityId=$(az identity show --resource-group "${vnetResourceGroup}" --name "${appGatewayIdentity}" -o tsv --query "principalId")
     az keyvault set-policy --name "${keyVault}" --object-id "${identityId}" --secret-permissions get 1>/dev/null
 }
 
-grantAccessToCosmosDB() {
-    local nodeSubnetName="aks-subnet"
+registerPreviewFeature() {
+    local feature=$1
+    local namespace=$2
 
-    echo "Granting CosmosDB access to subnet ${nodeSubnetName} in vnet ${vnet}"
-    vnet=$(az network vnet list --resource-group "${nodeResourceGroup}" --query "[].name" -o tsv)
-    service=$(az network vnet subnet show --resource-group "${nodeResourceGroup}" --name "${nodeSubnetName}" --vnet-name "${vnet}" --query "serviceEndpoints[?service=='Microsoft.AzureCosmosDB'].service" -o tsv)
-    nodeSubnetId=$(az network vnet subnet list --resource-group "${nodeResourceGroup}" --vnet-name "${vnet}" --query "[?name=='${nodeSubnetName}'].id" -o tsv)
-
-    if [[ -z ${service} ]]; then
-        az network vnet subnet update \
-            --resource-group "${nodeResourceGroup}" \
-            --name "${nodeSubnetName}" \
-            --vnet-name "${vnet}" \
-            --service-endpoints Microsoft.AzureCosmosDB 1>/dev/null
-    fi
-
-    az cosmosdb network-rule add --name "${cosmosDbAccount}" \
-        --resource-group "${resourceGroupName}" \
-        --virtual-network "${vnet}" \
-        --subnet "${nodeSubnetId}" 1>/dev/null
-}
-
-registerEncryptionAtHost() {
-    local end=$((SECONDS + 1800))
-
-    echo "Registering the EncryptionAtHost feature flags on subscription"
-    az feature register --namespace "Microsoft.Compute" --name "EncryptionAtHost" 1>/dev/null
+    echo "Registering the ${feature} feature flags on a subscription"
+    az feature register --namespace "${namespace}" --name "${feature}" 1>/dev/null
 
     printf " - Registering .."
+    local end=$((SECONDS + 1800))
     while [ "${SECONDS}" -le "${end}" ]; do
-        state=$(az feature list -o table --query "[?contains(name, 'Microsoft.Compute/EncryptionAtHost')].{State:properties.state}" -o tsv)
+        state=$(az feature list -o table --query "[?contains(name, '${namespace}/${feature}')].{State:properties.state}" -o tsv)
         if [[ ${state} == "Registered" ]]; then
             break
         else
@@ -115,8 +60,8 @@ registerEncryptionAtHost() {
     done
     echo " Registered"
 
-    # Refresh the registration of the Microsoft.Compute resource providers
-    az provider register --namespace Microsoft.Compute 1>/dev/null
+    # Refresh the feature registration (required)
+    az provider register --namespace "${namespace}" 1>/dev/null
 }
 
 # Read script arguments
@@ -142,14 +87,17 @@ fi
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
-# Enable the EncryptionAtHost feature flags on subscription
-registerEncryptionAtHost
+# Enable feature flags on subscription
+registerPreviewFeature "EncryptionAtHost" "Microsoft.Compute"
+registerPreviewFeature "EnablePodIdentityPreview" "Microsoft.ContainerService"
+az extension add --name aks-preview
 
 # Deploy Azure Kubernetes Service
 echo "Deploying Azure Kubernetes Service in resource group ${resourceGroupName}"
 az aks create --resource-group "${resourceGroupName}" --name "${kubernetesService}" --location "${location}" \
     --no-ssh-key \
     --enable-managed-identity \
+    --enable-pod-identity \
     --enable-encryption-at-host \
     --network-plugin azure \
     --appgw-name "${appGateway}" \
@@ -161,9 +109,11 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
     1>/dev/null
 echo ""
 
+# Get the service network configuration
+vnetResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
+
 waitForAppGatewayUpdate
-grantAccessToCluster
+attachContainerRegistry
 grantAccessToAppGateway
-grantAccessToCosmosDB
 
 echo "Azure Kubernetes Service successfully created."

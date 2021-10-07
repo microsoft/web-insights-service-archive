@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -24,20 +24,20 @@ if [[ -z "${resourceGroupName}" ]]; then
     exit 1
 fi
 
-resourceName=$(
+sourceResourceName=$(
     az monitor app-insights component show \
         --resource-group "${resourceGroupName}" \
         --query "[?starts_with(name,'wisappinsights')].name|[0]" \
         -o tsv
 )
 
-if [[ -z ${resourceName} ]]; then
+if [[ -z ${sourceResourceName} ]]; then
     echo "Unable to find Application Insights service in resource group ${resourceGroupName} to infer name suffix"
     return
 fi
 
 # Remove app insights name prefix
-export resourceNameSuffix=${resourceName:14}
+export resourceNameSuffix=${sourceResourceName:14}
 export frontEndPublicCertificate="front-end-public-ssl"
 export kubernetesService="wiskube${resourceNameSuffix}"
 export containerRegistry="wisregistry${resourceNameSuffix}"

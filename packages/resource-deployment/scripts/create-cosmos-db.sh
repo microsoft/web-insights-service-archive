@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -94,8 +94,8 @@ setupCosmosDb() {
         "createCosmosDatabase \"${webInsightsDbName}\""
     )
 
-    echo "Creating Cosmos databases in parallel"
-    runCommandsWithoutSecretsInParallel cosmosSetupProcesses
+    echo "Creating Cosmos DB databases in parallel"
+    waitForCommandsInParallel cosmosSetupProcesses
 
     # Increase autoscale maximum throughput for below collection only in case of prod
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
@@ -112,10 +112,26 @@ setupCosmosDb() {
         )
     fi
 
-    echo "Creating Cosmos collections in parallel"
-    runCommandsWithoutSecretsInParallel cosmosSetupProcesses
+    echo "Creating Cosmos DB collections in parallel"
+    waitForCommandsInParallel cosmosSetupProcesses
+}
 
-    echo "Cosmos DB account successfully created."
+createCosmosRBAC() {
+    # Create custom RBAC role
+    customRoleName="CosmosDocumentRW"
+    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].name" -o tsv)
+
+    if [[ -z ${RBACRoleId} ]]; then
+        echo "Creating a custom RBAC role with read-write permissions"
+        RBACRoleId=$(az cosmosdb sql role definition create --account-name "${cosmosDbAccount}" \
+            --resource-group "${resourceGroupName}" \
+            --body "@${0%/*}/../templates/cosmos-db-rw-role.json" \
+            --query "id" -o tsv)
+        az cosmosdb sql role definition wait --account-name "${cosmosDbAccount}" \
+            --resource-group "${resourceGroupName}" \
+            --id "${RBACRoleId}" \
+            --exists 1>/dev/null
+    fi
 }
 
 # Read script arguments
@@ -140,3 +156,6 @@ fi
 . "${0%/*}/process-utilities.sh"
 
 setupCosmosDb
+createCosmosRBAC
+
+echo "Cosmos DB service successfully created."

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -6,34 +6,41 @@
 set -eo pipefail
 
 function waitForProcesses() {
-    local processesToWaitFor=$1
+    # accepting an associative array as a string
+    arg1=$(declare -p "$1")
+    # converting string into a new associative array
+    eval "declare -A processesToWaitFor=${arg1#*=}"
 
-    list="${processesToWaitFor}[@]"
-    for pid in "${!list}"; do
-        echo "Waiting for process with pid ${pid}"
+    # shellcheck disable=SC2154
+    for pid in "${!processesToWaitFor[@]}"; do
+        echo "Waiting for process with pid ${pid}. Command: ${processesToWaitFor[${pid}]}"
+
         wait "${pid}"
-        local processExitCode=$?
-        echo "Process with pid ${pid} exited with exit code ${processExitCode}"
 
-        if [[ ${processExitCode} != 0 ]]; then
-            echo "Process - ${pid} failed with exit code ${processExitCode}. Killing current process."
+        local processExitCode=$?
+        if [[ ${processExitCode} == 0 ]]; then
+            echo "Process with pid ${pid} exited. Exit code: ${processExitCode}. Command: ${processesToWaitFor[${pid}]}"
+        else
+            echo "Process with pid ${pid} exited with non-zero code. Exiting current process. Exit code: ${processExitCode}. Command: ${processesToWaitFor[${pid}]}"
             exit "${processExitCode}"
         fi
     done
 }
 
-function runCommandsWithoutSecretsInParallel {
+function waitForCommandsInParallel {
     local commands=$1
-    local -a parallelizableProcesses
+
+    declare -A parallelizableProcesses
 
     local list="${commands}[@]"
     for command in "${!list}"; do
         eval "${command}" &
-        echo "Created process with pid $! for command: '${command}'"
-        parallelizableProcesses+=("$!")
+        echo "Created process with pid $!. Command: ${command}"
+        # shellcheck disable=SC2034
+        parallelizableProcesses[$!]="${command}"
     done
 
-    waitForProcesses parallelizableProcesses
+    waitForProcesses "parallelizableProcesses"
 }
 
 function sendSignalToProcessIfExists {

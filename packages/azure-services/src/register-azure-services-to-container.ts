@@ -6,9 +6,9 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { QueueServiceClient } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
-import { ContextAwareLogger } from 'logger';
 import { SecretClient } from '@azure/keyvault-secrets';
-import { DefaultAzureCredential } from '@azure/identity';
+import { TokenCredential } from '@azure/identity';
+import { ContextAwareLogger } from 'logger';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -17,14 +17,15 @@ import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
+import { AzureManagedCredential } from './credentials/azure-managed-credential';
 
 export function registerAzureServicesToContainer(
     container: Container,
     cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient = defaultCosmosClientFactory,
 ): void {
     container
-        .bind(iocTypeNames.DefaultAzureCredential)
-        .toDynamicValue((context) => new DefaultAzureCredential({ managedIdentityClientId: process.env.IDENTITY_CLIENT_ID }))
+        .bind(iocTypeNames.AzureCredential)
+        .toDynamicValue(() => new AzureManagedCredential())
         .inSingletonScope();
 
     setupSingletonAzureKeyVaultClientProvider(container);
@@ -57,20 +58,10 @@ async function getStorageAccountName(context: interfaces.Context): Promise<strin
     }
 }
 
-// DefaultAzureCredential will first look for Azure Active Directory (AAD)
-// client secret credentials in the following environment variables:
-//
-// - AZURE_TENANT_ID: The ID of your AAD tenant
-// - AZURE_CLIENT_ID: The ID of your AAD app registration (client)
-// - AZURE_CLIENT_SECRET: The client secret for your AAD app registration
-//
-// If those environment variables aren't found and your application is deployed
-// to an Azure VM or App Service instance, the managed service identity endpoint
-// will be used as a fallback authentication source.
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
-        const azureCredential = container.get<DefaultAzureCredential>(iocTypeNames.DefaultAzureCredential);
+        const azureCredential = container.get<TokenCredential>(iocTypeNames.AzureCredential);
 
         return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, azureCredential);
     });
@@ -82,7 +73,7 @@ function createCosmosContainerClient(container: interfaces.Container, dbName: st
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
-        const credentials = container.get<DefaultAzureCredential>(iocTypeNames.DefaultAzureCredential);
+        const credentials = container.get<TokenCredential>(iocTypeNames.AzureCredential);
 
         return new SecretClient(process.env.KEY_VAULT_URL, credentials);
     });
@@ -91,7 +82,7 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 function setupSingletonQueueServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<QueueServiceClient>(iocTypeNames.QueueServiceClientProvider, container, async (context) => {
         const accountName = await getStorageAccountName(context);
-        const credential = container.get<DefaultAzureCredential>(iocTypeNames.DefaultAzureCredential);
+        const credential = container.get<TokenCredential>(iocTypeNames.AzureCredential);
 
         return new QueueServiceClient(`https://${accountName}.queue.core.windows.net`, credential);
     });
@@ -108,7 +99,7 @@ function setupSingletonCosmosClientProvider(
         } else {
             const secretProvider = context.container.get(SecretProvider);
             cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
-            const credentials = container.get<DefaultAzureCredential>(iocTypeNames.DefaultAzureCredential);
+            const credentials = container.get<TokenCredential>(iocTypeNames.AzureCredential);
 
             return cosmosClientFactory({ endpoint: cosmosDbUrl, aadCredentials: credentials });
         }

@@ -7,11 +7,11 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { QueueServiceClient } from '@azure/storage-queue';
 
 export const iocTypeNames = {
+    AzureCredential: 'AzureCredential',
     AzureKeyVaultClientProvider: 'AzureKeyVaultClientProvider',
     BlobServiceClientProvider: 'BlobServiceClientProvider',
     CosmosClientProvider: 'CosmosClientProvider',
     QueueServiceClientProvider: 'QueueServiceClientProvider',
-    DefaultAzureCredential: 'DefaultAzureCredential',
 };
 
 export type AzureKeyVaultClientProvider = () => Promise<SecretClient>;

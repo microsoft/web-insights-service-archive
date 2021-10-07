@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -14,7 +14,7 @@ Usage: ${BASH_SOURCE} -r <resource group> [-c <aks cluster name>]
 }
 
 waitForAppGatewayUpdate() {
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
+    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
     if [[ -n ${nodeResourceGroup} ]]; then
         echo "Waiting for application gateway configuration update"
         az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -8,7 +8,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <service name> [-i <user-assigned identity client id>] [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-d debug]
+Usage: ${BASH_SOURCE} -r <resource group> -s <service name> [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-d debug]
 "
     exit 1
 }
@@ -37,7 +37,7 @@ getInstallAction() {
 }
 
 waitForAppGatewayUpdate() {
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
+    nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
     if [[ -n ${nodeResourceGroup} ]]; then
         echo "Waiting for application gateway configuration update"
         az network application-gateway wait --resource-group "${nodeResourceGroup}" --name "${appGateway}" --updated
@@ -50,7 +50,7 @@ getPublicDNS() {
 }
 
 # Read script arguments
-while getopts ":r:s:c:e:v:f:i:d" option; do
+while getopts ":r:s:c:e:v:f:d" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) serviceName=${OPTARG} ;;
@@ -59,7 +59,6 @@ while getopts ":r:s:c:e:v:f:i:d" option; do
     v) releaseVersion=${OPTARG} ;;
     f) flags=${OPTARG} ;;
     d) debug="debug" ;;
-    i) clientId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -100,6 +99,10 @@ repository="${containerRegistry}.azurecr.io"
 keyVaultUrl="https://${keyVault}.vault.azure.net/"
 helmChart="${0%/*}/../helm-charts/${serviceName}"
 
+# Create service managed identity
+principalName="${serviceName}-sp"
+. "${0%/*}/create-managed-identity.sh"
+
 getInstallAction
 
 # Install service manifest
@@ -111,7 +114,7 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     --set podAnnotations.releaseId="${releaseVersion}" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
-    --set env[2].name=IDENTITY_CLIENT_ID,env[2].value="${clientId}" \
+    --set env[2].name=AZURE_PRINCIPAL_ID,env[2].value="${principalId}" \
     --set ingress.tls[0].hosts[0]="${fqdn}" \
     ${flags}
 

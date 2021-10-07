@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -48,6 +48,20 @@ revokePermissionsToKeyVault() {
     fi
 }
 
+turnOffKeyVaultFirewall() {
+    echo "Disable key vault firewall"
+    az keyvault update --name "${keyVault}" --resource-group "${resourceGroupName}" --default-action allow 1>/dev/null
+}
+
+deletePrivateEndpointConnection() {
+    # Existing private endpoint connections will prevent access to Key Vault from an agent machine
+    endpoints=$(az keyvault show --name ${keyVault} --query "properties.privateEndpointConnections[].id" -o tsv)
+    for endpoint in ${endpoints}; do
+        echo "Deleting private endpoint connection associated with a Key Vault. Id: ${endpoint}"
+        az keyvault private-endpoint-connection delete --id ${endpoint} 1>/dev/null
+    done
+}
+
 pushSecretToKeyVault() {
     local secretName=$1
     local secretValue=$2
@@ -85,6 +99,7 @@ getContainerRegistryLogin() {
 }
 
 createAppInsightsApiKey() {
+    echo "Creating App Insights API key"
     apiKeyParams="--app ${appInsights} --resource-group ${resourceGroupName} --api-key ${appInsights}-api-key"
     apiKeyExists=$(az monitor app-insights api-key show ${apiKeyParams})
 
@@ -95,7 +110,7 @@ createAppInsightsApiKey() {
     fi
 
     appInsightsApiKey=$(az monitor app-insights api-key create ${apiKeyParams} --read-properties ReadTelemetry --query "apiKey" -o tsv)
-    echo "App Insights API key successfully created '${appInsightsApiKey}'"
+    echo "App Insights API key successfully created"
 }
 
 # function runs in a subshell to isolate trap handler
@@ -105,6 +120,9 @@ pushSecretsToKeyVault() (
 
     trap 'revokePermissionsToKeyVault' EXIT
     grantWritePermissionToKeyVault
+
+    turnOffKeyVaultFirewall
+    deletePrivateEndpointConnection
 
     getCosmosDbUrl
     pushSecretToKeyVault "cosmosDbUrl" "${cosmosDbUrl}"

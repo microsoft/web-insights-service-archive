@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
@@ -82,25 +82,35 @@ install() {
 
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
+    # Create App Insights first to infer auto-generated unique resource suffix
     . "${0%/*}/create-app-insights.sh"
     . "${0%/*}/get-resource-names.sh"
 
-    # Set of scripts that can be run in parallel without external dependencies
     # shellcheck disable=SC2034
     parallelProcesses=(
-        "${0%/*}/create-container-registry.sh"
-        "${0%/*}/create-cosmos-db.sh"
         "${0%/*}/create-storage-account.sh"
+        "${0%/*}/create-cosmos-db.sh"
+        "${0%/*}/create-container-registry.sh"
         "${0%/*}/create-monitor-workspace.sh"
     )
-    runCommandsWithoutSecretsInParallel parallelProcesses
+    waitForCommandsInParallel parallelProcesses
 
     . "${0%/*}/create-key-vault.sh"
     . "${0%/*}/push-secrets-to-key-vault.sh"
-    . "${0%/*}/push-image-to-container-registry.sh"
-    . "${0%/*}/create-kubernetes-service.sh"
+
+    # shellcheck disable=SC2034
+    parallelProcesses=(
+        "${0%/*}/push-image-to-container-registry.sh"
+        "${0%/*}/create-kubernetes-service.sh"
+    )
+    waitForCommandsInParallel parallelProcesses
+
     . "${0%/*}/create-public-network.sh"
     . "${0%/*}/install-storage-web-api.sh"
+    . "${0%/*}/create-key-vault-private-link.sh"
+    . "${0%/*}/create-cosmos-db-private-link.sh"
+
+    . "${0%/*}/restart-kubernetes-services.sh"
 }
 
 # Read script arguments
