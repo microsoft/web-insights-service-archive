@@ -7,6 +7,7 @@ import { AccessToken } from '@azure/core-auth';
 import { TokenCredential, GetTokenOptions } from '@azure/identity';
 import got, { Got, Options } from 'got';
 import NodeCache from 'node-cache';
+import { Mutex } from 'async-mutex';
 
 export interface ImdsToken {
     access_token: string;
@@ -38,6 +39,7 @@ export class AzureManagedCredential implements TokenCredential {
     constructor(
         private readonly httpClientBase: Got = got,
         private readonly tokenCache: NodeCache = new NodeCache({ checkperiod: AzureManagedCredential.cacheCheckPeriod }),
+        private readonly mutex: Mutex = new Mutex(),
     ) {
         this.httpClient = this.httpClientBase.extend({
             ...this.options,
@@ -45,7 +47,9 @@ export class AzureManagedCredential implements TokenCredential {
     }
 
     public async getToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken> {
-        const token = await this.getMsiToken(scopes, options?.requestOptions?.timeout);
+        // Prevent multiple async calls to IMDS to avoid request rejection
+        // The subsequent calls for the same scope will use token from a cache
+        const token = await this.mutex.runExclusive(async () => this.getMsiToken(scopes, options?.requestOptions?.timeout));
 
         return { token: token.access_token, expiresOnTimestamp: token.expires_on };
     }

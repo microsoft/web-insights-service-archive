@@ -6,12 +6,18 @@ import 'reflect-metadata';
 import { Got, CancelableRequest, Response } from 'got';
 import NodeCache from 'node-cache';
 import { IMock, Mock, Times } from 'typemoq';
+import { Mutex } from 'async-mutex';
+import { AccessToken } from '@azure/core-auth';
+import { System } from 'common';
 import { AzureManagedCredential } from './azure-managed-credential';
 
+const servicePrincipalId = 'sp-id';
+const resource = 'https://vault.azure.net';
+const requestUrlBase = 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2019-08-01';
+
 describe(AzureManagedCredential, () => {
-    const scopes = 'https://vault.azure.net/default';
-    const requestUrl =
-        'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2019-08-01&resource=https://vault.azure.net&principal_id=sp-id';
+    let scopes = 'https://vault.azure.net/default';
+    let requestUrl = `${requestUrlBase}&resource=${resource}&principal_id=${servicePrincipalId}`;
     const getTokenOptions = {
         requestOptions: {
             timeout: 30,
@@ -34,13 +40,13 @@ describe(AzureManagedCredential, () => {
     beforeEach(() => {
         httpClientBaseMock = Mock.ofType<Got>();
         tokenCacheMock = Mock.ofType<NodeCache>();
-        process.env.AZURE_PRINCIPAL_ID = 'sp-id';
+        process.env.AZURE_PRINCIPAL_ID = servicePrincipalId;
         httpClientBaseMock
             .setup((o) => o.extend({ ...httpClientOptions }))
             .returns(() => httpClientBaseMock.object)
             .verifiable();
 
-        azureManagedCredential = new AzureManagedCredential(httpClientBaseMock.object, tokenCacheMock.object);
+        azureManagedCredential = new AzureManagedCredential(httpClientBaseMock.object, tokenCacheMock.object, new Mutex());
     });
 
     afterEach(() => {
@@ -105,4 +111,60 @@ describe(AzureManagedCredential, () => {
 
         await expect(azureManagedCredential.getToken(scopes, getTokenOptions)).rejects.toThrow();
     });
+
+    it('synchronize get token async calls', async () => {
+        const requestCount = 10;
+        const actualRequestSequence: string[] = [];
+        const expectedRequestSequence: string[] = [];
+
+        for (let i = 1; i <= requestCount; i++) {
+            requestUrl = getRequestUrl(i);
+
+            // skip first request since it should be served from IMDS
+            if (i !== 1) {
+                expectedRequestSequence.push(requestUrl);
+                tokenCacheMock
+                    .setup((o) => o.get(requestUrl))
+                    .returns(async (url) => {
+                        actualRequestSequence.push(url);
+                        await System.wait(Math.random() * 100);
+
+                        return JSON.parse(imdsTokenString);
+                    })
+                    .verifiable();
+            }
+        }
+
+        // first request is served from IMDS
+        requestUrl = getRequestUrl(1);
+        tokenCacheMock
+            .setup((o) => o.set(requestUrl, JSON.parse(imdsTokenString), expires_in - 600 * 2))
+            .returns(() => true)
+            .verifiable(Times.once());
+
+        const response = { body: imdsTokenString } as unknown as CancelableRequest<Response<string>>;
+        httpClientBaseMock
+            .setup((o) => o.get(requestUrl, { timeout: getTokenOptions.requestOptions.timeout }))
+            .returns(() => response)
+            .verifiable(Times.once());
+
+        const calls: Promise<AccessToken>[] = [];
+        for (let i = 1; i <= requestCount; i++) {
+            scopes = `https://${i}.vault.azure.net/default`;
+            calls.push(azureManagedCredential.getToken(scopes, getTokenOptions));
+        }
+
+        await Promise.all(calls);
+
+        // the call sequence should match
+        for (let i = 0; i < expectedRequestSequence.length; i++) {
+            expect(actualRequestSequence[i]).toEqual(expectedRequestSequence[i]);
+        }
+    });
 });
+
+function getRequestUrl(resourceId: number): string {
+    const resourceWithId = `https://${resourceId}.vault.azure.net`;
+
+    return `${requestUrlBase}&resource=${resourceWithId}&principal_id=${servicePrincipalId}`;
+}

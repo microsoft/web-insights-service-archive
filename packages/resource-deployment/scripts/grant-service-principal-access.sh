@@ -17,12 +17,12 @@ assignCosmosRBAC() {
     local customRoleName="CosmosDocumentRW"
 
     echo "Assigning custom RBAC role ${customRoleName} to ${principalId} service principal"
-    RBACRoleId=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].name" -o tsv)
+    RBACRoleName=$(az cosmosdb sql role definition list --account-name "${cosmosDbAccount}" --resource-group "${resourceGroupName}" --query "[?roleName=='${customRoleName}'].name" -o tsv)
     az cosmosdb sql role assignment create --account-name "${cosmosDbAccount}" \
         --resource-group "${resourceGroupName}" \
         --scope "/" \
         --principal-id "${principalId}" \
-        --role-definition-id "${RBACRoleId}" 1>/dev/null
+        --role-definition-id "${RBACRoleName}" 1>/dev/null
 }
 
 createPodIdentity() {
