@@ -7,10 +7,14 @@
 
 set -eo pipefail
 
+export targetSubscription
+export profileName
+export resourceGroupName
+
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group>
+Usage: ${BASH_SOURCE} -r <resource group> -e <environment> [-p <private scripts directory>] [-s <subscription>]
 "
     exit 1
 }
@@ -98,6 +102,23 @@ getContainerRegistryLogin() {
     fi
 }
 
+pushPrivateSecrets() {
+    # Must do this before enabling private link
+    if [[ ${environment} == "dev" ]]; then
+        targetSubscription="${subscription}"
+        profileName="${environment}"
+        (
+            cd ${privateScriptsLocation}
+            targetSubscription="${subscription}"
+            profileName="${environment}"
+            echo "Running private script to push secrets to keyvault"
+            . "${0%/*}/copy-azsecpack-cert-to-keyvault.sh"
+        )
+        echo "Current working dir:"
+        pwd
+    fi
+}
+
 createAppInsightsApiKey() {
     echo "Creating App Insights API key"
     apiKeyParams="--app ${appInsights} --resource-group ${resourceGroupName} --api-key ${appInsights}-api-key"
@@ -137,19 +158,31 @@ pushSecretsToKeyVault() (
     getContainerRegistryLogin
     pushSecretToKeyVault "containerRegistryUsername" "${containerRegistryUsername}"
     pushSecretToKeyVault "containerRegistryPassword" "${containerRegistryPassword}"
+
+    pushPrivateSecrets
 )
 
 # Read script arguments
-while getopts ":r:" option; do
+while getopts ":r:e:p:s:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
+    p) privateScriptsLocation=${OPTARG} ;;
+    s) subscription=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${environment} ]]; then
     exitWithUsageInfo
+fi
+
+if [[ ${environment} == "dev" ]]; then
+    if [[ -z ${privateScriptsLocation} ]] || [[ -z ${subscription} ]]; then
+        echo "private script directory and subscription is required for environment ${dev}"
+        exitWithUsageInfo
+    fi
 fi
 
 . "${0%/*}/get-resource-names.sh"

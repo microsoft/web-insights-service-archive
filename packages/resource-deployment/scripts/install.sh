@@ -12,11 +12,12 @@ export location
 export resourceGroupName
 export subscription
 export releaseVersion
+export privateScriptsLocation
 
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -e <environment> -l <location> -r <resource group> -s <subscription name or id> [-v <release version>]
+Usage: ${BASH_SOURCE} -e <environment> -l <location> -r <resource group> -s <subscription name or id> [-p <private scripts location, required for dev environment>] [-v <release version>]
 where:
 
 resource group - The name of the resource group that everything will be deployed in.
@@ -114,13 +115,14 @@ install() {
 }
 
 # Read script arguments
-while getopts ":r:s:l:e:v:" option; do
+while getopts ":r:s:l:e:v:p:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     l) location=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
+    p) privateScriptsLocation=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
