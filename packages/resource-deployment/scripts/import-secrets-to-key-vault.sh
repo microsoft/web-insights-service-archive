@@ -144,7 +144,7 @@ if [[ -z ${environment} ]]; then
 fi
 
 if [[ -z ${profilesPath} ]]; then
-    profilesPath="${0%/*}/../../../azure-security-pack/dist/profiles/"
+    profilesPath="${0%/*}/../../../resource-deployment-private/dist/profiles/"
 fi
 
 echo "Importing secrets to key vault"
