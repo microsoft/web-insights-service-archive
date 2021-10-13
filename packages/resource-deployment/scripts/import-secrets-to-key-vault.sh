@@ -150,16 +150,15 @@ fi
 echo "Importing secrets to key vault"
 
 loadProfile
-if [[ "${profileLoaded}" != true ]]; then
+if [[ "${profileLoaded}" == true ]]; then
+    if [[ -z ${sourceKeyVault} ]] || [[ -z ${sourceSubscription} ]] || [[ -z ${sourceCertificateNames} ]] || [[ -z ${targetCertificateNames} ]]; then
+        echo "Profile configuration file ${profileName} misconfigured."
+        exit 1
+    fi
+
+    uploadSecretsToTargetKeyVault
+
+    echo "Import secrets to key vault successfully completed."
+else
     echo "Profile configuration file ${profileName} not found. Skip importing secrets to key vault."
-    exit 0
 fi
-
-if [[ -z ${sourceKeyVault} ]] || [[ -z ${sourceSubscription} ]] || [[ -z ${sourceCertificateNames} ]] || [[ -z ${targetCertificateNames} ]]; then
-    echo "Profile configuration file ${profileName} misconfigured."
-    exit 1
-fi
-
-uploadSecretsToTargetKeyVault
-
-echo "Import secrets to key vault successfully completed."
