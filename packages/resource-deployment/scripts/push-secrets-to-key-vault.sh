@@ -10,7 +10,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group>
+Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>] [-p <profiles path>]
 "
     exit 1
 }
@@ -38,7 +38,7 @@ grantWritePermissionToKeyVault() {
     fi
 }
 
-revokePermissionsToKeyVault() {
+onExit-push-secrets-to-key-vault() {
     echo "Revoking permission to key vault ${keyVault} for logged in user"
 
     if [[ ${loggedInUserType} == "user" ]]; then
@@ -113,12 +113,17 @@ createAppInsightsApiKey() {
     echo "App Insights API key successfully created"
 }
 
-# function runs in a subshell to isolate trap handler
+importSecrets() {
+    targetKeyVault=${keyVault}
+    targetSubscription=${subscription}
+    . "${0%/*}/import-secrets-to-key-vault.sh"
+}
+
 pushSecretsToKeyVault() (
     echo "Pushing secrets to key vault ${keyVault}"
     getLoggedInUserCredentials
 
-    trap 'revokePermissionsToKeyVault' EXIT
+    trap 'onExit-push-secrets-to-key-vault' EXIT
     grantWritePermissionToKeyVault
 
     turnOffKeyVaultFirewall
@@ -140,9 +145,11 @@ pushSecretsToKeyVault() (
 )
 
 # Read script arguments
-while getopts ":r:" option; do
+while getopts ":r:s:p:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
+    s) subscription=${OPTARG} ;;
+    p) profilesPath=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -152,7 +159,14 @@ if [[ -z ${resourceGroupName} ]]; then
     exitWithUsageInfo
 fi
 
+if [[ -z ${subscription} ]]; then
+    # Get the default subscription
+    subscription=$(az account show --query "id" -o tsv)
+fi
+
 . "${0%/*}/get-resource-names.sh"
 
 pushSecretsToKeyVault
+importSecrets
+
 echo "Key vault secrets successfully updated."

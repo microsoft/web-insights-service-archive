@@ -5,6 +5,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+nameOverride: ''
+fullnameOverride: ''
+podPrincipalName: ''
 replicaCount: 1
 
 image:
@@ -12,9 +15,6 @@ image:
   repository: ''
   pullPolicy: Always
   tag: latest
-
-nameOverride: ''
-fullnameOverride: ''
 
 podAnnotations:
   release: ci

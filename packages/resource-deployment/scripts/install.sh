@@ -58,7 +58,7 @@ location - Azure region where the instances will be deployed. Available Azure re
     exit 1
 }
 
-onExit() {
+onExit-install() {
     local exitCode=$?
 
     if [[ ${exitCode} != 0 ]]; then
@@ -129,7 +129,7 @@ if [[ -z ${resourceGroupName} ]] || [[ -z ${subscription} ]] || [[ -z ${location
     exitWithUsageInfo
 fi
 
-trap "onExit" EXIT
+trap "onExit-install" EXIT
 
 . "${0%/*}/process-utilities.sh"
 
