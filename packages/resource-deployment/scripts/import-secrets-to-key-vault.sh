@@ -144,8 +144,8 @@ if [[ -z ${environment} ]]; then
 fi
 
 if [[ -z ${profilesPath} ]]; then
-    # profilesPath="${0%/*}/../../../resource-deployment-private/dist/profiles/"
-    profilesPath="$(System.DefaultWorkingDirectory)/$(privateRepoDropName)/drop/resource-deployment-private/dist/profiles/"
+    # shellcheck disable=SC2154
+    profilesPath="${0%/*}/../../../../../${privateRepoDropName}/drop/resource-deployment/dist/profiles/"
 fi
 
 echo "Importing secrets to key vault"
