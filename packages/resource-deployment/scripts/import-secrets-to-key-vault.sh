@@ -144,6 +144,7 @@ if [[ -z ${environment} ]]; then
 fi
 
 if [[ -z ${profilesPath} ]]; then
+    # PRIVATEREPODROPNAME is a pipeline variable
     # shellcheck disable=SC2154
     profilesPath="${0%/*}/../../../../../${PRIVATEREPODROPNAME}/drop/resource-deployment/dist/profiles/"
 fi
@@ -162,5 +163,3 @@ if [[ "${profileLoaded}" == true ]]; then
 else
     echo "Profile configuration file ${profileName} not found. Skip importing secrets to key vault."
 fi
-
-exit 0
