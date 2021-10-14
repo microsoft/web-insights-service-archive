@@ -21,7 +21,7 @@ spec:
         {{ $key }}: {{ $val | quote }}
         {{- end }}
       labels:
-        aadpodidbinding: storage-web-api-sp
+        aadpodidbinding: {{ .Values.podPrincipalName }}
         {{- include "storage-web-api.selectorLabels" . | nindent 8 }}
     spec:
       containers:

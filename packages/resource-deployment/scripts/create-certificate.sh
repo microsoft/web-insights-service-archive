@@ -34,7 +34,7 @@ grantUserAccessToKeyVault() {
     fi
 }
 
-revokeUserAccessToKeyVault() {
+onExit-create-certificate() {
     if [[ ${userType} == "user" ]]; then
         echo "Revoking access to key vault for current user account"
         az keyvault delete-policy --name "${keyVault}" --upn "${principalName}" 1>/dev/null || true
@@ -68,7 +68,7 @@ createNewCertificateVersion() {
 # function runs in a subshell to isolate trap handler
 createCertificate() (
     getCurrentUserDetails
-    trap "revokeUserAccessToKeyVault" EXIT
+    trap "onExit-create-certificate" EXIT
     grantUserAccessToKeyVault
     createNewCertificateVersion
 )

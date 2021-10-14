@@ -13,7 +13,7 @@ Usage: ${BASH_SOURCE} -r <resource group> [-e <runtime environment>]
     exit 1
 }
 
-onExitPushImages() {
+onExit-push-image-to-container-registry() {
     local exitCode=$?
     if [[ ${exitCode} != 0 ]]; then
         echo "Failed to push images to Azure Container Registry."
@@ -63,7 +63,7 @@ pushImageToRegistry() {
 
 # function runs in a subshell to isolate trap handler
 pushImagesToRegistry() (
-    trap "onExitPushImages" EXIT
+    trap "onExit-push-image-to-container-registry" EXIT
 
     # shellcheck disable=SC2034
     local imageBuildProcesses=(

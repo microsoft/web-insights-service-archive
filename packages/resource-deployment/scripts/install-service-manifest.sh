@@ -100,7 +100,7 @@ keyVaultUrl="https://${keyVault}.vault.azure.net/"
 helmChart="${0%/*}/../helm-charts/${serviceName}"
 
 # Create service managed identity
-principalName="${serviceName}-sp"
+principalName="${serviceName}-sp-${resourceNameSuffix}"
 . "${0%/*}/create-managed-identity.sh"
 
 getInstallAction
@@ -112,6 +112,7 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     -f "${valuesManifest}" \
     --set image.repository="${repository}" \
     --set podAnnotations.releaseId="${releaseVersion}" \
+    --set podPrincipalName="${principalName}" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
     --set env[2].name=AZURE_PRINCIPAL_ID,env[2].value="${principalId}" \
