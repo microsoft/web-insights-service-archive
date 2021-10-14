@@ -68,7 +68,7 @@ revokePermissionsToKeyVault() {
     fi
 }
 
-onExit-import-secrets-to-key-vault() {
+onExit-import-secrets-from-key-vault() {
     echo "Deleting downloaded pfx file"
     rm -f "${pfxPath}"
 
@@ -117,7 +117,7 @@ loadProfile() {
 
 # function runs in a subshell to isolate trap handler
 uploadSecretsToTargetKeyVault() (
-    trap 'onExit-import-secrets-to-key-vault' EXIT
+    trap 'onExit-import-secrets-from-key-vault' EXIT
 
     setKeyVaultPermissions
     for i in "${!sourceCertificateNames[@]}"; do

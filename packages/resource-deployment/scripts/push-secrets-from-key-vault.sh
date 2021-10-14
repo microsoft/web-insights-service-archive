@@ -116,7 +116,7 @@ createAppInsightsApiKey() {
 importSecrets() {
     targetKeyVault=${keyVault}
     targetSubscription=${subscription}
-    . "${0%/*}/import-secrets-to-key-vault.sh"
+    . "${0%/*}/import-secrets-from-key-vault.sh"
 }
 
 pushSecretsToKeyVault() (
