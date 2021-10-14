@@ -150,6 +150,8 @@ if [[ -z ${profilesPath} ]]; then
     echo "current dscript dir: ${0%/*}"
     echo "expected root path:"
     ls -al ./../../../../../
+    echo "Envs:"
+    printenv
 fi
 
 echo "Importing secrets to key vault"
