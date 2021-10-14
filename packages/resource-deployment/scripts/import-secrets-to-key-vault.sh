@@ -144,12 +144,15 @@ if [[ -z ${environment} ]]; then
 fi
 
 if [[ -z ${profilesPath} ]]; then
-    profilesPath="${0%/*}/../../../resource-deployment-private/dist/profiles/"
+    # profilesPath="${0%/*}/../../../resource-deployment-private/dist/profiles/"
+    profilesPath="$(System.DefaultWorkingDirectory)/$(privateRepoDropName)/drop/resource-deployment-private/dist/profiles/"
 fi
 
 echo "Importing secrets to key vault"
 
 loadProfile
+exit 0
+
 if [[ "${profileLoaded}" == true ]]; then
     if [[ -z ${sourceKeyVault} ]] || [[ -z ${sourceSubscription} ]] || [[ -z ${sourceCertificateNames} ]] || [[ -z ${targetCertificateNames} ]]; then
         echo "Profile configuration file ${profileName} misconfigured."
@@ -157,7 +160,6 @@ if [[ "${profileLoaded}" == true ]]; then
     fi
 
     uploadSecretsToTargetKeyVault
-
     echo "Import secrets to key vault successfully completed."
 else
     echo "Profile configuration file ${profileName} not found. Skip importing secrets to key vault."
