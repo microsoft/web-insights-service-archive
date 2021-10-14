@@ -145,12 +145,9 @@ fi
 
 if [[ -z ${profilesPath} ]]; then
     # shellcheck disable=SC2154
-    profilesPath="${0%/*}/../../../../../_web-insights-private-ci/drop/resource-deployment/dist/profiles/"
+    profilesPath="${0%/*}/../../../../../${PRIVATEREPODROPNAME}/drop/resource-deployment/dist/profiles/"
     echo "profilesPath: ${profilesPath}"
     echo "current dscript dir: ${0%/*}"
-    echo "expected root path:"
-    ls -al ./../../../../../
-    echo "Envs:"
     printenv
 fi
 
