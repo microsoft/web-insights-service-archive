@@ -146,16 +146,11 @@ fi
 if [[ -z ${profilesPath} ]]; then
     # shellcheck disable=SC2154
     profilesPath="${0%/*}/../../../../../${PRIVATEREPODROPNAME}/drop/resource-deployment/dist/profiles/"
-    echo "profilesPath: ${profilesPath}"
-    echo "current dscript dir: ${0%/*}"
-    printenv
 fi
 
 echo "Importing secrets to key vault"
 
 loadProfile
-exit 0
-
 if [[ "${profileLoaded}" == true ]]; then
     if [[ -z ${sourceKeyVault} ]] || [[ -z ${sourceSubscription} ]] || [[ -z ${sourceCertificateNames} ]] || [[ -z ${targetCertificateNames} ]]; then
         echo "Profile configuration file ${profileName} misconfigured."
