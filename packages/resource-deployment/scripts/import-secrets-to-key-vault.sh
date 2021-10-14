@@ -162,3 +162,5 @@ if [[ "${profileLoaded}" == true ]]; then
 else
     echo "Profile configuration file ${profileName} not found. Skip importing secrets to key vault."
 fi
+
+exit 0
