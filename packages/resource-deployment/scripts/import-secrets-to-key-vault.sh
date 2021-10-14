@@ -146,6 +146,10 @@ fi
 if [[ -z ${profilesPath} ]]; then
     # shellcheck disable=SC2154
     profilesPath="${0%/*}/../../../../../${privateRepoDropName}/drop/resource-deployment/dist/profiles/"
+    echo "privateRepoDropName: ${privateRepoDropName}"
+    echo "profilesPath: ${profilesPath}"
+    echo "current dir:"
+    pwd
 fi
 
 echo "Importing secrets to key vault"
