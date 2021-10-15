@@ -28,7 +28,7 @@ describe(ApiRequestValidator, () => {
             },
         });
 
-        expect(await testSubject.validateRequest(context)).toBeFalse();
+        expect(await testSubject.validateRequest(context)).toEqual(false);
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter));
     });
 
@@ -40,7 +40,7 @@ describe(ApiRequestValidator, () => {
             },
         });
 
-        expect(await testSubject.validateRequest(context)).toBeFalse();
+        expect(await testSubject.validateRequest(context)).toEqual(false);
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter));
     });
 
@@ -54,7 +54,7 @@ describe(ApiRequestValidator, () => {
             },
         });
 
-        expect(await testSubject.validateRequest(context)).toBeFalse();
+        expect(await testSubject.validateRequest(context)).toEqual(false);
         expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
     });
 
@@ -68,7 +68,7 @@ describe(ApiRequestValidator, () => {
             },
         });
 
-        expect(await testSubject.validateRequest(context)).toBeTrue();
+        expect(await testSubject.validateRequest(context)).toEqual(true);
     });
 
     describe.each(['POST', 'PUT'])('%s request', (method) => {
@@ -87,21 +87,21 @@ describe(ApiRequestValidator, () => {
         });
 
         it('rejects when there is no payload', async () => {
-            expect(await testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toEqual(false);
             expect(context.res.status).toEqual(204);
         });
 
         it.each([undefined, '{}'])('rejects when payload=%s', async (payload) => {
             context.req.rawBody = payload;
 
-            expect(await testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toEqual(false);
             expect(context.res.status).toEqual(204);
         });
 
         it('rejects when body is invalid JSON', async () => {
             context.req.rawBody = 'invalid JSON string';
 
-            expect(await testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toEqual(false);
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument));
         });
 
@@ -109,7 +109,7 @@ describe(ApiRequestValidator, () => {
             context.req.rawBody = validPayload;
             context.req.headers = headers;
 
-            expect(await testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toEqual(false);
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader));
         });
 
@@ -119,7 +119,7 @@ describe(ApiRequestValidator, () => {
                 'content-type': 'text/plain',
             };
 
-            expect(await testSubject.validateRequest(context)).toBeFalse();
+            expect(await testSubject.validateRequest(context)).toEqual(false);
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedContentType));
         });
 
@@ -129,7 +129,7 @@ describe(ApiRequestValidator, () => {
                 'content-type': 'application/json',
             };
 
-            expect(await testSubject.validateRequest(context)).toBeTrue();
+            expect(await testSubject.validateRequest(context)).toEqual(true);
         });
     });
 });
