@@ -24,7 +24,7 @@
     "devDependencies": {
         "@types/jest": "^27.0.2",
         "@types/node": "^12.20.31",
-        "jest": "^27.2.5",
+        "jest": "^27.3.1",
         "jest-junit": "^13.0.0",
         "rimraf": "^3.0.2",
         "ts-transformer-keys": "^0.4.3",

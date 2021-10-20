@@ -28,7 +28,7 @@
         "@types/normalize-path": "^3.0.0",
         "@types/sha.js": "^2.4.0",
         "@types/wtfnode": "^0.7.0",
-        "jest": "^27.2.5",
+        "jest": "^27.3.1",
         "jest-junit": "^13.0.0",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.0.5",
