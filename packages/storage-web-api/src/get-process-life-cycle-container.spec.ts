@@ -16,7 +16,7 @@ describe(getProcessLifeCycleContainer, () => {
 
     beforeEach(() => {
         testSubject = getProcessLifeCycleContainer();
-        secretProviderMock = Mock.ofType<SecretProvider>();
+        secretProviderMock = Mock.ofType(SecretProvider);
         testSubject.unbind(SecretProvider);
         testSubject.bind(SecretProvider).toConstantValue(secretProviderMock.object);
     });
