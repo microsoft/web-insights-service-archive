@@ -35,7 +35,11 @@
         {
             "integration-tests",
             "path": "../packages/integration-tests"
-        }
+        },
+        {
+            "storage-api-client",
+            "path": "../packages/storage-api-client"
+        },
         {
             "name": "root",
             "path": "../"
