@@ -279,7 +279,7 @@
   dependencies:
     debug "^4.1.1"
 
-"@azure/msal-node@^1.3.0":
+"@azure/msal-node@^1.3.0", "@azure/msal-node@^1.3.2":
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/@azure/msal-node/-/msal-node-1.3.2.tgz#17665397c04b9cad57b42eb6e21d5d6f35d9b83a"
   integrity sha512-aKU2lVRKhZa1IJ/Za/Ir6qlythQ3FHz0g0px3SbM4iC1otyr3ANS4mIn/6fmkpZDIHc8eAgJh2KMep1Yn2zpig==
@@ -2777,6 +2777,13 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
 
+"@types/jsonwebtoken@^8.5.5":
+  version "8.5.5"
+  resolved "https://registry.yarnpkg.com/@types/jsonwebtoken/-/jsonwebtoken-8.5.5.tgz#da5f2f4baee88f052ef3e4db4c1a0afb46cff22c"
+  integrity sha512-OGqtHQ7N5/Ap/TUwO6IgHDuLiAoTmHhGpNvgkCm/F4N6pKzx/RBSfr2OXZSwC6vkfnsEdb6+7DNZVtiXiwdwFw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/keyv@*":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@types/keyv/-/keyv-3.1.1.tgz#e45a45324fca9dab716ab1230ee249c9fb52cfa7"
@@ -3606,6 +3613,15 @@ axios@>=0.21.2, axios@^0.21.1, axios@^0.21.4:
   integrity sha512-NmvAE4i0YAv5cKq8zlDoPd1VLKAqX5oLuZKs8xkJa4qi6RGn0uhCYFjWtHHC9EM/MwOwYWOs53W+V0aqEXq1sg==
   dependencies:
     follow-redirects "^1.14.4"
+
+azure-ad-verify-token@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/azure-ad-verify-token/-/azure-ad-verify-token-1.1.2.tgz#0c89ace0edf4a94132fa7a4885e1859e5d6e9107"
+  integrity sha512-/qqyjl8J7fkb7maksCqUp/KqKQWAxeQawvhzfZRDJoEyFliK/0NdGySAFH5al+VsTYTmxYxHOtiDzmGg3N/koA==
+  dependencies:
+    jsonwebtoken "^8.5.1"
+    node-fetch "^2.6.1"
+    rsa-pem-from-mod-exp "^0.8.4"
 
 babel-jest@^27.3.1:
   version "27.3.1"
@@ -9830,6 +9846,11 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
   dependencies:
     hash-base "^3.0.0"
     inherits "^2.0.1"
+
+rsa-pem-from-mod-exp@^0.8.4:
+  version "0.8.4"
+  resolved "https://registry.yarnpkg.com/rsa-pem-from-mod-exp/-/rsa-pem-from-mod-exp-0.8.4.tgz#362a42c6d304056d493b3f12bceabb2c6576a6d4"
+  integrity sha1-NipCxtMEBW1JOz8SvOq7LGV2ptQ=
 
 run-async@^2.4.0:
   version "2.4.1"
