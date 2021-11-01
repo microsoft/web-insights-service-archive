@@ -10960,10 +10960,10 @@ typemoq@^2.1.0:
     lodash "^4.17.4"
     postinstall-build "^5.0.1"
 
-typescript-is@^0.18.3:
-  version "0.18.3"
-  resolved "https://registry.yarnpkg.com/typescript-is/-/typescript-is-0.18.3.tgz#143ce2b348684083fc3963b95a6c2e24abd89389"
-  integrity sha512-kBgZIJt3AKrtye1H2GYf9bWu1YS0Z9AZZl4OZG4z2Ps2jPMZuycilP9RkxPLP+tPxCUjXfmaJti9TNGoz5schA==
+typescript-is@^0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/typescript-is/-/typescript-is-0.19.0.tgz#5e42ad64f899d5eb169bc2fa692331638d02fa25"
+  integrity sha512-SAJEx2cxbQZhfOjDEjPnQJt1qRS1M3wrKbUwvsywVHWGbMgM1dcIf9gPWNDS1/dgTa/7Iexk2mmAHHsP9MeCsA==
   dependencies:
     nested-error-stacks "^2"
     tsutils "^3.17.1"
