@@ -157,7 +157,7 @@ export class WebApiErrorCodes {
         error: {
             code: 'Unauthorized',
             codeId: 4014,
-            message: `You do not have permission to view this directory or page.`,
+            message: `You do not have permission to access this resource.`,
         },
     };
 

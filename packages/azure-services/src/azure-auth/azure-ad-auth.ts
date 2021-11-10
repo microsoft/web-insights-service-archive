@@ -28,7 +28,7 @@ export class AzureAdAuth {
         private readonly verifyToken: typeof verify = verify,
     ) {}
 
-    public async authenticate(token: string, aclName: string): Promise<boolean> {
+    public async authorize(token: string, aclName: string): Promise<boolean> {
         const acl = await this.aclProvider.getAcl(aclName);
         if (acl?.valid !== true) {
             this.logger.logError(`Access denied. Invalid ACL configuration.`, { aclName });

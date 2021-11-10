@@ -7,6 +7,7 @@ import { Context } from '@azure/functions';
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
+import { Container } from 'inversify';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ApiController } from './api-controller';
 import { HttpResponse } from './http-response';
@@ -47,6 +48,7 @@ class TestableApiController extends ApiController {
 describe(ApiController, () => {
     let isValidRequest: boolean;
     let loggerMock: IMock<MockableLogger>;
+    let containerMock: IMock<Container>;
     const requestValidatorStub: WebRequestValidator = {
         validateRequest: async () => isValidRequest,
     };
@@ -54,6 +56,12 @@ describe(ApiController, () => {
     beforeEach(() => {
         isValidRequest = true;
         loggerMock = Mock.ofType(MockableLogger);
+        containerMock = Mock.ofType(Container);
+    });
+
+    afterEach(() => {
+        loggerMock.verifyAll();
+        containerMock.verifyAll();
     });
 
     describe('hasPayload()', () => {
@@ -100,7 +108,7 @@ describe(ApiController, () => {
             });
             const apiControllerMock = new TestableApiController(loggerMock.object, requestValidatorStub);
             expect(apiControllerMock.context).toBeNull();
-            await apiControllerMock.invoke(context);
+            await apiControllerMock.invoke(context, containerMock.object);
             expect(apiControllerMock.handleRequestInvoked).toEqual(false);
         });
 
@@ -112,7 +120,7 @@ describe(ApiController, () => {
             });
             const apiControllerMock = new TestableApiController(loggerMock.object, requestValidatorStub);
             expect(apiControllerMock.context).toBeNull();
-            await apiControllerMock.invoke(context);
+            await apiControllerMock.invoke(context, containerMock.object);
             expect(apiControllerMock.handleRequestInvoked).toEqual(true);
         });
 
@@ -128,7 +136,7 @@ describe(ApiController, () => {
             context.req.query['api-version'] = '1.0';
             context.req.headers['content-type'] = 'application/json';
             const apiControllerMock = new TestableApiController(loggerMock.object, requestValidatorStub);
-            await apiControllerMock.invoke(context, 'a', 1);
+            await apiControllerMock.invoke(context, containerMock.object, 'a', 1);
             expect(apiControllerMock.handleRequestInvoked).toEqual(true);
             expect(apiControllerMock.args).toEqual(['a', 1]);
         });

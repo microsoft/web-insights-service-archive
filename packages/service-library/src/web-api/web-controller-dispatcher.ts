@@ -26,7 +26,7 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
 
         const controller = container.get(controllerType) as WebController;
 
-        return controller.invoke(context, ...args);
+        return controller.invoke(context, container, ...args);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -3,30 +3,43 @@
 
 import { Context } from '@azure/functions';
 import { System } from 'common';
-import { inject, injectable } from 'inversify';
+import { injectable, Container, unmanaged } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebRequestValidator } from './web-request-validator';
+import { WebControllerAuth } from './web-controller-auth';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+export interface WebController {
+    aclName?: string;
+}
 
 @injectable()
 export abstract class WebController {
     public context: Context;
 
+    public container: Container;
+
     constructor(
-        @inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger,
-        protected readonly requestValidator: WebRequestValidator,
+        @unmanaged() protected readonly logger: ContextAwareLogger,
+        @unmanaged() protected readonly requestValidator: WebRequestValidator,
     ) {}
 
     public abstract readonly apiVersion: string;
 
     public abstract readonly apiName: string;
 
-    public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
+    public async invoke(requestContext: Context, container: Container, ...args: any[]): Promise<unknown> {
         this.context = requestContext;
+        this.container = container;
 
         try {
             this.logger.setCommonProperties(this.getBaseTelemetryProperties());
+
+            const authorized = await this.authorize();
+            if (!authorized) {
+                return;
+            }
 
             let result: unknown;
             if (await this.requestValidator.validateRequest(this.context)) {
@@ -51,6 +64,18 @@ export abstract class WebController {
             controller: this.constructor.name,
             invocationId: this.context.invocationId,
         };
+    }
+
+    private async authorize(): Promise<boolean> {
+        // The ACL is defined by {@link authorize} class decorator
+        const hasDecorator = Reflect.getMetadata('authorize', this.constructor);
+        if (hasDecorator === true) {
+            const webControllerAuth = this.container.get(WebControllerAuth);
+
+            return webControllerAuth.authorize(this.context, this.aclName);
+        }
+
+        return true;
     }
 
     private setResponseContentTypeHeader(): void {

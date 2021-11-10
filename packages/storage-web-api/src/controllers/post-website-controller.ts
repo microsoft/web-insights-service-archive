@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, WebsiteProvider, PageProvider } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
+import { authorize } from 'azure-services';
 import { createPageApiObject, PageDocumentResponseConverter } from '../converters/page-document-response-converter';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 import { PostWebsiteRequestValidator } from '../request-validators/post-website-request-validator';
@@ -17,6 +18,7 @@ type WebsiteUpdateResponse = {
     created: boolean;
 };
 
+@authorize('aclApiWriteAll')
 @injectable()
 export class PostWebsiteController extends ApiController {
     public readonly apiVersion = '1.0';

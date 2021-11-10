@@ -7,9 +7,11 @@ import { ContextAwareLogger } from 'logger';
 import { HttpResponse, WebApiErrorCodes, ApiController, PageProvider } from 'service-library';
 import * as StorageDocuments from 'storage-documents';
 import * as ApiContracts from 'api-contracts';
+import { authorize } from 'azure-services';
 import { createPageApiResponse, PageDocumentResponseConverter } from '../converters/page-document-response-converter';
 import { PostPageRequestValidator } from '../request-validators/post-page-request-validator';
 
+@authorize('aclApiWriteAll')
 @injectable()
 export class PostPageController extends ApiController {
     public readonly apiVersion = '1.0';

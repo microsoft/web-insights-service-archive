@@ -14,7 +14,7 @@ import { WebRequestValidator } from './web-request-validator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export class TestableWebController extends WebController {
+class TestableWebController extends WebController {
     public static readonly handleRequestResult = 'handle-request-result';
 
     public readonly apiVersion = '1.0';
@@ -23,8 +23,9 @@ export class TestableWebController extends WebController {
 
     public requestArgs: any[];
 
-    public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
+    public async invoke(requestContext: Context, container: Container, ...args: any[]): Promise<unknown> {
         this.context = requestContext;
+        this.container = container;
         this.requestArgs = args;
 
         return TestableWebController.handleRequestResult;
@@ -78,6 +79,7 @@ describe(WebControllerDispatcher, () => {
         await webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context, 1, 'a');
 
         expect(testableWebController.context).toEqual(context);
+        expect(testableWebController.container).toEqual(containerMock.object);
         expect(testableWebController.requestArgs).toEqual([1, 'a']);
     });
 

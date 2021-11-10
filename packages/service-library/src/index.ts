@@ -15,3 +15,4 @@ export { PageProvider } from './data-providers/page-provider';
 export { PageScanProvider } from './data-providers/page-scan-provider';
 export { WebsiteProvider } from './data-providers/website-provider';
 export { WebsiteScanProvider } from './data-providers/website-scan-provider';
+export { WebControllerAuth } from './web-api/web-controller-auth';

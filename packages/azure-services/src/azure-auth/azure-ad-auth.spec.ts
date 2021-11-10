@@ -62,7 +62,7 @@ describe(AzureAdAuth, () => {
             .verifiable();
         loggerMock.setup((o) => o.logInfo(`Access granted.`, { aclName, audience: jwt.aud, appId: jwt.appid })).verifiable();
 
-        const actualResult = await azureAdAuth.authenticate(token, aclName);
+        const actualResult = await azureAdAuth.authorize(token, aclName);
         expect(actualResult).toEqual(true);
     });
 
@@ -75,7 +75,7 @@ describe(AzureAdAuth, () => {
             .verifiable();
         loggerMock.setup((o) => o.logError(`Access denied. Invalid ACL configuration.`, { aclName })).verifiable();
 
-        const actualResult = await azureAdAuth.authenticate(token, aclName);
+        const actualResult = await azureAdAuth.authorize(token, aclName);
         expect(actualResult).toEqual(false);
     });
 
@@ -90,7 +90,7 @@ describe(AzureAdAuth, () => {
             .verifiable();
         loggerMock.setup((o) => o.logWarn(`Access denied.`, { aclName, audience: jwt.aud, appId: jwt.appid })).verifiable();
 
-        const actualResult = await azureAdAuth.authenticate(token, aclName);
+        const actualResult = await azureAdAuth.authorize(token, aclName);
         expect(actualResult).toEqual(false);
     });
 
@@ -105,7 +105,7 @@ describe(AzureAdAuth, () => {
             .verifiable();
         loggerMock.setup((o) => o.logWarn(`Access denied.`, { aclName, audience: jwt.aud, appId: jwt.appid })).verifiable();
 
-        const actualResult = await azureAdAuth.authenticate(token, aclName);
+        const actualResult = await azureAdAuth.authorize(token, aclName);
         expect(actualResult).toEqual(false);
     });
 
@@ -116,7 +116,7 @@ describe(AzureAdAuth, () => {
             .verifiable();
         loggerMock.setup((o) => o.logError(`Access denied. Token validation failure.`, { aclName, error: "'Invalid token'" })).verifiable();
 
-        const actualResult = await azureAdAuth.authenticate(token, aclName);
+        const actualResult = await azureAdAuth.authorize(token, aclName);
         expect(actualResult).toEqual(false);
     });
 });
