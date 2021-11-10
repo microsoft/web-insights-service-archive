@@ -39,6 +39,7 @@
         "got": "^11.8.2",
         "inversify": "^6.0.1",
         "logger": "1.0.0",
-        "reflect-metadata": "^0.1.13"
+        "reflect-metadata": "^0.1.13",
+        "storage-documents": "1.0.0"
     }
 }

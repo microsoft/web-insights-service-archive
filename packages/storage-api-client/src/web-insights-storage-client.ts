@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as ApiContracts from 'api-contracts';
+import * as StorageDocuments from 'storage-documents';
 import { getForeverAgents, ResponseWithBodyType, RetryHelper, System } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
@@ -79,6 +80,53 @@ export class WebInsightsStorageClient {
             });
 
         return this.executeRequestWithRetries<ApiContracts.Page>(executeRequest, onRetry);
+    }
+
+    public async postWebsiteScan(websiteScan: ApiContracts.WebsiteScanRequest): Promise<ResponseWithBodyType<ApiContracts.WebsiteScan>> {
+        const requestUrl = `${this.baseUrl}/websites/scans`;
+        const options: Options = { json: websiteScan };
+
+        const executeRequest = async () => this.baseRequestObj.post(requestUrl, options);
+        const onRetry = async (e: Error) =>
+            this.logger.logError('POST website scan REST API request failed. Retrying on error.', {
+                url: requestUrl,
+                error: System.serializeError(e),
+            });
+
+        return this.executeRequestWithRetries<ApiContracts.WebsiteScan>(executeRequest, onRetry);
+    }
+
+    public async getWebsiteScan(
+        websiteId: string,
+        scanType: StorageDocuments.ScanType,
+        websiteScanId: string,
+    ): Promise<ResponseWithBodyType<ApiContracts.WebsiteScan>> {
+        return this.getWebsiteImpl(websiteId, scanType, websiteScanId);
+    }
+
+    public async getLatestWebsiteScan(
+        websiteId: string,
+        scanType: StorageDocuments.ScanType,
+    ): Promise<ResponseWithBodyType<ApiContracts.WebsiteScan>> {
+        return this.getWebsiteImpl(websiteId, scanType);
+    }
+
+    private async getWebsiteImpl(
+        websiteId: string,
+        scanType: StorageDocuments.ScanType,
+        websiteScanId?: string,
+    ): Promise<ResponseWithBodyType<ApiContracts.WebsiteScan>> {
+        const latestScanTag = 'latest';
+        const requestUrl = `${this.baseUrl}/websites/${websiteId}/scans/${scanType}/${websiteScanId ?? latestScanTag}`;
+
+        const executeRequest = async () => this.baseRequestObj.get(requestUrl);
+        const onRetry = async (e: Error) =>
+            this.logger.logError('GET website scan REST API request failed. Retrying on error.', {
+                url: requestUrl,
+                error: System.serializeError(e),
+            });
+
+        return this.executeRequestWithRetries<ApiContracts.WebsiteScan>(executeRequest, onRetry);
     }
 
     private async executeRequestWithRetries<T>(

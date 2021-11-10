@@ -6,8 +6,8 @@ import 'reflect-metadata';
 import * as ApiContracts from 'api-contracts';
 import { Agents, ExtendOptions, Got, Options } from 'got';
 import { IMock, It, Mock } from 'typemoq';
-import { RetryHelper, ServiceConfiguration } from 'common';
-import { ConsoleLoggerClient, GlobalLogger, Logger } from 'logger';
+import { RetryHelper } from 'common';
+import { Logger } from 'logger';
 import { WebInsightsStorageClient } from './web-insights-storage-client';
 
 describe(WebInsightsStorageClient, () => {
@@ -25,14 +25,12 @@ describe(WebInsightsStorageClient, () => {
     let retryHelperMock: IMock<RetryHelper<unknown>>;
     let loggerMock: IMock<Logger>;
     let getAgentsMock: IMock<() => Agents>;
-    // let error: Error;
     let response: unknown;
     const agentsStub = {};
 
     let testSubject: WebInsightsStorageClient;
 
     beforeEach(() => {
-        // error = new Error('HTTP 500 Server Error');
         response = { statusCode: 200 };
 
         extendMock = Mock.ofInstance(() => gotStub);
@@ -149,6 +147,56 @@ describe(WebInsightsStorageClient, () => {
 
         const actualResponse = await testSubject.postPage(pageUpdate);
 
+        expect(actualResponse).toBe(response);
+    });
+
+    it('postWebsiteScan sends POST request with expected properties', async () => {
+        const websiteScan: ApiContracts.WebsiteScanRequest = {
+            websiteId: 'website id',
+            scanType: 'a11y',
+        };
+        const requestOptions = { json: websiteScan };
+        const requestUrl = `${baseUrl}/websites/scans`;
+
+        setupRetryHelperMock();
+        postMock
+            .setup((req) => req(requestUrl, requestOptions))
+            .returns(async () => response)
+            .verifiable();
+
+        const actualResponse = await testSubject.postWebsiteScan(websiteScan);
+
+        expect(actualResponse).toBe(response);
+    });
+
+    it('getWebsiteScan sends GET request with specified website id', async () => {
+        const websiteId = 'website id';
+        const scanType = 'a11y';
+        const websiteScanId = 'website scan id';
+        const requestUrl = `${baseUrl}/websites/${websiteId}/scans/${scanType}/${websiteScanId}`;
+
+        setupRetryHelperMock();
+        getMock
+            .setup((req) => req(requestUrl))
+            .returns(async () => response)
+            .verifiable();
+
+        const actualResponse = await testSubject.getWebsiteScan(websiteId, scanType, websiteScanId);
+        expect(actualResponse).toBe(response);
+    });
+
+    it('getLatestWebsiteScan sends GET request with expected url', async () => {
+        const websiteId = 'website id';
+        const scanType = 'a11y';
+        const requestUrl = `${baseUrl}/websites/${websiteId}/scans/${scanType}/latest`;
+
+        setupRetryHelperMock();
+        getMock
+            .setup((req) => req(requestUrl))
+            .returns(async () => response)
+            .verifiable();
+
+        const actualResponse = await testSubject.getLatestWebsiteScan(websiteId, scanType);
         expect(actualResponse).toBe(response);
     });
 
