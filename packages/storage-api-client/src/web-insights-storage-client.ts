@@ -32,6 +32,9 @@ export class WebInsightsStorageClient {
             responseType: 'json',
             throwHttpErrors: throwOnRequestFailure,
             agent: getAgents(),
+            https: {
+                rejectUnauthorized: false, // Must be false because we use a self-signed cert
+            },
         };
 
         this.baseRequestObj = requestObj.extend(defaultRequestOptions);
@@ -49,6 +52,33 @@ export class WebInsightsStorageClient {
             });
 
         return this.executeRequestWithRetries<ApiContracts.Website>(executeRequest, onRetry);
+    }
+
+    public async getWebsite(websiteId: string): Promise<ResponseWithBodyType<ApiContracts.Website>> {
+        const requestUrl = `${this.baseUrl}/websites/${websiteId}`;
+
+        const executeRequest = async () => this.baseRequestObj.get(requestUrl);
+        const onRetry = async (e: Error) =>
+            this.logger.logError('GET website REST API request failed. Retrying on error.', {
+                url: requestUrl,
+                error: System.serializeError(e),
+            });
+
+        return this.executeRequestWithRetries<ApiContracts.Website>(executeRequest, onRetry);
+    }
+
+    public async postPage(pageUpdate: ApiContracts.PageUpdate): Promise<ResponseWithBodyType<ApiContracts.Page>> {
+        const requestUrl = `${this.baseUrl}/pages`;
+        const options: Options = { json: pageUpdate };
+
+        const executeRequest = async () => this.baseRequestObj.post(requestUrl, options);
+        const onRetry = async (e: Error) =>
+            this.logger.logError('POST page REST API request failed. Retrying on error.', {
+                url: requestUrl,
+                error: System.serializeError(e),
+            });
+
+        return this.executeRequestWithRetries<ApiContracts.Page>(executeRequest, onRetry);
     }
 
     private async executeRequestWithRetries<T>(
