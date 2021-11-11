@@ -27,7 +27,8 @@ export class WebControllerAuth {
     }
 
     private getToken(requestContext: Context): string {
-        const authHeader = requestContext?.req?.headers?.Authorization;
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        const authHeader = requestContext?.req?.headers['authorization'];
 
         return !isEmpty(authHeader) && authHeader.startsWith('Bearer ') ? authHeader.substring(7, authHeader.length) : undefined;
     }

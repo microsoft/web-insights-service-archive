@@ -25,35 +25,35 @@ describe(WebControllerAuth, () => {
     });
 
     it('should reject if no HTTP Authorization header', async () => {
-        context = <Context>(<unknown>{ res: {}, req: {} });
+        context = <Context>(<unknown>{ res: {}, req: { headers: [] } });
         const actualResponse = await webControllerAuth.authorize(context, aclName);
         expect(actualResponse).toEqual(false);
         validateResponse();
     });
 
     it('should reject if HTTP Authorization header is not OAuth 2.0', async () => {
-        context = <Context>(<unknown>{ res: {}, req: { headers: { Authorization: 'token' } } });
+        context = <Context>(<unknown>{ res: {}, req: { headers: { authorization: 'token' } } });
         const actualResponse = await webControllerAuth.authorize(context, aclName);
         expect(actualResponse).toEqual(false);
         validateResponse();
     });
 
     it('should reject if token is empty', async () => {
-        context = <Context>(<unknown>{ res: {}, req: { headers: { Authorization: 'Bearer ' } } });
+        context = <Context>(<unknown>{ res: {}, req: { headers: { authorization: 'Bearer ' } } });
         const actualResponse = await webControllerAuth.authorize(context, aclName);
         expect(actualResponse).toEqual(false);
         validateResponse();
     });
 
     it('should reject if no ACL name', async () => {
-        context = <Context>(<unknown>{ res: {}, req: { headers: { Authorization: 'Bearer token' } } });
+        context = <Context>(<unknown>{ res: {}, req: { headers: { authorization: 'Bearer token' } } });
         const actualResponse = await webControllerAuth.authorize(context, '');
         expect(actualResponse).toEqual(false);
         validateResponse();
     });
 
     it('should reject if token provider has rejected', async () => {
-        context = <Context>(<unknown>{ res: {}, req: { headers: { Authorization: 'Bearer token' } } });
+        context = <Context>(<unknown>{ res: {}, req: { headers: { authorization: 'Bearer token' } } });
         azureAdAuthMock
             .setup((o) => o.authorize('token', aclName))
             .returns(() => Promise.resolve(false))
@@ -64,7 +64,7 @@ describe(WebControllerAuth, () => {
     });
 
     it('should accept if token provider has accepted', async () => {
-        context = <Context>(<unknown>{ res: {}, req: { headers: { Authorization: 'Bearer token' } } });
+        context = <Context>(<unknown>{ res: {}, req: { headers: { authorization: 'Bearer token' } } });
         azureAdAuthMock
             .setup((o) => o.authorize('token', aclName))
             .returns(() => Promise.resolve(true))
