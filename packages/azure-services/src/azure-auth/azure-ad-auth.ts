@@ -9,9 +9,6 @@ import { includes, isEmpty } from 'lodash';
 import { AclProvider } from './acl-provider';
 
 // References:
-//  Register an application with the Microsoft identity platform
-//  https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app
-//
 //  Microsoft identity platform and the OAuth 2.0 client credentials flow
 //  https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow
 
