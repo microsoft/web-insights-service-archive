@@ -6,10 +6,11 @@ import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, PageProvider, PageScanProvider, WebApiErrorCodes, WebsiteScanProvider } from 'service-library';
-import { client } from 'azure-services';
+import { client, authorize } from 'azure-services';
 import { GetWebsiteScanRequestValidator, latestScanTag } from '../request-validators/get-website-scan-request-validator';
 import { createWebsiteScanApiResponse, WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 
+@authorize('aclApiReadAll')
 @injectable()
 export class GetWebsiteScanController extends ApiController {
     public readonly apiVersion = '1.0';

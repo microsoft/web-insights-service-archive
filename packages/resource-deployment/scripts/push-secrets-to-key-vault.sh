@@ -113,6 +113,10 @@ createAppInsightsApiKey() {
     echo "App Insights API key successfully created"
 }
 
+getTenantId() {
+    tenantId=$(az account show --query "tenantId" -o tsv)
+}
+
 importSecrets() {
     targetKeyVault=${keyVault}
     targetSubscription=${subscription}
@@ -142,6 +146,14 @@ pushSecretsToKeyVault() (
     getContainerRegistryLogin
     pushSecretToKeyVault "containerRegistryUsername" "${containerRegistryUsername}"
     pushSecretToKeyVault "containerRegistryPassword" "${containerRegistryPassword}"
+
+    getTenantId
+    # The Azure AD metadata is available from the discovery endpoint https://login.microsoftonline.com/<Tenant ID>/.well-known/openid-configuration
+    # or https://login.microsoftonline.com/common/.well-known/openid-configuration
+    # - issuer
+    pushSecretToKeyVault "aclIssuer" "https://sts.windows.net/${tenantId}"
+    # - jwks_uri (common for all tenants)
+    pushSecretToKeyVault "aclPublicKeysUrl" "https://login.microsoftonline.com/common/discovery/keys"
 )
 
 # Read script arguments

@@ -27,6 +27,8 @@ import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
+import { AzureManagedCredential } from './credentials/azure-managed-credential';
+import { AclProvider } from './azure-auth/acl-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -47,7 +49,8 @@ describe(registerAzureServicesToContainer, () => {
 
         verifySingletonDependencyResolution(container, StorageConfig);
         verifySingletonDependencyResolution(container, SecretProvider);
-        verifySingletonDependencyResolution(container, iocTypeNames.AzureCredential);
+        verifySingletonDependencyResolution(container, AzureManagedCredential);
+        verifySingletonDependencyResolution(container, AclProvider);
     });
 
     it('verify non-singleton resolution', () => {
@@ -89,7 +92,7 @@ describe(registerAzureServicesToContainer, () => {
         });
     });
 
-    describe('QueueServiceURLProvider', () => {
+    describe('QueueServiceClientProvider', () => {
         const storageAccountName = 'test-storage-account-name';
         let secretProviderMock: IMock<SecretProvider>;
 
@@ -107,14 +110,14 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock.verifyAll();
         });
 
-        it('verify Azure QueueService resolution', async () => {
+        it('verify resolution', async () => {
             const queueServiceClientProvider = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
             const queueServiceClient = await queueServiceClientProvider();
 
             expect(queueServiceClient).toBeInstanceOf(QueueServiceClient);
         });
 
-        it('creates singleton queueService instance', async () => {
+        it('creates singleton instance', async () => {
             const queueServiceClientProvider1 = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
             const queueServiceClientProvider2 = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
             const queueServiceClient1Promise = queueServiceClientProvider1();
@@ -129,14 +132,14 @@ describe(registerAzureServicesToContainer, () => {
             registerAzureServicesToContainer(container);
         });
 
-        it('gets KeyVaultClient', async () => {
+        it('verify resolution', async () => {
             const keyVaultClientProvider = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
             const keyVaultClient = await keyVaultClientProvider();
 
             expect(keyVaultClient).toBeInstanceOf(SecretClient);
         });
 
-        it('gets singleton KeyVaultClient', async () => {
+        it('gets singleton instance', async () => {
             const keyVaultClientProvider1 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
             const keyVaultClientProvider2 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
 
@@ -155,7 +158,6 @@ describe(registerAzureServicesToContainer, () => {
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
-
             secretProviderMock
                 .setup(async (s) => s.getSecret(secretNames.cosmosDbUrl))
                 .returns(async () => Promise.resolve(cosmosDbUrl))
@@ -166,11 +168,11 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock.verifyAll();
         });
 
-        it('verify CosmosClientProvider resolution', async () => {
+        it('verify resolution', async () => {
             const expectedOptions = { endpoint: cosmosDbUrl, aadCredentials: credentialStub };
 
             runCosmosClientTest(container, secretProviderMock);
-            stubBinding(container, iocTypeNames.AzureCredential, credentialStub);
+            stubBinding(container, AzureManagedCredential, credentialStub);
 
             const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
             const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
@@ -179,7 +181,7 @@ describe(registerAzureServicesToContainer, () => {
             expect(cosmosClient).toMatchObject(expectedCosmosClient);
         });
 
-        it('creates singleton queueService instance', async () => {
+        it('verify singleton instance', async () => {
             runCosmosClientTest(container, secretProviderMock);
 
             const cosmosClientProvider1 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);

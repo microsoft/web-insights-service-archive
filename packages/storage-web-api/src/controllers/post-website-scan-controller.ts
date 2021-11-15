@@ -8,7 +8,7 @@ import { inject, injectable } from 'inversify';
 import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, WebApiErrorCodes, WebsiteProvider, WebsiteScanProvider } from 'service-library';
-import { client } from 'azure-services';
+import { client, authorize } from 'azure-services';
 import { createWebsiteScanApiResponse, WebsiteScanDocumentResponseConverter } from '../converters/website-scan-document-response-converter';
 import { PostWebsiteScanRequestValidator } from '../request-validators/post-website-scan-request-validator';
 
@@ -18,6 +18,7 @@ const defaultFrequencyKeys: { [key in StorageDocuments.ScanType]: keyof RestApiC
     security: undefined,
 };
 
+@authorize('aclApiWriteAll')
 @injectable()
 export class PostWebsiteScanController extends ApiController {
     public readonly apiVersion = '1.0';

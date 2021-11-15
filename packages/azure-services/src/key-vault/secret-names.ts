@@ -6,4 +6,6 @@ export const secretNames = {
     storageAccountName: 'storageAccountName',
     storageAccountKey: 'storageAccountKey',
     appInsightsApiKey: 'appInsightsApiKey',
+    aclIssuer: 'aclIssuer',
+    aclPublicKeysUrl: 'aclPublicKeysUrl',
 };

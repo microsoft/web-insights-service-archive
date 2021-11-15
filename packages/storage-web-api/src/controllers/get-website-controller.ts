@@ -5,10 +5,11 @@ import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { HttpResponse, WebApiErrorCodes, ApiController, WebsiteProvider, PageProvider } from 'service-library';
-import { client } from 'azure-services';
+import { client, authorize } from 'azure-services';
 import { createWebsiteApiResponse, WebsiteDocumentResponseConverter } from '../converters/website-document-response-converter';
 import { GetWebsiteRequestValidator } from '../request-validators/get-website-request-validator';
 
+@authorize('aclApiReadAll')
 @injectable()
 export class GetWebsiteController extends ApiController {
     public readonly apiVersion = '1.0';

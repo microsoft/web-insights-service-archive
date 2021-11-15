@@ -23,3 +23,5 @@ export { iocTypeNames as AzureServicesIocTypes } from './ioc-types';
 export { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 export { ApplicationInsightsClient } from './app-insights-api-client/application-insights-client';
 export * from './app-insights-api-client/query-response';
+export { AzureAdAuth } from './azure-auth/azure-ad-auth';
+export { authorize } from './azure-auth/authorize';

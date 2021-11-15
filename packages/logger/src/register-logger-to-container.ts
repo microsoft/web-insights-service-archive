@@ -25,10 +25,12 @@ export function registerContextAwareLoggerToContainer(container: Container): voi
     container
         .bind(ContextAwareLogger)
         .toDynamicValue((context) => {
-            const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
-            const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
+            const clients =
+                process.env.APPINSIGHTS_DISABLED === 'true'
+                    ? [context.container.get(ContextAwareConsoleLoggerClient)]
+                    : [context.container.get(ContextAwareAppInsightsLoggerClient), context.container.get(ContextAwareConsoleLoggerClient)];
 
-            return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+            return new ContextAwareLogger(clients, context.container.get(loggerTypes.Process));
         })
         .inSingletonScope();
 }
@@ -37,10 +39,12 @@ function registerGlobalLoggerToContainer(container: Container): void {
     container
         .bind(GlobalLogger)
         .toDynamicValue((context) => {
-            const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
-            const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
+            const clients =
+                process.env.APPINSIGHTS_DISABLED === 'true'
+                    ? [context.container.get(ConsoleLoggerClient)]
+                    : [context.container.get(AppInsightsLoggerClient), context.container.get(ConsoleLoggerClient)];
 
-            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+            return new GlobalLogger(clients, context.container.get(loggerTypes.Process));
         })
         .inSingletonScope();
 }

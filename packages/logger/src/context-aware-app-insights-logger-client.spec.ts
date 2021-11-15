@@ -17,15 +17,12 @@ export class TestableContextAwareAppInsightsLoggerClient extends ContextAwareApp
 describe(ContextAwareAppInsightsLoggerClient, () => {
     let testSubject: TestableContextAwareAppInsightsLoggerClient;
     let globalLoggerClient: IMock<AppInsightsLoggerClient>;
+    let TelemetryClientMock: IMock<TelemetryClient>;
 
     beforeEach(() => {
         globalLoggerClient = Mock.ofType(AppInsightsLoggerClient);
-        testSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
-        process.env.APPINSIGHTS_INSTRUMENTATIONKEY = '00000000-0000-0000-0000-000000000000';
-    });
-
-    afterEach(() => {
-        delete process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
+        TelemetryClientMock = Mock.ofInstance({} as TelemetryClient);
+        testSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object, () => TelemetryClientMock.object);
     });
 
     it('should not create telemetry client without calling setup', async () => {
@@ -56,7 +53,10 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
         });
 
         it('should only initialize rootLoggerClient once', async () => {
-            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
+            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(
+                globalLoggerClient.object,
+                () => TelemetryClientMock.object,
+            );
 
             globalLoggerClient
                 .setup((r) => r.setup())

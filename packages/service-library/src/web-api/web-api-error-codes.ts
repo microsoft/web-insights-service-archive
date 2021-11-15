@@ -17,7 +17,8 @@ export declare type WebApiErrorCodeName =
     | 'InvalidFrequencyExpression'
     | 'OutOfRangePriority'
     | 'MalformedBody'
-    | 'InvalidScanType';
+    | 'InvalidScanType'
+    | 'Unauthorized';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -148,6 +149,15 @@ export class WebApiErrorCodes {
             code: 'InvalidScanType',
             codeId: 4013,
             message: 'The scan type must be either a11y, privacy, or security.',
+        },
+    };
+
+    public static unauthorized: WebApiErrorCode = {
+        statusCode: 401,
+        error: {
+            code: 'Unauthorized',
+            codeId: 4014,
+            message: `You do not have permission to access this resource.`,
         },
     };
 
