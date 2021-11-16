@@ -102,6 +102,6 @@ Update the key vault secret value for the corresponding ACL name. The secret val
 }
 ```
 
-### 3. Access Service APIs
+### 4. Access Service APIs
 
 Use Postman templates or build HTTP GET request to create OAuth 2.0 access token as described in [Microsoft identity platform and the OAuth 2.0 client credentials flow](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow) to access service APIs
