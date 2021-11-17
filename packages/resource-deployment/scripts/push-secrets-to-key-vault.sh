@@ -151,7 +151,7 @@ pushSecretsToKeyVault() (
     # The Azure AD metadata is available from the discovery endpoint https://login.microsoftonline.com/<Tenant ID>/.well-known/openid-configuration
     # or https://login.microsoftonline.com/common/.well-known/openid-configuration
     # - issuer
-    pushSecretToKeyVault "aclIssuer" "https://sts.windows.net/${tenantId}"
+    pushSecretToKeyVault "aclIssuer" "https://sts.windows.net/${tenantId}/"
     # - jwks_uri (common for all tenants)
     pushSecretToKeyVault "aclPublicKeysUrl" "https://login.microsoftonline.com/common/discovery/keys"
 )
