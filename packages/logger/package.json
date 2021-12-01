@@ -27,7 +27,7 @@
         "@types/lodash": "^4.14.176",
         "@types/node": "^12.20.36",
         "@types/verror": "^1.10.4",
-        "jest": "^27.3.1",
+        "jest": "^27.4.3",
         "jest-junit": "^13.0.0",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.0.7",
