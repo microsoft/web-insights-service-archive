@@ -65,7 +65,7 @@ describe(WebInsightsAPICredential, () => {
         setupRetryHelperMock(false);
         loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
-        expect(testSubject.getAuthHeaders()).rejects.toThrow(error);
+        expect(testSubject.getToken()).rejects.toThrow(error);
     });
 
     it('Gets token with expected options', async () => {
@@ -85,9 +85,9 @@ describe(WebInsightsAPICredential, () => {
             .verifiable();
         setupRetryHelperMock(true);
 
-        const headers = await testSubject.getAuthHeaders();
+        const tokenResult = await testSubject.getToken();
 
-        expect(headers.authorization).toEqual(`Bearer ${accessToken}`);
+        expect(tokenResult).toEqual(authResult);
     });
 
     function setupRetryHelperMock(shouldSucceed: boolean): void {

@@ -4,7 +4,6 @@
 import { AuthenticationResult } from '@azure/msal-common';
 import { ConfidentialClientApplication, Configuration } from '@azure/msal-node';
 import { RetryHelper, System } from 'common';
-import { Headers } from 'got';
 import { Logger } from 'logger';
 
 export type ConfidentialClientApplicationFactory = (config: Configuration) => ConfidentialClientApplication;
@@ -37,15 +36,7 @@ export class WebInsightsAPICredential {
         this.app = clientApplicationFactory(config);
     }
 
-    public async getAuthHeaders(): Promise<Headers> {
-        const accessToken = await this.getToken();
-
-        return {
-            authorization: `${accessToken.tokenType} ${accessToken.accessToken}`,
-        };
-    }
-
-    private async getToken(): Promise<AuthenticationResult> {
+    public async getToken(): Promise<AuthenticationResult> {
         return this.retryHelper.executeWithRetries(
             () =>
                 this.app.acquireTokenByClientCredential({
