@@ -228,7 +228,7 @@
     "@azure/logger" "^1.0.0"
     tslib "^2.2.0"
 
-"@azure/logger@^1.0.0", "@azure/logger@^1.0.1":
+"@azure/logger@^1.0.0":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@azure/logger/-/logger-1.0.3.tgz#6e36704aa51be7d4a1bae24731ea580836293c96"
   integrity sha512-aK4s3Xxjrx3daZr3VylxejK3vG5ExXck5WOHDJ8in/k9AqlfIyFMMT1uG7u8mNjX+QRILTIn0/Xgschfh/dQ9g==
@@ -3615,13 +3615,12 @@ applicationinsights-native-metrics@^0.0.6:
     "@mapbox/node-pre-gyp" "^1.0.0"
     nan "^2.14.0"
 
-applicationinsights@^2.1.9:
-  version "2.1.9"
-  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.1.9.tgz#b0429b0c7e44808ca6730611d2ed8be23cb23dfb"
-  integrity sha512-N42sWh16y3Itq/4ZBdHnNqdv08tk/XqBum0FeuWWmPCyoiSiv4eyDYcFtDvJXToj/SQlb8BdQ4mwIxkau+lrpA==
+applicationinsights@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-2.2.0.tgz#286f00b60d6eada12f592231a2d1283fe67c9124"
+  integrity sha512-zb6b1wchJwnCH+PghmxDbygQtWW11lz8YsHbZ6o89kR8EbE/2lO9VwNCxMtU1H1f7RQbiIZuNEnFR7wb8Ah4qA==
   dependencies:
     "@azure/core-http" "^2.2.2"
-    "@azure/logger" "^1.0.1"
     "@opentelemetry/api" "^1.0.3"
     "@opentelemetry/core" "^0.23.0"
     "@opentelemetry/semantic-conventions" "^0.24.0"
@@ -6039,9 +6038,9 @@ flatten@^1.0.2:
   integrity sha512-dVsPA/UwQ8+2uoFe5GHtiBMu48dWLTdsuEd7CKGlZlD78r1TTWBvDuFaFGKCo/ZfEr95Uk56vZoX86OsHkUeIg==
 
 follow-redirects@^1.14.4:
-  version "1.14.5"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.5.tgz#f09a5848981d3c772b5392309778523f8d85c381"
-  integrity sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==
+  version "1.14.6"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.6.tgz#8cfb281bbc035b3c067d6cd975b0f6ade6e855cd"
+  integrity sha512-fhUl5EwSJbbl8AR+uYL2KQDxLkdSjZGR36xy46AO7cOMTrCMON6Sa28FmAnC2tRTDbd/Uuzz3aJBv7EBN7JH8A==
 
 for-in@^1.0.2:
   version "1.0.2"
