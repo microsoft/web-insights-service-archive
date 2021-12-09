@@ -8,7 +8,9 @@ import { Agents, ExtendOptions, Got, Options } from 'got';
 import { IMock, It, Mock } from 'typemoq';
 import { RetryHelper } from 'common';
 import { Logger } from 'logger';
+import { AuthenticationResult } from '@azure/msal-common';
 import { WebInsightsStorageClient } from './web-insights-storage-client';
+import { WebInsightsAPICredential } from './web-insights-api-credential';
 
 describe(WebInsightsStorageClient, () => {
     const baseUrl = 'base-url';
@@ -22,11 +24,16 @@ describe(WebInsightsStorageClient, () => {
     let getMock: IMock<(url: string, options?: Options) => {}>;
     // eslint-disable-next-line @typescript-eslint/ban-types
     let postMock: IMock<(url: string, options?: Options) => {}>;
+    let credentialMock: IMock<WebInsightsAPICredential>;
     let retryHelperMock: IMock<RetryHelper<unknown>>;
     let loggerMock: IMock<Logger>;
     let getAgentsMock: IMock<() => Agents>;
     let response: unknown;
     const agentsStub = {};
+    const token = {
+        tokenType: 'Bearer',
+        accessToken: 'access token',
+    } as AuthenticationResult;
 
     let testSubject: WebInsightsStorageClient;
 
@@ -50,9 +57,11 @@ describe(WebInsightsStorageClient, () => {
         retryHelperMock = Mock.ofType<RetryHelper<unknown>>();
         getAgentsMock = Mock.ofType<() => Agents>();
         getAgentsMock.setup((ga) => ga()).returns(() => agentsStub);
+        credentialMock = Mock.ofType<WebInsightsAPICredential>();
 
         testSubject = new WebInsightsStorageClient(
             baseUrl,
+            credentialMock.object,
             loggerMock.object,
             false,
             apiVersion,
@@ -70,6 +79,7 @@ describe(WebInsightsStorageClient, () => {
         postMock.verifyAll();
         getMock.verifyAll();
         getAgentsMock.verifyAll();
+        credentialMock.verifyAll();
     });
 
     it.each([true, false])('Constructor sets request parameters when throwOnRequestFailure=%s', (throwOnRequestFailure) => {
@@ -90,6 +100,7 @@ describe(WebInsightsStorageClient, () => {
 
         testSubject = new WebInsightsStorageClient(
             baseUrl,
+            credentialMock.object,
             loggerMock.object,
             throwOnRequestFailure,
             apiVersion,
@@ -107,6 +118,7 @@ describe(WebInsightsStorageClient, () => {
         const requestUrl = `${baseUrl}/websites`;
 
         setupRetryHelperMock();
+        setupSignRequest();
         postMock
             .setup((req) => req(requestUrl, requestOptions))
             .returns(async () => response)
@@ -122,6 +134,7 @@ describe(WebInsightsStorageClient, () => {
         const requestUrl = `${baseUrl}/websites/${websiteId}`;
 
         setupRetryHelperMock();
+        setupSignRequest();
         getMock
             .setup((req) => req(requestUrl))
             .returns(async () => response)
@@ -140,6 +153,7 @@ describe(WebInsightsStorageClient, () => {
         const requestUrl = `${baseUrl}/pages`;
 
         setupRetryHelperMock();
+        setupSignRequest();
         postMock
             .setup((req) => req(requestUrl, requestOptions))
             .returns(async () => response)
@@ -159,6 +173,7 @@ describe(WebInsightsStorageClient, () => {
         const requestUrl = `${baseUrl}/websites/scans`;
 
         setupRetryHelperMock();
+        setupSignRequest();
         postMock
             .setup((req) => req(requestUrl, requestOptions))
             .returns(async () => response)
@@ -176,6 +191,7 @@ describe(WebInsightsStorageClient, () => {
         const requestUrl = `${baseUrl}/websites/${websiteId}/scans/${scanType}/${websiteScanId}`;
 
         setupRetryHelperMock();
+        setupSignRequest();
         getMock
             .setup((req) => req(requestUrl))
             .returns(async () => response)
@@ -191,6 +207,7 @@ describe(WebInsightsStorageClient, () => {
         const requestUrl = `${baseUrl}/websites/${websiteId}/scans/${scanType}/latest`;
 
         setupRetryHelperMock();
+        setupSignRequest();
         getMock
             .setup((req) => req(requestUrl))
             .returns(async () => response)
@@ -206,6 +223,22 @@ describe(WebInsightsStorageClient, () => {
             .returns(async (action: () => Promise<unknown>, errorHandler: (error: Error) => Promise<void>, maxAttempts: number) => {
                 return action();
             })
+            .verifiable();
+    }
+
+    function setupSignRequest(): void {
+        credentialMock
+            .setup((c) => c.getToken())
+            .returns(async () => token)
+            .verifiable();
+        const expectedOptions: ExtendOptions = {
+            headers: {
+                authorization: `${token.tokenType} ${token.accessToken}`,
+            },
+        };
+        extendMock
+            .setup((e) => e(expectedOptions))
+            .returns(() => gotStub)
             .verifiable();
     }
 });
