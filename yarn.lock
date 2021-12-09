@@ -4601,12 +4601,12 @@ create-hmac@^1.1.7:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-cron-parser@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/cron-parser/-/cron-parser-4.1.0.tgz#8355502f5ca7f8badca03426959a4915765330d5"
-  integrity sha512-9AIKixzWHV1nn+EF8bR9/0Q9E2xhv8UW9l7/nX8LN7pzYYi1HPr7kLTUxsyimaoqwjn8S15HwXmza6Ebt6BWJw==
+cron-parser@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/cron-parser/-/cron-parser-4.2.0.tgz#cee7d9b5a04f3f64c6c9d815097df2e98b7c5427"
+  integrity sha512-pHDdek1iV87R9iG1edv5P2aImDOO1+y2VqCm0V3t0g3JtT/o0V0wAnX/6J2bsF8XEDvR7iqL3Co/3RBj2AhPFQ==
   dependencies:
-    luxon "^1.26.0"
+    luxon "^1.28.0"
 
 cross-spawn@^6.0.5:
   version "6.0.5"
@@ -5766,9 +5766,9 @@ flatten@^1.0.2:
   integrity sha512-dVsPA/UwQ8+2uoFe5GHtiBMu48dWLTdsuEd7CKGlZlD78r1TTWBvDuFaFGKCo/ZfEr95Uk56vZoX86OsHkUeIg==
 
 follow-redirects@^1.14.4:
-  version "1.14.5"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.5.tgz#f09a5848981d3c772b5392309778523f8d85c381"
-  integrity sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==
+  version "1.14.6"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.6.tgz#8cfb281bbc035b3c067d6cd975b0f6ade6e855cd"
+  integrity sha512-fhUl5EwSJbbl8AR+uYL2KQDxLkdSjZGR36xy46AO7cOMTrCMON6Sa28FmAnC2tRTDbd/Uuzz3aJBv7EBN7JH8A==
 
 for-in@^1.0.2:
   version "1.0.2"
@@ -8164,7 +8164,7 @@ lru-cache@^6.0.0:
   dependencies:
     yallist "^4.0.0"
 
-luxon@^1.26.0:
+luxon@^1.28.0:
   version "1.28.0"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.28.0.tgz#e7f96daad3938c06a62de0fb027115d251251fbf"
   integrity sha512-TfTiyvZhwBYM/7QdAVDh+7dBTBA29v4ik0Ce9zda3Mnf8on1S5KJI8P2jKFZ8+5C0jhmr0KwJEO/Wdpm0VeWJQ==
