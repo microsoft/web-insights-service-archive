@@ -27,7 +27,7 @@
         "@types/jsonwebtoken": "^8.5.5",
         "@types/lodash": "^4.14.176",
         "@types/verror": "^1.10.4",
-        "@types/yargs": "^17.0.5",
+        "@types/yargs": "^17.0.7",
         "fork-ts-checker-webpack-plugin": "^6.3.6",
         "jest": "^27.3.1",
         "jest-junit": "^13.0.0",
