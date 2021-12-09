@@ -7,6 +7,7 @@ import { getForeverAgents, ResponseWithBodyType, RetryHelper, System } from 'com
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
 import got, { Agents, ExtendOptions, Got, Options } from 'got';
+import { WebInsightsAPICredential } from './web-insights-api-credential';
 
 @injectable()
 export class WebInsightsStorageClient {
@@ -14,6 +15,7 @@ export class WebInsightsStorageClient {
 
     constructor(
         private readonly baseUrl: string,
+        private readonly credential: WebInsightsAPICredential,
         private readonly logger: Logger,
         throwOnRequestFailure: boolean = false,
         apiVersion: string = '1.0',
@@ -43,9 +45,11 @@ export class WebInsightsStorageClient {
 
     public async postWebsite(website: ApiContracts.Website): Promise<ResponseWithBodyType<ApiContracts.Website>> {
         const requestUrl = `${this.baseUrl}/websites`;
-        const options: Options = { json: website };
+        const options: Options = {
+            json: website,
+        };
 
-        const executeRequest = async () => this.baseRequestObj.post(requestUrl, options);
+        const executeRequest = async () => (await this.signRequest()).post(requestUrl, options);
         const onRetry = async (e: Error) =>
             this.logger.logError('POST website REST API request failed. Retrying on error.', {
                 url: requestUrl,
@@ -58,7 +62,7 @@ export class WebInsightsStorageClient {
     public async getWebsite(websiteId: string): Promise<ResponseWithBodyType<ApiContracts.Website>> {
         const requestUrl = `${this.baseUrl}/websites/${websiteId}`;
 
-        const executeRequest = async () => this.baseRequestObj.get(requestUrl);
+        const executeRequest = async () => (await this.signRequest()).get(requestUrl);
         const onRetry = async (e: Error) =>
             this.logger.logError('GET website REST API request failed. Retrying on error.', {
                 url: requestUrl,
@@ -72,7 +76,7 @@ export class WebInsightsStorageClient {
         const requestUrl = `${this.baseUrl}/pages`;
         const options: Options = { json: pageUpdate };
 
-        const executeRequest = async () => this.baseRequestObj.post(requestUrl, options);
+        const executeRequest = async () => (await this.signRequest()).post(requestUrl, options);
         const onRetry = async (e: Error) =>
             this.logger.logError('POST page REST API request failed. Retrying on error.', {
                 url: requestUrl,
@@ -86,7 +90,7 @@ export class WebInsightsStorageClient {
         const requestUrl = `${this.baseUrl}/websites/scans`;
         const options: Options = { json: websiteScan };
 
-        const executeRequest = async () => this.baseRequestObj.post(requestUrl, options);
+        const executeRequest = async () => (await this.signRequest()).post(requestUrl, options);
         const onRetry = async (e: Error) =>
             this.logger.logError('POST website scan REST API request failed. Retrying on error.', {
                 url: requestUrl,
@@ -119,7 +123,7 @@ export class WebInsightsStorageClient {
         const latestScanTag = 'latest';
         const requestUrl = `${this.baseUrl}/websites/${websiteId}/scans/${scanType}/${websiteScanId ?? latestScanTag}`;
 
-        const executeRequest = async () => this.baseRequestObj.get(requestUrl);
+        const executeRequest = async () => (await this.signRequest()).get(requestUrl);
         const onRetry = async (e: Error) =>
             this.logger.logError('GET website scan REST API request failed. Retrying on error.', {
                 url: requestUrl,
@@ -139,5 +143,15 @@ export class WebInsightsStorageClient {
             this.maxRetryCount,
             this.msecBetweenRetries,
         )) as ResponseWithBodyType<T>;
+    }
+
+    private async signRequest(): Promise<Got> {
+        const accessToken = await this.credential.getToken();
+
+        return this.baseRequestObj.extend({
+            headers: {
+                authorization: `${accessToken.tokenType} ${accessToken.accessToken}`,
+            },
+        });
     }
 }
