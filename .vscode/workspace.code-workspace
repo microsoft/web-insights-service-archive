@@ -41,6 +41,10 @@
             "path": "../packages/storage-api-client"
         },
         {
+            "e2e-test-runner",
+            "path": "../packages/e2e-test-runner"
+        },
+        {
             "name": "root",
             "path": "../"
         }

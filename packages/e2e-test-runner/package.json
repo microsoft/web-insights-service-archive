@@ -1,0 +1,53 @@
+{
+    "name": "e2e-test-runner",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {
+        "build": "webpack --config ./webpack.config.js && node ../../create-docker-image-package-json.js",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist test-results",
+        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
+        "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
+        "test": "jest --coverage --colors",
+        "watch": "tsc --w",
+        "start:host": "func start",
+        "start": "npm-run-all --parallel start:host watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/web-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/web-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/web-insights-service#readme",
+    "devDependencies": {
+        "@types/dotenv": "^8.2.0",
+        "@types/jest": "^27.0.3",
+        "@types/node": "^12.20.36",
+        "copy-webpack-plugin": "^10.0.0",
+        "fork-ts-checker-webpack-plugin": "^6.3.6",
+        "jest": "^27.3.1",
+        "jest-junit": "^13.0.0",
+        "node-loader": "^2.0.0",
+        "npm-run-all": "^4.1.5",
+        "rimraf": "^3.0.2",
+        "ts-jest": "^27.0.7",
+        "ts-loader": "^9.2.6",
+        "typemoq": "^2.1.0",
+        "typescript": "^4.4.4",
+        "webpack": "^5.64.4",
+        "webpack-cli": "^4.9.1"
+    },
+    "dependencies": {
+        "api-contracts": "1.0.0",
+        "azure-services": "1.0.0",
+        "common": "1.0.0",
+        "logger": "1.0.0",
+        "reflect-metadata": "^0.1.13",
+        "service-library": "1.0.0",
+        "storage-documents": "1.0.0"
+    }
+}
