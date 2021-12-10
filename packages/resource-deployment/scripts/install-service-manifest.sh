@@ -44,11 +44,6 @@ waitForAppGatewayUpdate() {
     fi
 }
 
-getPublicDNS() {
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
-    fqdn=$(az network public-ip show --resource-group "${nodeResourceGroup}" --name "${appGatewayPublicIP}" -o tsv --query "dnsSettings.fqdn")
-}
-
 # Read script arguments
 while getopts ":r:s:c:e:v:f:d" option; do
     case ${option} in
@@ -93,7 +88,6 @@ kubectl config use-context "${kubernetesService}" 1>/dev/null
 
 getAppInsightKey
 getValuesManifest
-getPublicDNS
 releaseName="${serviceName}-service"
 repository="${containerRegistry}.azurecr.io"
 keyVaultUrl="https://${keyVault}.vault.azure.net/"
@@ -116,7 +110,6 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
     --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
     --set env[2].name=AZURE_PRINCIPAL_ID,env[2].value="${principalId}" \
-    --set ingress.tls[0].hosts[0]="${fqdn}" \
     ${flags}
 
 waitForAppGatewayUpdate

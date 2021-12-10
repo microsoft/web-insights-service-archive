@@ -13,11 +13,6 @@ Usage: ${BASH_SOURCE} -r <resource group> [-c <aks cluster name>] [-e <environme
     exit 1
 }
 
-getPublicDNS() {
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
-    fqdn=$(az network public-ip show --resource-group "${nodeResourceGroup}" --name "${appGatewayPublicIP}" -o tsv --query "dnsSettings.fqdn")
-}
-
 # Read script arguments
 while getopts ":r:s:c:e:v:d" option; do
     case ${option} in
@@ -30,13 +25,14 @@ while getopts ":r:s:c:e:v:d" option; do
     esac
 done
 
-. "${0%/*}/get-resource-names.sh"
+# Print script usage help
+if [[ -z ${resourceGroupName} ]]; then
+    exitWithUsageInfo
+fi
 
-getPublicDNS
-flags="--set ingress.tls[0].hosts[0]=${fqdn}"
-serviceName="storage-web-api"
+serviceName="e2e-test-runner"
 
 . "${0%/*}/install-service-manifest.sh"
 . "${0%/*}/grant-service-principal-access.sh"
 
-echo "The Storage Web API service successfully installed."
+echo "The E2E Test Runner job successfully installed."

@@ -44,11 +44,13 @@ getPackagesLocation() {
 
 setImageBuildSource() {
     storageWebApiDist="${packagesLocation}storage-web-api/dist/"
+    e2eTestRunnerDist="${packagesLocation}e2e-test-runner/dist/"
 }
 
 prepareImageBuildSource() {
     echo "Copy '${environment}' runtime configuration to the docker image build source."
     cp "${0%/*}/../runtime-config/runtime-config.${environment}.json" "${storageWebApiDist}runtime-config.json"
+    cp "${0%/*}/../runtime-config/runtime-config.${environment}.json" "${e2eTestRunnerDist}runtime-config.json"
     echo "Runtime configuration copied successfully."
 }
 
@@ -68,6 +70,7 @@ pushImagesToRegistry() (
     # shellcheck disable=SC2034
     local imageBuildProcesses=(
         "pushImageToRegistry \"storage-web-api-func\" \"${storageWebApiDist}\" \"linux\""
+        "pushImageToRegistry \"e2e-test-runner\" \"${e2eTestRunnerDist}\" \"linux\""
     )
 
     echo "Pushing images to Azure Container Registry."
