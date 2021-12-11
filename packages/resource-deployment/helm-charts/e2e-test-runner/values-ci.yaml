@@ -28,3 +28,5 @@ env:
     value: ''
   - name: KEY_VAULT_URL
     value: ''
+  - name: WEB_API_BASE_URL
+    value: ''

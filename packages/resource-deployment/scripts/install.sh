@@ -12,11 +12,14 @@ export location
 export resourceGroupName
 export subscription
 export releaseVersion
+export webApiAdClientId
+export webApiAdClientSecret
+export webApiAdResourceId
 
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -e <environment> -l <location> -r <resource group> -s <subscription name or id> [-v <release version>]
+Usage: ${BASH_SOURCE} -e <environment> -l <location> -r <resource group> -s <subscription name or id> -c <client id> -i <API resource id> -t <client secret> [-v <release version>]
 where:
 
 resource group - The name of the resource group that everything will be deployed in.
@@ -115,18 +118,27 @@ install() {
 }
 
 # Read script arguments
-while getopts ":r:s:l:e:v:" option; do
+while getopts ":r:s:l:e:c:i:t:v:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     l) location=${OPTARG} ;;
     e) environment=${OPTARG} ;;
+    c) webApiAdClientId=${OPTARG} ;;
+    i) webApiAdResourceId=${OPTARG} ;;
+    t) webApiAdClientSecret=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z ${resourceGroupName} ]] || [[ -z ${subscription} ]] || [[ -z ${location} ]] || [[ -z ${environment} ]]; then
+if [[ -z ${resourceGroupName} ]] ||
+    [[ -z ${subscription} ]] ||
+    [[ -z ${location} ]] ||
+    [[ -z ${environment} ]] ||
+    [[ -z ${webApiAdClientId} ]] ||
+    [[ -z ${webApiAdResourceId} ]] ||
+    [[ -z ${webApiAdClientSecret} ]]; then
     exitWithUsageInfo
 fi
 

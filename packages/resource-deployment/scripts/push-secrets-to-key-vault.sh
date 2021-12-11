@@ -10,7 +10,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> [-s <subscription name or id>] [-p <profiles path>]
+Usage: ${BASH_SOURCE} -r <resource group> -c <client id> -i <API resource id> -t <client secret> [-s <subscription name or id>] [-p <profiles path>]
 "
     exit 1
 }
@@ -154,20 +154,27 @@ pushSecretsToKeyVault() (
     pushSecretToKeyVault "aclIssuer" "https://sts.windows.net/${tenantId}/"
     # - jwks_uri (common for all tenants)
     pushSecretToKeyVault "aclPublicKeysUrl" "https://login.microsoftonline.com/common/discovery/keys"
+    pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
+    pushSecretToKeyVault "restApiClientId" "${webApiAdClientId}"
+    pushSecretToKeyVault "restApiClientSecret" "${webApiAdClientSecret}"
+    pushSecretToKeyVault "restApiResourceId" "${webApiAdResourceId}"
 )
 
 # Read script arguments
-while getopts ":r:s:p:" option; do
+while getopts ":r:s:p:c:i:t:" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     p) profilesPath=${OPTARG} ;;
+    c) webApiAdClientId=${OPTARG} ;;
+    i) webApiAdResourceId=${OPTARG} ;;
+    t) webApiAdClientSecret=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z ${resourceGroupName} ]]; then
+if [[ -z ${resourceGroupName} ]] || [[ -z ${webApiAdClientId} ]] || [[ -z ${webApiAdResourceId} ]] || [[ -z ${webApiAdClientSecret} ]]; then
     exitWithUsageInfo
 fi
 

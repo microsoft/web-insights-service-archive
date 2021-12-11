@@ -11,6 +11,10 @@ spec:
     spec:
       activeDeadlineSeconds: {{ .Values.jobSettings.maxRuntimeSeconds }}
       template:
+        metadata:
+          labels:
+            aadpodidbinding: {{ .Values.podPrincipalName }}
+            {{- include "e2e-test-runner.labels" . | nindent 12 }}
         spec:
           restartPolicy: Never
           containers:
