@@ -10,6 +10,7 @@ describe('listMonorepoPackageNames', () => {
               "api-contracts",
               "azure-services",
               "common",
+              "e2e-test-runner",
               "integration-tests",
               "logger",
               "resource-deployment",
