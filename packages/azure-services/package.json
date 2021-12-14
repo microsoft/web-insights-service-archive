@@ -50,7 +50,7 @@
         "@azure/storage-blob": "^12.8.0",
         "@azure/storage-queue": "^12.7.0",
         "async-mutex": "^0.3.2",
-        "azure-ad-verify-token": "^1.1.2",
+        "azure-ad-verify-token": "^2.0.0",
         "common": "1.0.0",
         "dotenv": "^10.0.0",
         "got": "^11.8.3",
