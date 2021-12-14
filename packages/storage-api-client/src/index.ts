@@ -2,3 +2,5 @@
 // Licensed under the MIT License.
 
 export { WebInsightsStorageClient } from './web-insights-storage-client';
+export { registerWebInsightsStorageClientToContainer } from './register-wis-client-to-container';
+export { WebInsightsServiceClientTypeNames, WebInsightsClientProvider } from './type-names';
