@@ -42,8 +42,6 @@ formatEnvVariables() {
     local varValue
     local allEnvVariables="${commonEnvVariables},${customEnvVariables}"
 
-    echo "${allEnvVariables}"
-
     oldIFS=${IFS}
     IFS=","
     for envPair in ${allEnvVariables}; do

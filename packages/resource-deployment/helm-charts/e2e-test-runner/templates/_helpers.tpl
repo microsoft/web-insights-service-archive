@@ -38,17 +38,8 @@ Common labels
 */}}
 {{- define "e2e-test-runner.labels" -}}
 helm.sh/chart: {{ include "e2e-test-runner.chart" . }}
-{{ include "e2e-test-runner.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
-
-{{/*
-Selector labels
-*/}}
-{{- define "e2e-test-runner.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "e2e-test-runner.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
