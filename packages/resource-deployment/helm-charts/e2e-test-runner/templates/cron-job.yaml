@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "e2e-test-runner.fullname" . }}
+  labels:
+    {{- include "e2e-test-runner.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.jobSettings.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: {{ .Values.jobSettings.maxRuntimeSeconds }}
+      template:
+        metadata:
+          labels:
+            aadpodidbinding: {{ .Values.podPrincipalName }}
+            {{- include "e2e-test-runner.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: {{ .Values.image.name }}
+              image: {{ .Values.image.repository }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              env:          
+                {{- range .Values.env }}
+                - name: {{ .name }}
+                  value: {{ .value }}
+                {{- end }}

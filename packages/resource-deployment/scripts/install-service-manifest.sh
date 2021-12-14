@@ -8,7 +8,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-Usage: ${BASH_SOURCE} -r <resource group> -s <service name> [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-d debug]
+Usage: ${BASH_SOURCE} -r <resource group> -s <service name> [-c <aks cluster name>] [-e <environment>] [-v <release version>] [-f flags] [-n <environment variables(comma-separated name=value pairs)>] [-d debug]
 "
     exit 1
 }
@@ -36,6 +36,41 @@ getInstallAction() {
     fi
 }
 
+formatEnvVariables() {
+    local index=0
+    local varName
+    local varValue
+    local allEnvVariables="${commonEnvVariables},${customEnvVariables}"
+
+    oldIFS=${IFS}
+    IFS=","
+    for envPair in ${allEnvVariables}; do
+        if [[ -z ${envPair} ]]; then
+            continue
+        fi
+
+        if [[ "${envPair}" != *"="* ]]; then
+            echo "Env variables parameter is incorrectly formated. Must be a comma separated list of name=value pairs."
+            echo "${customEnvVariables}"
+            echo "${envPair}"
+            exitWithUsageInfo
+        fi
+        varName="$(cut -d "=" -f 1 <<<"${envPair}")"
+        varValue="$(cut -d "=" -f 2- <<<"${envPair}")"
+
+        # shellcheck disable=SC2089
+        formattedEnvPair="env[${index}].name=${varName},env[${index}].value=\"${varValue}\""
+        if [[ -z ${formattedEnvVariables} ]]; then
+            formattedEnvVariables="${formattedEnvPair}"
+        else
+            formattedEnvVariables="${formattedEnvVariables},${formattedEnvPair}"
+        fi
+
+        ((index = index + 1))
+    done
+    IFS=${oldIFS}
+}
+
 waitForAppGatewayUpdate() {
     nodeResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query "[].nodeResourceGroup" -o tsv)
     if [[ -n ${nodeResourceGroup} ]]; then
@@ -44,13 +79,8 @@ waitForAppGatewayUpdate() {
     fi
 }
 
-getPublicDNS() {
-    nodeResourceGroup=$(az aks show --resource-group "${resourceGroupName}" --name "${kubernetesService}" -o tsv --query "nodeResourceGroup")
-    fqdn=$(az network public-ip show --resource-group "${nodeResourceGroup}" --name "${appGatewayPublicIP}" -o tsv --query "dnsSettings.fqdn")
-}
-
 # Read script arguments
-while getopts ":r:s:c:e:v:f:d" option; do
+while getopts ":r:s:c:e:v:f:n:d" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
     s) serviceName=${OPTARG} ;;
@@ -58,6 +88,7 @@ while getopts ":r:s:c:e:v:f:d" option; do
     e) environment=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
     f) flags=${OPTARG} ;;
+    n) customEnvVariables=${OPTARG} ;;
     d) debug="debug" ;;
     *) exitWithUsageInfo ;;
     esac
@@ -93,7 +124,6 @@ kubectl config use-context "${kubernetesService}" 1>/dev/null
 
 getAppInsightKey
 getValuesManifest
-getPublicDNS
 releaseName="${serviceName}-service"
 repository="${containerRegistry}.azurecr.io"
 keyVaultUrl="https://${keyVault}.vault.azure.net/"
@@ -105,6 +135,12 @@ principalName="${serviceName}-sp-${resourceNameSuffix}"
 
 getInstallAction
 
+# Set common env variables before formatting
+commonEnvVariables="APPINSIGHTS_INSTRUMENTATIONKEY=${appInsightInstrumentationKey}"
+commonEnvVariables+=",KEY_VAULT_URL=${keyVaultUrl}"
+commonEnvVariables+=",AZURE_PRINCIPAL_ID=${principalId}"
+formatEnvVariables
+
 # Install service manifest
 # To debug add --debug --dry-run options
 # shellcheck disable=SC2086
@@ -113,10 +149,7 @@ helm "${installAction}" "${releaseName}" "${helmChart}" \
     --set image.repository="${repository}" \
     --set podAnnotations.releaseId="${releaseVersion}" \
     --set podPrincipalName="${principalName}" \
-    --set env[0].name=APPINSIGHTS_INSTRUMENTATIONKEY,env[0].value="${appInsightInstrumentationKey}" \
-    --set env[1].name=KEY_VAULT_URL,env[1].value="${keyVaultUrl}" \
-    --set env[2].name=AZURE_PRINCIPAL_ID,env[2].value="${principalId}" \
-    --set ingress.tls[0].hosts[0]="${fqdn}" \
+    --set "${formattedEnvVariables}" \
     ${flags}
 
 waitForAppGatewayUpdate

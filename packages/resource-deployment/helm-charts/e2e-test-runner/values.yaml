@@ -1,0 +1,32 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+# Default values for storage-web-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ''
+fullnameOverride: ''
+podPrincipalName: ''
+
+image:
+  name: e2e-test-runner
+  repository: ''
+  pullPolicy: Always
+  tag: latest
+
+podAnnotations:
+  release: dev
+  releaseId: ''
+
+jobSettings:
+  schedule: '*/5 * * * *'
+  maxRuntimeSeconds: 600
+
+env:
+  - name: APPINSIGHTS_INSTRUMENTATIONKEY
+    value: ''
+  - name: KEY_VAULT_URL
+    value: ''
+  - name: WEB_API_BASE_URL
+    value: ''

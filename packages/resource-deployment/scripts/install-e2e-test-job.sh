@@ -30,13 +30,20 @@ while getopts ":r:s:c:e:v:d" option; do
     esac
 done
 
+# Print script usage help
+if [[ -z ${resourceGroupName} ]]; then
+    exitWithUsageInfo
+fi
+
 . "${0%/*}/get-resource-names.sh"
 
 getPublicDNS
-flags="--set ingress.tls[0].hosts[0]=${fqdn}"
-serviceName="storage-web-api"
+
+serviceName="e2e-test-runner"
+storageApiBaseUrl="https://${fqdn}/storage/api"
+customEnvVariables="WEB_API_BASE_URL=${storageApiBaseUrl}"
 
 . "${0%/*}/install-service-manifest.sh"
 . "${0%/*}/grant-service-principal-access.sh"
 
-echo "The Storage Web API service successfully installed."
+echo "The E2E Test Runner job successfully installed."

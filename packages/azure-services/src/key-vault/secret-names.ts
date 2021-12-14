@@ -8,4 +8,8 @@ export const secretNames = {
     appInsightsApiKey: 'appInsightsApiKey',
     aclIssuer: 'aclIssuer',
     aclPublicKeysUrl: 'aclPublicKeysUrl',
+    restApiClientId: 'restApiClientId',
+    restApiClientSecret: 'restApiClientSecret',
+    restApiResourceId: 'restApiResourceId',
+    authorityUrl: 'authorityUrl',
 };

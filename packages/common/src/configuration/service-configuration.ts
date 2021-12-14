@@ -21,10 +21,15 @@ export interface RestApiConfig {
     defaultA11yScanFrequency: string;
 }
 
+export interface AvailabilityTestConfig {
+    environmentDefinition: string;
+}
+
 export interface RuntimeConfig {
     logConfig: LogRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
     restApiConfig: RestApiConfig;
+    availabilityTestConfig: AvailabilityTestConfig;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -117,6 +122,13 @@ export class ServiceConfiguration {
                     default: '0 0 17 ? * 1#1',
                     doc: 'A cron expression describing the default scheduling for accessibility scans. By default, accessibility scans will run at\
                     5pm UTC (10am PST) on the first Monday of every month.',
+                },
+            },
+            availabilityTestConfig: {
+                environmentDefinition: {
+                    format: String,
+                    default: 'canary',
+                    doc: 'The environment definition used to select tests to run',
                 },
             },
         };

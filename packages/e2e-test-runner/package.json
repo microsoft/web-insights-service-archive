@@ -1,5 +1,5 @@
 {
-    "name": "storage-web-api",
+    "name": "e2e-test-runner",
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
@@ -26,10 +26,7 @@
     "devDependencies": {
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^27.0.3",
-        "@types/lodash": "^4.14.177",
         "@types/node": "^12.20.37",
-        "@types/verror": "^1.10.4",
-        "@types/yargs": "^17.0.7",
         "copy-webpack-plugin": "^10.0.0",
         "fork-ts-checker-webpack-plugin": "^6.5.0",
         "jest": "^27.4.3",
@@ -40,24 +37,19 @@
         "ts-jest": "^27.0.7",
         "ts-loader": "^9.2.6",
         "typemoq": "^2.1.0",
-        "typescript": "^4.5.3",
+        "typescript": "^4.5.2",
         "webpack": "^5.64.4",
         "webpack-cli": "^4.9.1"
     },
     "dependencies": {
-        "@azure/functions": "^1.2.3",
         "api-contracts": "1.0.0",
-        "applicationinsights-native-metrics": "^0.0.6",
         "azure-services": "1.0.0",
         "common": "1.0.0",
-        "cron-parser": "^4.2.0",
         "inversify": "^6.0.1",
-        "lodash": "^4.17.21",
         "logger": "1.0.0",
-        "@opentelemetry/tracing": "^0.21.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
-        "storage-documents": "1.0.0",
-        "moment": "^2.29.1"
+        "storage-api-client": "1.0.0",
+        "storage-documents": "1.0.0"
     }
 }
