@@ -12,7 +12,7 @@ import { E2ETestDataProvider } from './e2e-test-data-provider';
 
 describe(E2ETestDataProvider, () => {
     const containerName = 'e2e-test-data';
-    const testWebsiteBlobName = 'test-website.json';
+    const blobName = 'test-website.json';
     const readableStream = {
         readable: true,
     } as NodeJS.ReadableStream;
@@ -37,7 +37,7 @@ describe(E2ETestDataProvider, () => {
         const storageReadResponse = { notFound: true } as BlobContentDownloadResponse;
         setupBlobRead(storageReadResponse);
 
-        const result = await testSubject.readTestWebsite();
+        const result = await testSubject.readTestWebsite(blobName);
 
         expect(result.error).toEqual({ errorCode: 'blobNotFound' });
     });
@@ -51,7 +51,7 @@ describe(E2ETestDataProvider, () => {
         setupBlobRead(successfulReadResponse);
         bodyParserMock.setup((b) => b.getRawBody(It.isAny())).throws(testError);
 
-        const result = await testSubject.readTestWebsite();
+        const result = await testSubject.readTestWebsite(blobName);
 
         expect(result.error).toEqual(expectedError);
     });
@@ -61,7 +61,7 @@ describe(E2ETestDataProvider, () => {
         setupBlobRead(successfulReadResponse);
         setupParseBody(invalidJson);
 
-        const result = await testSubject.readTestWebsite();
+        const result = await testSubject.readTestWebsite(blobName);
 
         expect(result.error?.errorCode).toEqual('jsonParseError');
         expect(result.error.data).toBeDefined();
@@ -77,7 +77,7 @@ describe(E2ETestDataProvider, () => {
         setupParseBody(invalidWebsiteJson);
         isValidWebsiteObjectMock.setup((x) => x(websiteStub as ApiContracts.Website)).returns(() => false);
 
-        const result = await testSubject.readTestWebsite();
+        const result = await testSubject.readTestWebsite(blobName);
 
         expect(result.error).toEqual(expectedError);
     });
@@ -88,13 +88,13 @@ describe(E2ETestDataProvider, () => {
         setupParseBody(JSON.stringify(websiteStub));
         isValidWebsiteObjectMock.setup((x) => x(websiteStub as ApiContracts.Website)).returns(() => true);
 
-        const result = await testSubject.readTestWebsite();
+        const result = await testSubject.readTestWebsite(blobName);
 
         expect(result).toEqual(expectedResult);
     });
 
     function setupBlobRead(response: BlobContentDownloadResponse): void {
-        blobStorageClientMock.setup((b) => b.getBlobContent(containerName, testWebsiteBlobName)).returns(async () => response);
+        blobStorageClientMock.setup((b) => b.getBlobContent(containerName, blobName)).returns(async () => response);
     }
 
     function setupParseBody(contentString: string): void {

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+export * from './types/health-report';
 export { Page } from './types/page';
 export { PageScan } from './types/page-scan';
 export { PageUpdate } from './types/page-update';

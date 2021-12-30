@@ -23,16 +23,14 @@ export type E2ETestDataReadResponse<T> = {
 export class E2ETestDataProvider {
     private readonly e2eTestDataContainerName = 'e2e-test-data';
 
-    private readonly testWebsiteBlobName = 'test-website.json';
-
     constructor(
         @inject(BlobStorageClient) private readonly blobStorageClient: BlobStorageClient,
         @inject(BodyParser) private readonly bodyParser: BodyParser,
         private readonly isValidWebsiteObject: ApiContracts.ApiObjectValidator<ApiContracts.Website> = ApiContracts.isValidWebsiteObject,
     ) {}
 
-    public async readTestWebsite(): Promise<E2ETestDataReadResponse<ApiContracts.Website>> {
-        const downloadResponse = await this.blobStorageClient.getBlobContent(this.e2eTestDataContainerName, this.testWebsiteBlobName);
+    public async readTestWebsite(blobName: string): Promise<E2ETestDataReadResponse<ApiContracts.Website>> {
+        const downloadResponse = await this.blobStorageClient.getBlobContent(this.e2eTestDataContainerName, blobName);
 
         if (downloadResponse.notFound) {
             return {
