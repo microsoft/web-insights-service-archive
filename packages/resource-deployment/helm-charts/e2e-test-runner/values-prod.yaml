@@ -30,3 +30,5 @@ env:
     value: ''
   - name: WEB_API_BASE_URL
     value: ''
+  - name: RELEASE_VERSION
+    value: ''

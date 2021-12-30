@@ -139,6 +139,7 @@ getInstallAction
 commonEnvVariables="APPINSIGHTS_INSTRUMENTATIONKEY=${appInsightInstrumentationKey}"
 commonEnvVariables+=",KEY_VAULT_URL=${keyVaultUrl}"
 commonEnvVariables+=",AZURE_PRINCIPAL_ID=${principalId}"
+commonEnvVariables+=",RELEASE_VERSION=${releaseVersion}"
 formatEnvVariables
 
 # Install service manifest
