@@ -9,7 +9,7 @@ import { WebInsightsStorageClient } from 'storage-api-client';
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-export abstract class FunctionalTestGroup {
+export class FunctionalTestGroup {
     constructor(
         @inject(WebInsightsStorageClient) protected readonly webInsightsClient: WebInsightsStorageClient,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
