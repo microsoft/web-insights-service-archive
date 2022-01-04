@@ -77,11 +77,7 @@ fi
 function uploadFiles() {
     echo "Uploading files to Blob storage"
 
-    uploadProcesses=(
-        "uploadFileIfExists \"e2e-test-data\" \"${dropFolder}/resource-deployment/dist/e2e-test-data/test-website.${environment}.json\" \"${storageAccount}\" \"test-website.json\""
-    )
-
-    waitForCommandsInParallel uploadProcesses
+    uploadFileIfExists "e2e-test-data" "${dropFolder}/resource-deployment/dist/e2e-test-data/test-website.${environment}.json" "${storageAccount}" "test-website.json"
 
     echo "Upload files completed successfully."
 }
