@@ -12,6 +12,7 @@ import { TestScenarioDriver } from './test-scenarios/test-scenario-driver';
 import { TestContainerFactory } from './functional-tests/test-container-factory';
 import { TestRunner } from './functional-tests/test-runner';
 import { FinalizerTestGroup } from './functional-tests/test-groups/finalizer-test-group';
+import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 
 describe(E2ETestRunner, () => {
     let loggerMock: IMock<ContextAwareLogger>;
@@ -81,6 +82,7 @@ describe(E2ETestRunner, () => {
 
     function setupRunFinalizerTest(): void {
         const finalizerTestContainerMock = Mock.ofType<FinalizerTestGroup>();
+        getPromisableDynamicMock(finalizerTestContainerMock);
         testContainerFactoryMock
             .setup((f) => f.createTestContainer(FinalizerTestGroup))
             .returns(async () => finalizerTestContainerMock.object);
