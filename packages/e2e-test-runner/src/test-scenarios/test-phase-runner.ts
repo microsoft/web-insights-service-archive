@@ -9,6 +9,7 @@ import { TestEnvironment } from '../functional-tests/common-types';
 import { TestContextData } from '../functional-tests/test-context-data';
 import { TestRunMetadata, TestRunner } from '../functional-tests/test-runner';
 import { WebApiConfig } from '../web-api-config';
+import { FinalizerTestGroup } from '../functional-tests/test-groups/finalizer-test-group';
 import { TestPhases, TestScenarioDefinition } from './test-scenario-definitions';
 
 @injectable()
@@ -38,16 +39,27 @@ export class TestPhaseRunner {
             (TestContainerType) => new TestContainerType(this.webInsightsClient, this.guidGenerator),
         );
 
+        const testMetadata = await this.getTestMetadata(testScenario.readableName, testContextData);
+
+        await this.testRunner.runAll(testContainers, testMetadata, testContextData);
+    }
+
+    public async finalizeTestRun(): Promise<void> {
+        const testMetadata = await this.getTestMetadata('Finalizer');
+        const finalizerTestContainer = new FinalizerTestGroup(this.webInsightsClient, this.guidGenerator);
+        await this.testRunner.run(finalizerTestContainer, testMetadata, {} as TestContextData);
+    }
+
+    private async getTestMetadata(testScenarioName: string, testContextData?: TestContextData): Promise<TestRunMetadata> {
         const availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
-        const testMetadata: TestRunMetadata = {
+
+        return {
             environment: this.getTestEnvironment(availabilityTestConfig.environmentDefinition),
             releaseId: this.webApiConfig.releaseId,
             runId: this.runId,
-            scenarioName: testScenario.readableName,
-            scanId: testContextData.websiteScanId,
+            scenarioName: testScenarioName,
+            scanId: testContextData?.websiteScanId,
         };
-
-        await this.testRunner.runAll(testContainers, testMetadata, testContextData);
     }
 
     private getTestEnvironment(environment: string): TestEnvironment {

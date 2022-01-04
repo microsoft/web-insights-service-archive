@@ -25,17 +25,17 @@ export class TestRunner {
     public constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {}
 
     public async runAll(testContainers: FunctionalTestGroup[], metadata: TestRunMetadata, testContextData: TestContextData): Promise<void> {
-        await Promise.all(testContainers.map(async (testContainer) => this.run(testContainer, metadata)));
+        await Promise.all(testContainers.map(async (testContainer) => this.run(testContainer, metadata, testContextData)));
     }
 
-    public async run(testContainer: FunctionalTestGroup, metadata: TestRunMetadata): Promise<void> {
+    public async run(testContainer: FunctionalTestGroup, metadata: TestRunMetadata, testContextData: TestContextData): Promise<void> {
         const definedTests = getDefinedTestsMetadata(testContainer);
         // eslint-disable-next-line no-bitwise
         const targetedTests = definedTests.filter((definedTest) => definedTest.environments & metadata.environment);
         let containerPass = true;
         await Promise.all(
             targetedTests.map(async (targetedTest) => {
-                const testPass = await this.runTest(targetedTest, testContainer, metadata);
+                const testPass = await this.runTest(targetedTest, testContainer, metadata, testContextData);
 
                 containerPass = containerPass && testPass;
             }),
@@ -51,9 +51,14 @@ export class TestRunner {
         });
     }
 
-    private async runTest(testDefinition: TestDefinition, testContainer: FunctionalTestGroup, metadata: TestRunMetadata): Promise<boolean> {
+    private async runTest(
+        testDefinition: TestDefinition,
+        testContainer: FunctionalTestGroup,
+        metadata: TestRunMetadata,
+        testContextData: TestContextData,
+    ): Promise<boolean> {
         try {
-            await Promise.resolve(testDefinition.testImplFunc.call(testContainer));
+            await Promise.resolve(testDefinition.testImplFunc.call(testContainer, testContextData));
 
             this.log({
                 ...metadata,

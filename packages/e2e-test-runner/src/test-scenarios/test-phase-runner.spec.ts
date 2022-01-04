@@ -8,6 +8,7 @@ import { IMock, It, Mock } from 'typemoq';
 import { TestEnvironment } from '../functional-tests/common-types';
 import { FunctionalTestGroup } from '../functional-tests/functional-test-group';
 import { TestContextData } from '../functional-tests/test-context-data';
+import { FinalizerTestGroup } from '../functional-tests/test-groups/finalizer-test-group';
 import { TestRunMetadata, TestRunner } from '../functional-tests/test-runner';
 import { WebApiConfig } from '../web-api-config';
 import { TestPhaseRunner } from './test-phase-runner';
@@ -59,47 +60,66 @@ describe(TestPhaseRunner, () => {
         testRunnerMock.verifyAll();
     });
 
-    it('Handles scenario with undefined test phase', async () => {
-        const testScenarioDefinition = {
-            readableName: testScenarioName,
-            testPhases: {},
-        } as TestScenarioDefinition;
+    describe('runTestPhaseForScenario', () => {
+        it('Handles scenario with undefined test phase', async () => {
+            const testScenarioDefinition = {
+                readableName: testScenarioName,
+                testPhases: {},
+            } as TestScenarioDefinition;
 
-        await testSubject.runTestPhaseForScenario('beforeScan', testScenarioDefinition, testContextData);
+            await testSubject.runTestPhaseForScenario('beforeScan', testScenarioDefinition, testContextData);
+        });
+
+        it('Handles scenario with empty list for test phase', async () => {
+            const testScenarioDefinition = {
+                readableName: testScenarioName,
+                testPhases: {
+                    beforeScan: [],
+                },
+            } as TestScenarioDefinition;
+
+            await testSubject.runTestPhaseForScenario('beforeScan', testScenarioDefinition, testContextData);
+        });
+
+        it('Runs all test groups with expected data', async () => {
+            const testScenarioDefinition = {
+                readableName: testScenarioName,
+                testPhases: {
+                    beforeScan: [TestGroupA, TestGroupB],
+                },
+            } as TestScenarioDefinition;
+            const expectedMetadata: TestRunMetadata = {
+                environment: TestEnvironment.canary,
+                releaseId: webApiConfig.releaseId,
+                runId: guid,
+                scenarioName: testScenarioName,
+                scanId: testContextData.websiteScanId,
+            };
+
+            const isExpectedTestGroupList = (testGroups: FunctionalTestGroup[]) => {
+                return testGroups.length === 2 && testGroups[0] instanceof TestGroupA && testGroups[1] instanceof TestGroupB;
+            };
+
+            testRunnerMock.setup((tr) => tr.runAll(It.is(isExpectedTestGroupList), expectedMetadata, testContextData)).verifiable();
+
+            await testSubject.runTestPhaseForScenario('beforeScan', testScenarioDefinition, testContextData);
+        });
     });
 
-    it('Handles scenario with empty list for test phase', async () => {
-        const testScenarioDefinition = {
-            readableName: testScenarioName,
-            testPhases: {
-                beforeScan: [],
-            },
-        } as TestScenarioDefinition;
+    describe('FinalizeTestRun', () => {
+        it('Runs finalizer test group', async () => {
+            const expectedMetadata: TestRunMetadata = {
+                environment: TestEnvironment.canary,
+                releaseId: webApiConfig.releaseId,
+                runId: guid,
+                scenarioName: 'Finalizer',
+                scanId: undefined,
+            };
 
-        await testSubject.runTestPhaseForScenario('beforeScan', testScenarioDefinition, testContextData);
-    });
+            const isFinalizerTestGroup = (testGroup: FunctionalTestGroup) => testGroup instanceof FinalizerTestGroup;
+            testRunnerMock.setup((tr) => tr.run(It.is(isFinalizerTestGroup), expectedMetadata, It.isAny())).verifiable();
 
-    it('Runs all test groups with expected data', async () => {
-        const testScenarioDefinition = {
-            readableName: testScenarioName,
-            testPhases: {
-                beforeScan: [TestGroupA, TestGroupB],
-            },
-        } as TestScenarioDefinition;
-        const expectedMetadata: TestRunMetadata = {
-            environment: TestEnvironment.canary,
-            releaseId: webApiConfig.releaseId,
-            runId: guid,
-            scenarioName: testScenarioName,
-            scanId: testContextData.websiteScanId,
-        };
-
-        const isExpectedTestGroupList = (testGroups: FunctionalTestGroup[]) => {
-            return testGroups.length === 2 && testGroups[0] instanceof TestGroupA && testGroups[1] instanceof TestGroupB;
-        };
-
-        testRunnerMock.setup((tr) => tr.runAll(It.is(isExpectedTestGroupList), expectedMetadata, testContextData)).verifiable();
-
-        await testSubject.runTestPhaseForScenario('beforeScan', testScenarioDefinition, testContextData);
+            await testSubject.finalizeTestRun();
+        });
     });
 });

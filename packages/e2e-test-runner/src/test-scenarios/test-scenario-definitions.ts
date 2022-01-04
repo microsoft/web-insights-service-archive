@@ -17,7 +17,7 @@ export type TestScenarioDefinition = {
 
 export type TestScenarioDefinitionFactory = () => TestScenarioDefinition;
 
-export const TestScenarioFactories: TestScenarioDefinitionFactory[] = [
+export const allTestScenarioFactories: TestScenarioDefinitionFactory[] = [
     (): TestScenarioDefinition => {
         return {
             readableName: 'SimpleScan ',

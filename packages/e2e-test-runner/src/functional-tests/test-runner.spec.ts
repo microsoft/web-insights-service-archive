@@ -23,9 +23,15 @@ class TestGroupWithContext extends TestGroupStubBase {
     public var1: string = 'some value';
 
     @test(TestEnvironment.all)
-    public async test(_: TestContextData): Promise<void> {
+    public async testInstanceVariable(_: TestContextData): Promise<void> {
         expect(this.var1).toBeDefined();
         expect(this.var1).toEqual('some value');
+    }
+
+    @test(TestEnvironment.all)
+    public async testContextData(testContextData: TestContextData): Promise<void> {
+        expect(testContextData).toBeDefined();
+        expect(testContextData).toEqual({ websiteId: 'website id' });
     }
 }
 
@@ -61,6 +67,7 @@ describe(TestRunner, () => {
     const runId = 'run id';
     const releaseId = 'release id';
     const scenarioName = 'scenarioName';
+    const testContextData: TestContextData = { websiteId: 'website id' };
     let testContainerA: TestGroupAStub;
     let testContainerB: TestGroupBStub;
     let testContainerAName: string;
@@ -173,7 +180,7 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, { environment: TestEnvironment.canary, releaseId, runId, scenarioName });
+        await testRunner.run(testContainerA, { environment: TestEnvironment.canary, releaseId, runId, scenarioName }, testContextData);
     });
 
     it('handle test exception', async () => {
@@ -209,7 +216,7 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, { environment: TestEnvironment.insider, releaseId, runId, scenarioName });
+        await testRunner.run(testContainerA, { environment: TestEnvironment.insider, releaseId, runId, scenarioName }, testContextData);
     });
 
     it('Runs test with correct context', async () => {
@@ -221,7 +228,17 @@ describe(TestRunner, () => {
             scenarioName: scenarioName,
             environment: 'all',
             testContainer: testContainerName,
-            testName: 'test',
+            testName: 'testInstanceVariable',
+            result: 'pass',
+            logSource: 'TestRun',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            scenarioName: scenarioName,
+            environment: 'all',
+            testContainer: testContainerName,
+            testName: 'testContextData',
             result: 'pass',
             logSource: 'TestRun',
         });
@@ -235,7 +252,11 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerWithContext, { environment: TestEnvironment.all, releaseId, runId, scenarioName });
+        await testRunner.run(
+            testContainerWithContext,
+            { environment: TestEnvironment.all, releaseId, runId, scenarioName },
+            testContextData,
+        );
     });
 
     function setupLoggerMock(params: TestRunLogProperties | TestContainerLogProperties): void {
