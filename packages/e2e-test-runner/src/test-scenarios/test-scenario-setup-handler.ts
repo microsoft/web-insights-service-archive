@@ -5,7 +5,7 @@ import * as ApiContracts from 'api-contracts';
 import { client } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { E2ETestDataProvider } from 'service-library';
-import { WebInsightsStorageClient } from 'storage-api-client';
+import { WebInsightsClientProvider, WebInsightsServiceClientTypeNames } from 'storage-api-client';
 import { TestContextData } from '../functional-tests/test-context-data';
 import { TestScenarioDefinition } from './test-scenario-definitions';
 
@@ -13,7 +13,8 @@ import { TestScenarioDefinition } from './test-scenario-definitions';
 export class TestScenarioSetupHandler {
     constructor(
         @inject(E2ETestDataProvider) private readonly testDataProvider: E2ETestDataProvider,
-        @inject(WebInsightsStorageClient) private readonly webInsightsClient: WebInsightsStorageClient,
+        @inject(WebInsightsServiceClientTypeNames.WebInsightsClientProvider)
+        private readonly webInsightsClientProvider: WebInsightsClientProvider,
     ) {}
 
     public async setUpTestScenario(testScenario: TestScenarioDefinition): Promise<TestContextData> {
@@ -35,7 +36,8 @@ export class TestScenarioSetupHandler {
     }
 
     private async postTestWebsite(website: ApiContracts.Website): Promise<ApiContracts.Website | undefined> {
-        const websiteResponse = await this.webInsightsClient.postWebsite(website);
+        const webInsightsClient = await this.webInsightsClientProvider();
+        const websiteResponse = await webInsightsClient.postWebsite(website);
         if (!client.isSuccessStatusCode(websiteResponse)) {
             const statusCode = websiteResponse.statusCode;
             throw new Error(`Error attempting to POST website: status code ${statusCode}`);

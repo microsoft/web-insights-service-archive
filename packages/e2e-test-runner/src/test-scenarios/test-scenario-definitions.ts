@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { FunctionalTestGroup } from '../functional-tests/functional-test-group';
-
-type TestGroupConstructor = typeof FunctionalTestGroup;
+import { TestGroupConstructor } from '../functional-tests/test-container-factory';
 
 export type TestPhases = {
     beforeScan: TestGroupConstructor[];

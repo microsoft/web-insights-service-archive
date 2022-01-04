@@ -3,8 +3,10 @@
 
 import 'reflect-metadata';
 
-import { Logger } from 'logger';
+import { ContextAwareLogger, Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { AvailabilityTestConfig, GuidGenerator, ServiceConfiguration } from 'common';
+import { WebApiConfig } from '../web-api-config';
 import { TestContainerLogProperties, TestEnvironment, TestRunLogProperties } from './common-types';
 import { TestRunner } from './test-runner';
 import { test } from './test-decorator';
@@ -74,15 +76,27 @@ describe(TestRunner, () => {
     let testContainerBName: string;
     let testRunner: TestRunner;
     let loggerMock: IMock<Logger>;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
+    let guidGeneratorMock: IMock<GuidGenerator>;
+    const webApiConfig = {
+        releaseId: releaseId,
+    } as WebApiConfig;
+    const availabilityTestConfig = {
+        environmentDefinition: 'canary',
+    } as AvailabilityTestConfig;
 
     beforeEach(() => {
         testContainerA = new TestGroupAStub();
         testContainerB = new TestGroupBStub();
         testContainerAName = testContainerA.constructor.name;
         testContainerBName = testContainerB.constructor.name;
-        loggerMock = Mock.ofType();
+        loggerMock = Mock.ofType<ContextAwareLogger>();
+        serviceConfigMock = Mock.ofType<ServiceConfiguration>();
+        serviceConfigMock.setup((sc) => sc.getConfigValue('availabilityTestConfig')).returns(async () => availabilityTestConfig);
+        guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => runId);
 
-        testRunner = new TestRunner(loggerMock.object);
+        testRunner = new TestRunner(loggerMock.object, serviceConfigMock.object, webApiConfig, guidGeneratorMock.object);
     });
 
     afterEach(() => {
@@ -90,6 +104,7 @@ describe(TestRunner, () => {
     });
 
     it('run all tests', async () => {
+        setEnvironment(TestEnvironment.canary);
         loggerMock.setup((o) => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(5));
         setupLoggerMock({
             runId: runId,
@@ -141,14 +156,11 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.runAll(
-            [testContainerA, testContainerB],
-            { environment: TestEnvironment.canary, releaseId, runId, scenarioName },
-            { websiteId: 'website id' },
-        );
+        await testRunner.runAll([testContainerA, testContainerB], { scenarioName }, { websiteId: 'website id' });
     });
 
     it('run tests for the given environment only', async () => {
+        setEnvironment(TestEnvironment.canary);
         loggerMock.setup((o) => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
         setupLoggerMock({
             runId: runId,
@@ -180,10 +192,11 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, { environment: TestEnvironment.canary, releaseId, runId, scenarioName }, testContextData);
+        await testRunner.run(testContainerA, { scenarioName }, testContextData);
     });
 
     it('handle test exception', async () => {
+        setEnvironment(TestEnvironment.insider);
         loggerMock.setup((o) => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
         setupLoggerMock({
             runId: runId,
@@ -216,12 +229,13 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, { environment: TestEnvironment.insider, releaseId, runId, scenarioName }, testContextData);
+        await testRunner.run(testContainerA, { scenarioName }, testContextData);
     });
 
     it('Runs test with correct context', async () => {
         const testContainerWithContext = new TestGroupWithContext();
         const testContainerName = testContainerWithContext.constructor.name;
+        setEnvironment(TestEnvironment.all);
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
@@ -252,14 +266,16 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(
-            testContainerWithContext,
-            { environment: TestEnvironment.all, releaseId, runId, scenarioName },
-            testContextData,
-        );
+        await testRunner.run(testContainerWithContext, { scenarioName }, testContextData);
     });
 
-    function setupLoggerMock(params: TestRunLogProperties | TestContainerLogProperties): void {
+    function setupLoggerMock(
+        params: (TestRunLogProperties | TestContainerLogProperties) & { runId: string; releaseId: string; environment: string },
+    ): void {
         loggerMock.setup((o) => o.trackEvent('FunctionalTest', { ...params })).verifiable(Times.once());
+    }
+
+    function setEnvironment(environment: TestEnvironment): void {
+        availabilityTestConfig.environmentDefinition = TestEnvironment[environment];
     }
 });

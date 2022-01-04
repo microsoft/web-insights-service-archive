@@ -3,7 +3,10 @@
 
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger, Logger } from 'logger';
-import { TestPhaseRunner } from './test-scenarios/test-phase-runner';
+import { TestContainerFactory } from './functional-tests/test-container-factory';
+import { TestContextData } from './functional-tests/test-context-data';
+import { FinalizerTestGroup } from './functional-tests/test-groups/finalizer-test-group';
+import { TestRunner } from './functional-tests/test-runner';
 import {
     allTestScenarioFactories,
     TestScenarioDefinition,
@@ -16,8 +19,9 @@ const testScenarioDriverFactory = (
     scenario: TestScenarioDefinition,
     logger: Logger,
     setupHandler: TestScenarioSetupHandler,
-    testPhaseRunner: TestPhaseRunner,
-) => new TestScenarioDriver(scenario, logger, setupHandler, testPhaseRunner);
+    testContainerFactory: TestContainerFactory,
+    testRunner: TestRunner,
+) => new TestScenarioDriver(scenario, logger, setupHandler, testContainerFactory, testRunner);
 
 export type TestScenarioDriverFactory = typeof testScenarioDriverFactory;
 
@@ -26,7 +30,8 @@ export class E2ETestRunner {
     constructor(
         @inject(ContextAwareLogger) private readonly logger: Logger,
         @inject(TestScenarioSetupHandler) private readonly testScenarioSetupHandler: TestScenarioSetupHandler,
-        @inject(TestPhaseRunner) private readonly testPhaseRunner: TestPhaseRunner,
+        @inject(TestContainerFactory) private readonly testContainerFactory: TestContainerFactory,
+        @inject(TestRunner) private readonly testRunner: TestRunner,
         private readonly testScenarioFactories: TestScenarioDefinitionFactory[] = allTestScenarioFactories,
         private readonly createTestScenarioDriver: typeof testScenarioDriverFactory = testScenarioDriverFactory,
     ) {}
@@ -38,16 +43,24 @@ export class E2ETestRunner {
 
         await Promise.all(testScenarioDrivers.map((testScenarioDriver) => testScenarioDriver.executeTestScenario()));
 
-        await this.testPhaseRunner.finalizeTestRun();
+        await this.finalizeTestRun();
 
         this.logger.logInfo('E2E test run completed');
     }
 
     private createAllTestScenarioDrivers(): TestScenarioDriver[] {
-        const testScenarios = this.testScenarioFactories.map((factory) => factory());
+        const testScenarios = this.testScenarioFactories.map((testScenarioFactory) => testScenarioFactory());
 
         return testScenarios.map((scenario) =>
-            this.createTestScenarioDriver(scenario, this.logger, this.testScenarioSetupHandler, this.testPhaseRunner),
+            this.createTestScenarioDriver(scenario, this.logger, this.testScenarioSetupHandler, this.testContainerFactory, this.testRunner),
+        );
+    }
+
+    private async finalizeTestRun(): Promise<void> {
+        await this.testRunner.run(
+            await this.testContainerFactory.createTestContainer(FinalizerTestGroup),
+            { scenarioName: 'Finalizer' },
+            {} as TestContextData,
         );
     }
 }

@@ -6,7 +6,9 @@ import 'reflect-metadata';
 import { ContextAwareLogger, Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { TestContextData } from '../functional-tests/test-context-data';
-import { TestPhaseRunner } from './test-phase-runner';
+import { TestContainerFactory } from '../functional-tests/test-container-factory';
+import { FunctionalTestGroup } from '../functional-tests/functional-test-group';
+import { TestRunner } from '../functional-tests/test-runner';
 import { TestPhases, TestScenarioDefinition } from './test-scenario-definitions';
 
 import { TestScenarioDriver } from './test-scenario-driver';
@@ -16,36 +18,46 @@ class TestableTestScenarioDriver extends TestScenarioDriver {
     public testContextData: TestContextData;
 }
 
+class TestContainerA extends FunctionalTestGroup {}
+
+class TestContainerB extends FunctionalTestGroup {}
+
 describe(TestScenarioDriver, () => {
     const testScenarioDefinition: TestScenarioDefinition = {
         readableName: 'test scenario name',
-        testPhases: {},
+        testPhases: {
+            beforeScan: [TestContainerA, TestContainerB],
+        },
         websiteDataBlobName: 'blob name',
     };
     const initialTestContextData = { websiteId: 'website id' };
     let loggerMock: IMock<Logger>;
     let setupHandlerMock: IMock<TestScenarioSetupHandler>;
-    let testPhaseRunnerMock: IMock<TestPhaseRunner>;
+    let testContainerFactoryMock: IMock<TestContainerFactory>;
+    let testRunnerMock: IMock<TestRunner>;
 
     let testSubject: TestableTestScenarioDriver;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<ContextAwareLogger>();
         setupHandlerMock = Mock.ofType<TestScenarioSetupHandler>();
-        testPhaseRunnerMock = Mock.ofType<TestPhaseRunner>();
+        testContainerFactoryMock = Mock.ofType<TestContainerFactory>();
+        testRunnerMock = Mock.ofType<TestRunner>();
 
         testSubject = new TestableTestScenarioDriver(
             testScenarioDefinition,
             loggerMock.object,
             setupHandlerMock.object,
-            testPhaseRunnerMock.object,
+            testContainerFactoryMock.object,
+            testRunnerMock.object,
         );
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
         setupHandlerMock.verifyAll();
-        testPhaseRunnerMock.verifyAll();
+        testContainerFactoryMock.verifyAll();
+        testRunnerMock.verifyAll();
     });
 
     it('handles and logs setup error', async () => {
@@ -56,12 +68,13 @@ describe(TestScenarioDriver, () => {
         };
         setupHandlerMock.setup((s) => s.setUpTestScenario(testScenarioDefinition)).throws(testError);
         loggerMock.setup((l) => l.logError(It.isAny(), expectedLogProperties)).verifiable();
-        testPhaseRunnerMock.setup((t) => t.runTestPhaseForScenario(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        testRunnerMock.setup((tr) => tr.runAll(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        testRunnerMock.setup((tr) => tr.run(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
         await testSubject.executeTestScenario();
     });
 
-    it('calls setup handler and saves testContextData', async () => {
+    it('calls setup handler and runs beforeScanPhase', async () => {
         setupHandlerMock.setup((s) => s.setUpTestScenario(testScenarioDefinition)).returns(async () => initialTestContextData);
         setupRunTestPhase('beforeScan');
 
@@ -69,6 +82,19 @@ describe(TestScenarioDriver, () => {
     });
 
     function setupRunTestPhase(phase: keyof TestPhases, testContextData: TestContextData = initialTestContextData): void {
-        testPhaseRunnerMock.setup((t) => t.runTestPhaseForScenario(phase, testScenarioDefinition, testContextData));
+        const testsToRun = testScenarioDefinition.testPhases[phase];
+        const testContainerMocks = testsToRun.map((testGroupConstructor) => {
+            const testContainerMock = Mock.ofType(testGroupConstructor);
+            testContainerFactoryMock
+                .setup((f) => f.createTestContainer(testGroupConstructor))
+                .returns(async () => testContainerMock.object);
+
+            return testContainerMock;
+        });
+        const testContainerObjects = testContainerMocks.map((mock) => mock.object);
+
+        testRunnerMock
+            .setup((t) => t.runAll(testContainerObjects, { scenarioName: testScenarioDefinition.readableName }, testContextData))
+            .verifiable();
     }
 });

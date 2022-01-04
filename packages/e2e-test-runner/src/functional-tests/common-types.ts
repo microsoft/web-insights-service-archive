@@ -25,9 +25,6 @@ export interface TestDefinition {
 
 export interface TestRunLogProperties {
     logSource: LogSource;
-    runId: string;
-    releaseId: string;
-    environment: string;
     testContainer: string;
     testName: string;
     scenarioName: string;
@@ -38,9 +35,6 @@ export interface TestRunLogProperties {
 
 export interface TestContainerLogProperties {
     logSource: LogSource;
-    runId: string;
-    releaseId: string;
-    environment: string;
     scenarioName: string;
     testContainer: string;
     result: TestRunResult;

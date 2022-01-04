@@ -8,6 +8,7 @@ import { E2ETestDataProvider, E2ETestDataReadResponse } from 'service-library';
 import { WebInsightsStorageClient } from 'storage-api-client';
 import { IMock, Mock } from 'typemoq';
 import { ResponseWithBodyType } from 'common';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { TestScenarioDefinition } from './test-scenario-definitions';
 
 import { TestScenarioSetupHandler } from './test-scenario-setup-handler';
@@ -25,9 +26,10 @@ describe(TestScenarioSetupHandler, () => {
 
     beforeEach(() => {
         webInsightsClientMock = Mock.ofType<WebInsightsStorageClient>();
+        getPromisableDynamicMock(webInsightsClientMock);
         testDataProviderMock = Mock.ofType<E2ETestDataProvider>();
 
-        testSubject = new TestScenarioSetupHandler(testDataProviderMock.object, webInsightsClientMock.object);
+        testSubject = new TestScenarioSetupHandler(testDataProviderMock.object, async () => webInsightsClientMock.object);
     });
 
     it('Throws if blob read fails', () => {

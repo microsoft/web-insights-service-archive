@@ -3,17 +3,13 @@
 
 import { expect } from 'chai';
 import { getSerializableResponse, GuidGenerator, ResponseWithBodyType } from 'common';
-import { inject } from 'inversify';
 import { WebApiErrorCode } from 'service-library';
 import { WebInsightsStorageClient } from 'storage-api-client';
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 export class FunctionalTestGroup {
-    constructor(
-        @inject(WebInsightsStorageClient) protected readonly webInsightsClient: WebInsightsStorageClient,
-        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
-    ) {}
+    constructor(protected readonly webInsightsClient: WebInsightsStorageClient, protected readonly guidGenerator: GuidGenerator) {}
 
     public ensureResponseSuccessStatusCode(response: ResponseWithBodyType<unknown>, message?: string): void {
         const serializedResponse = JSON.stringify(getSerializableResponse(response));
