@@ -4537,10 +4537,10 @@ copy-descriptor@^0.1.0:
   resolved "https://registry.yarnpkg.com/copy-descriptor/-/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha1-Z29us8OZl8LuGsOpJP1hJHSPV40=
 
-copy-webpack-plugin@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/copy-webpack-plugin/-/copy-webpack-plugin-10.0.0.tgz#f25a29ca2398a6ca31183b62e76adacb53b981d1"
-  integrity sha512-tuCVuFMBbRsb7IH0q1CUb50/Skv+7a6c7DJ+xi4fAbOzNLTYVMUTPnf8uGvKPtmqTvzYBrfEFo7YgP4TsUWmtg==
+copy-webpack-plugin@^10.2.0:
+  version "10.2.0"
+  resolved "https://registry.yarnpkg.com/copy-webpack-plugin/-/copy-webpack-plugin-10.2.0.tgz#24c2d256953a55400a1ec66be4e0eccd1c4ae958"
+  integrity sha512-my6iXII95c78w14HzYCNya5TlJYa44lOppAge5GSTMM1SyDxNsVGCJvhP4/ld6snm8lzjn3XOonMZD6s1L86Og==
   dependencies:
     fast-glob "^3.2.7"
     glob-parent "^6.0.1"
@@ -8310,9 +8310,9 @@ map-visit@^1.0.0:
     object-visit "^1.0.0"
 
 marked@>=2.0.0, marked@^2.0.0:
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.6.tgz#cd199503102b6807354f00574348d41ad4fd25d2"
-  integrity sha512-+H0bTf8DM8zLuFBUm/2VklxaCrwlBFgoJzHJcMZCnZ9cPgsllHwKpL6TPLdDeA38yPluMuVKOL1hO5w6HmG5Mg==
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.8.tgz#ef127626ac65786460f9420d57cc8d5ffdcacbed"
+  integrity sha512-dkpJMIlJpc833hbjjg8jraw1t51e/eKDoG8TFOgc5O0Z77zaYKigYekTDop5AplRoKFGIaoazhYEhGkMtU3IeA==
 
 match-all@^1.2.6:
   version "1.2.6"
@@ -11497,9 +11497,9 @@ unbox-primitive@^1.0.0, unbox-primitive@^1.0.1:
     which-boxed-primitive "^1.0.2"
 
 underscore@^1.11.0:
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.1.tgz#0c1c6bd2df54b6b69f2314066d65b6cde6fcf9d1"
-  integrity sha512-hzSoAVtJF+3ZtiFX0VgfFPHEDRm7Y/QPjGyNo4TVdnDTdft3tr8hEkD25a1jC+TjTuE7tkHGKkhwCgs9dgBB2g==
+  version "1.13.2"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.2.tgz#276cea1e8b9722a8dbed0100a407dda572125881"
+  integrity sha512-ekY1NhRzq0B08g4bGuX4wd2jZx5GnKz6mKSqFL4nqBlfyMGiG10gDFhDTMEfYmDL6Jy0FUIZp7wiRB+0BP7J2g==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"
