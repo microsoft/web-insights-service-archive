@@ -23,13 +23,7 @@ class TestContainerA extends FunctionalTestGroup {}
 class TestContainerB extends FunctionalTestGroup {}
 
 describe(TestScenarioDriver, () => {
-    const testScenarioDefinition: TestScenarioDefinition = {
-        readableName: 'test scenario name',
-        testPhases: {
-            beforeScan: [TestContainerA, TestContainerB],
-        },
-        websiteDataBlobName: 'blob name',
-    };
+    let testScenarioDefinition: TestScenarioDefinition;
     const initialTestContextData = { websiteId: 'website id' };
     let loggerMock: IMock<Logger>;
     let setupHandlerMock: IMock<TestScenarioSetupHandler>;
@@ -39,6 +33,13 @@ describe(TestScenarioDriver, () => {
     let testSubject: TestableTestScenarioDriver;
 
     beforeEach(() => {
+        testScenarioDefinition = {
+            readableName: 'test scenario name',
+            testPhases: {
+                beforeScan: [TestContainerA, TestContainerB],
+            },
+            websiteDataBlobName: 'blob name',
+        };
         loggerMock = Mock.ofType<ContextAwareLogger>();
         setupHandlerMock = Mock.ofType<TestScenarioSetupHandler>();
         testContainerFactoryMock = Mock.ofType<TestContainerFactory>();
@@ -68,8 +69,23 @@ describe(TestScenarioDriver, () => {
         };
         setupHandlerMock.setup((s) => s.setUpTestScenario(testScenarioDefinition)).throws(testError);
         loggerMock.setup((l) => l.logError(It.isAny(), expectedLogProperties)).verifiable();
-        testRunnerMock.setup((tr) => tr.runAll(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-        testRunnerMock.setup((tr) => tr.run(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        setupTestRunnerNeverCalled();
+
+        await testSubject.executeTestScenario();
+    });
+
+    it('handles empty test phase', async () => {
+        setupHandlerMock.setup((s) => s.setUpTestScenario(testScenarioDefinition)).returns(async () => initialTestContextData);
+        testScenarioDefinition.testPhases.beforeScan = [];
+        setupTestRunnerNeverCalled();
+
+        await testSubject.executeTestScenario();
+    });
+
+    it('handles undefined test phase', async () => {
+        setupHandlerMock.setup((s) => s.setUpTestScenario(testScenarioDefinition)).returns(async () => initialTestContextData);
+        testScenarioDefinition.testPhases.beforeScan = undefined;
+        setupTestRunnerNeverCalled();
 
         await testSubject.executeTestScenario();
     });
@@ -96,5 +112,10 @@ describe(TestScenarioDriver, () => {
         testRunnerMock
             .setup((t) => t.runAll(testContainerObjects, { scenarioName: testScenarioDefinition.readableName }, testContextData))
             .verifiable();
+    }
+
+    function setupTestRunnerNeverCalled(): void {
+        testRunnerMock.setup((tr) => tr.runAll(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        testRunnerMock.setup((tr) => tr.run(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
     }
 });
