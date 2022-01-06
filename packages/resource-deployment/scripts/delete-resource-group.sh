@@ -8,7 +8,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-        Usage: ${BASH_SOURCE} -r <resource group name>
+        Usage: ${BASH_SOURCE} -r <resource group name> [-p <purge key vault if flag is present>]
     "
     exit 1
 }
@@ -40,7 +40,7 @@ getResourcesToDelete() {
 }
 
 deleteResources() {
-    local deleteTimeout=1800
+    local deleteTimeout=2700
     local end=$((SECONDS + deleteTimeout))
 
     getResourcesToDelete
@@ -60,6 +60,16 @@ deleteResources() {
     fi
 }
 
+purgeKeyVaultIfSoftDeleted() {
+    local response
+
+    response=$(az keyvault list-deleted --resource-type vault --query "[?name=='${keyVault}'].id" -o tsv)
+    if [[ -n "${response}" ]]; then
+        echo "Purging keyvault ${keyVault}"
+        az keyvault purge --name "${keyVault}" || true
+    fi
+}
+
 deleteResourceGroup() {
     local resourceGroupName=$1
     local response
@@ -68,16 +78,26 @@ deleteResourceGroup() {
     if [[ "${response}" == true ]]; then
         echo "Resource group ${resourceGroupName} exists."
 
+        . "${0%/*}/get-resource-names.sh"
+
         echo "Deleting resources from resource group ${resourceGroupName}"
+        deleteResources
+
+        if [[ "${purgeKeyVault}" == true ]]; then
+            purgeKeyVaultIfSoftDeleted
+        else
+            echo "Keyvault ${keyVault} was not purged and will be recoverable for 90 days."
+        fi
     else
         echo "Resource group ${resourceGroupName} does not exist."
     fi
 }
 
 # Read script arguments
-while getopts ":r:" option; do
+while getopts ":r:p" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
+    p) purgeKeyVault=true ;;
     *) exitWithUsageInfo ;;
     esac
 done
