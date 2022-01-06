@@ -8,7 +8,7 @@ set -eo pipefail
 exitWithUsageInfo() {
     # shellcheck disable=SC2128
     echo "
-        Usage: ${BASH_SOURCE} -r <resource group name> [-p <purge key vault if set to true>]
+        Usage: ${BASH_SOURCE} -r <resource group name> [-p <purge key vault if flag is present>]
     "
     exit 1
 }
@@ -40,7 +40,7 @@ getResourcesToDelete() {
 }
 
 deleteResources() {
-    local deleteTimeout=1800
+    local deleteTimeout=2700
     local end=$((SECONDS + deleteTimeout))
 
     getResourcesToDelete
@@ -94,10 +94,10 @@ deleteResourceGroup() {
 }
 
 # Read script arguments
-while getopts ":r:p:" option; do
+while getopts ":r:p" option; do
     case ${option} in
     r) resourceGroupName=${OPTARG} ;;
-    p) purgeKeyVault=${OPTARG} ;;
+    p) purgeKeyVault=true ;;
     *) exitWithUsageInfo ;;
     esac
 done
