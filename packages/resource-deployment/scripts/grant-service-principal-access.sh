@@ -14,7 +14,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -p <service principal id> [-c <aks clu
 }
 
 grantStorageAccess() {
-    subscription=$(az account list --query "[?isDefault==\`true\`].id")
+    subscription=$(az account list --query "[?isDefault==\`true\`].id" -o tsv)
     scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount}"
 
     role="Storage Blob Data Contributor"
@@ -64,6 +64,7 @@ fi
 
 createPodIdentity
 assignCosmosRBAC
+grantStorageAccess
 . "${0%/*}/enable-msi-for-key-vault.sh"
 
 echo "The access successfully granted to the ${principalId} service principal."
