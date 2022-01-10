@@ -27,17 +27,13 @@ getPackagesLocation() {
     fi
 }
 
-uploadFileIfExists() {
+uploadFolderContents() {
     destinationContainer=$1
     pathToSource=$2
     storageAccountName=$3
-    blobName=$4
+    local includePattern="*[!*.map]"
 
-    if [ -f "${pathToSource}" ]; then
-        az storage blob upload --account-name "${storageAccountName}" --container-name "${destinationContainer}" --file "${pathToSource}" --name "${blobName}" 1>/dev/null
-    else
-        echo "WARNING: Could not find file ${pathToSource}. Skipping upload."
-    fi
+    az storage blob upload-batch --account-name "${storageAccountName}" --destination "${destinationContainer}" --source "${pathToSource}" --pattern "${includePattern}" 1>/dev/null
 }
 
 exitWithUsageInfo() {
@@ -77,7 +73,7 @@ fi
 function uploadFiles() {
     echo "Uploading files to Blob storage"
 
-    uploadFileIfExists "e2e-test-data" "${dropFolder}/resource-deployment/dist/e2e-test-data/test-website.${environment}.json" "${storageAccount}" "test-website.json"
+    uploadFolderContents "e2e-test-data" "${dropFolder}/resource-deployment/dist/e2e-test-data/" "${storageAccount}"
 
     echo "Upload files completed successfully."
 }
