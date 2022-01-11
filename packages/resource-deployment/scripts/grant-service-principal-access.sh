@@ -13,6 +13,14 @@ Usage: ${BASH_SOURCE} -r <resource group> -p <service principal id> [-c <aks clu
     exit 1
 }
 
+grantStorageAccess() {
+    subscription=$(az account list --query "[?isDefault==\`true\`].id" -o tsv)
+    scope="--scope /subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/Microsoft.Storage/storageAccounts/${storageAccount}"
+
+    role="Storage Blob Data Contributor"
+    . "${0%/*}/role-assign-for-sp.sh"
+}
+
 assignCosmosRBAC() {
     local customRoleName="CosmosDocumentRW"
 
@@ -56,6 +64,7 @@ fi
 
 createPodIdentity
 assignCosmosRBAC
+grantStorageAccess
 . "${0%/*}/enable-msi-for-key-vault.sh"
 
 echo "The access successfully granted to the ${principalId} service principal."

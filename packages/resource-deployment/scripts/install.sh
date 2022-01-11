@@ -103,6 +103,7 @@ install() {
 
     # shellcheck disable=SC2034
     parallelProcesses=(
+        "${0%/*}/upload-files.sh"
         "${0%/*}/push-image-to-container-registry.sh"
         "${0%/*}/create-kubernetes-service.sh"
     )

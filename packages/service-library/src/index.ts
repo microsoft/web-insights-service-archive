@@ -11,6 +11,7 @@ export { getGlobalWebControllerDispatcher } from './web-api/get-global-web-contr
 export * from './web-api/web-api-error-codes';
 export { HttpResponse } from './web-api/http-response';
 export { CosmosQueryResultsIterable } from './data-providers/cosmos-query-results-iterable';
+export * from './data-providers/e2e-test-data-provider';
 export { PageProvider } from './data-providers/page-provider';
 export { PageScanProvider } from './data-providers/page-scan-provider';
 export { WebsiteProvider } from './data-providers/website-provider';
