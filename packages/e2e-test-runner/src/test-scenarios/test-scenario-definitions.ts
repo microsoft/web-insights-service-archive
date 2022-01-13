@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 import { TestGroupConstructor } from '../functional-tests/test-container-factory';
+import { GetWebsiteTestGroup } from '../functional-tests/test-groups/get-website-test-group';
+import { PostWebsiteScanTestGroup } from '../functional-tests/test-groups/post-website-scan-test-group';
+import { PostWebsiteTestGroup } from '../functional-tests/test-groups/post-website-test-group';
 
 export type TestPhases = {
     beforeScan: TestGroupConstructor[];
@@ -21,7 +24,7 @@ export const allTestScenarioFactories: TestScenarioDefinitionFactory[] = [
             readableName: 'SimpleScan ',
             websiteDataBlobName: 'test-website.json',
             testPhases: {
-                beforeScan: [],
+                beforeScan: [GetWebsiteTestGroup, PostWebsiteTestGroup, PostWebsiteScanTestGroup],
             },
         };
     },
