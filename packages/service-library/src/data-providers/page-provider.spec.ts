@@ -63,6 +63,14 @@ describe(PageProvider, () => {
         });
     });
 
+    describe('deletePage', () => {
+        it('deletes page doc', async () => {
+            cosmosContainerClientMock.setup((c) => c.deleteDocument(pageId, partitionKey)).verifiable();
+
+            await testSubject.deletePage(pageId);
+        });
+    });
+
     describe('updatePage', () => {
         it('throws if no id', () => {
             const pageData: Partial<Page> = {

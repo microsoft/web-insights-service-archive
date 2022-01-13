@@ -1,0 +1,18 @@
+{
+    "id": "1ec15992-4a5a-6da0-67d2-a744ded46dcd",
+    "name": "Test website",
+    "baseUrl": "https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/",
+    "priority": 0,
+    "discoveryPatterns": [],
+    "knownPages": ["https://teststorage57bzoqjjclekk.z13.web.core.windows.net/2021-05-04/linked1/"],
+    "scanners": ["a11y"],
+    "domainId": "domain id",
+    "compliant": false,
+    "enableCrawler": true,
+    "deleted": false,
+    "noBanner": true,
+    "serviceTreeId": "service tree id",
+    "isCustomBanner": false,
+    "isMicrosoftOwned": false,
+    "isCookieManagable": false
+}

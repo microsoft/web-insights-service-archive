@@ -17,7 +17,7 @@ import { TestContextData } from './test-context-data';
 
 class TestGroupStubBase extends FunctionalTestGroup {
     constructor() {
-        super(undefined, undefined);
+        super(undefined, undefined, undefined, undefined);
     }
 }
 

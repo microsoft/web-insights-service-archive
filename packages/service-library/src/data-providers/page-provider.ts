@@ -29,6 +29,10 @@ export class PageProvider {
         return pageDoc;
     }
 
+    public async deletePage(pageId: string): Promise<void> {
+        await this.cosmosContainerClient.deleteDocument(pageId, this.getPagePartitionKey(pageId));
+    }
+
     public async updatePage(page: Partial<Page>): Promise<Page> {
         const response = await this.cosmosContainerClient.mergeOrWriteDocument<Page>(this.normalizeDbDocument(page) as Page);
 

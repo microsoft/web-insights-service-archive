@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { WebApiErrorCodes } from 'service-library';
+import { PageProvider, WebApiErrorCodes, WebsiteProvider } from 'service-library';
 import { IMock, Mock } from 'typemoq';
 import { WebInsightsStorageClient } from 'storage-api-client';
 import { FunctionalTestGroup } from './functional-test-group';
@@ -16,13 +16,21 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {}
 describe(FunctionalTestGroup, () => {
     let testSubject: FunctionalTestGroupStub;
     let webInsightsClientMock: IMock<WebInsightsStorageClient>;
+    let websiteProviderMock: IMock<WebsiteProvider>;
+    let pageProviderMock: IMock<PageProvider>;
     let guidGeneratorMock: IMock<GuidGenerator>;
 
     beforeEach(() => {
         webInsightsClientMock = Mock.ofType(WebInsightsStorageClient);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
+        websiteProviderMock = Mock.ofType(WebsiteProvider);
 
-        testSubject = new FunctionalTestGroupStub(webInsightsClientMock.object, guidGeneratorMock.object);
+        testSubject = new FunctionalTestGroupStub(
+            webInsightsClientMock.object,
+            guidGeneratorMock.object,
+            websiteProviderMock.object,
+            pageProviderMock.object,
+        );
     });
 
     it('validate ensureResponseSuccessStatusCode()', async () => {
