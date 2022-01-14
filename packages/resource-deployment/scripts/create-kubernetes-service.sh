@@ -32,16 +32,6 @@ waitForAppGatewayUpdate() {
     fi
 }
 
-enableAppGatewayAutoscale() {
-    local minCapacity=2
-    local maxCapacity=5
-    echo "Configuring autoscale for application gateway"
-    az network application-gateway update --name "${appGateway}" --resource-group "${vnetResourceGroup}" \
-        --set sku='{"capacity": null, "name": "Standard_v2", "tier": "Standard_v2"}' \
-        --set autoscaleConfiguration="{\"minCapacity\": ${minCapacity}, \"maxCapacity\": ${maxCapacity}}" \
-        1>/dev/null
-}
-
 grantAccessToAppGateway() {
     echo "Granting access to application gateway"
     az network application-gateway identity assign --gateway-name "${appGateway}" --resource-group "${vnetResourceGroup}" --identity "${appGatewayIdentity}" 1>/dev/null
@@ -124,7 +114,6 @@ vnetResourceGroup=$(az aks list --resource-group "${resourceGroupName}" --query 
 
 waitForAppGatewayUpdate
 attachContainerRegistry
-enableAppGatewayAutoscale
 grantAccessToAppGateway
 
 echo "Azure Kubernetes Service successfully created."
