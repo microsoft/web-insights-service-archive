@@ -24,6 +24,7 @@ describe(FunctionalTestGroup, () => {
         webInsightsClientMock = Mock.ofType(WebInsightsStorageClient);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         websiteProviderMock = Mock.ofType(WebsiteProvider);
+        pageProviderMock = Mock.ofType(PageProvider);
 
         testSubject = new FunctionalTestGroupStub(
             webInsightsClientMock.object,

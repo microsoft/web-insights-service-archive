@@ -13,12 +13,14 @@ import { TestContainerFactory } from './functional-tests/test-container-factory'
 import { TestRunner } from './functional-tests/test-runner';
 import { FinalizerTestGroup } from './functional-tests/test-groups/finalizer-test-group';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
+import { TestScanHandler } from './test-scenarios/test-scan-handler';
 
 describe(E2ETestRunner, () => {
     let loggerMock: IMock<ContextAwareLogger>;
     let setupHandlerMock: IMock<TestScenarioSetupHandler>;
     let testContainerFactoryMock: IMock<TestContainerFactory>;
     let testRunnerMock: IMock<TestRunner>;
+    let testScanHandlerMock: IMock<TestScanHandler>;
     let testScenarioADriverMock: IMock<TestScenarioDriver>;
     let testScenarioBDriverMock: IMock<TestScenarioDriver>;
     let testScenarioDriverFactoryMock: IMock<TestScenarioDriverFactory>;
@@ -37,6 +39,7 @@ describe(E2ETestRunner, () => {
         setupHandlerMock = Mock.ofType<TestScenarioSetupHandler>();
         testContainerFactoryMock = Mock.ofType<TestContainerFactory>();
         testRunnerMock = Mock.ofType<TestRunner>();
+        testScanHandlerMock = Mock.ofType<TestScanHandler>();
         testScenarioADriverMock = Mock.ofType<TestScenarioDriver>();
         testScenarioBDriverMock = Mock.ofType<TestScenarioDriver>();
         testScenarioDriverFactoryMock = Mock.ofType<TestScenarioDriverFactory>();
@@ -46,6 +49,7 @@ describe(E2ETestRunner, () => {
             setupHandlerMock.object,
             testContainerFactoryMock.object,
             testRunnerMock.object,
+            testScanHandlerMock.object,
             testScenarioFactoriesStub,
             testScenarioDriverFactoryMock.object,
         );
@@ -70,12 +74,26 @@ describe(E2ETestRunner, () => {
     function setupTestScenarioDriverFactory(): void {
         testScenarioDriverFactoryMock
             .setup((t) =>
-                t(testScenarioA, loggerMock.object, setupHandlerMock.object, testContainerFactoryMock.object, testRunnerMock.object),
+                t(
+                    testScenarioA,
+                    loggerMock.object,
+                    setupHandlerMock.object,
+                    testContainerFactoryMock.object,
+                    testRunnerMock.object,
+                    testScanHandlerMock.object,
+                ),
             )
             .returns(() => testScenarioADriverMock.object);
         testScenarioDriverFactoryMock
             .setup((t) =>
-                t(testScenarioB, loggerMock.object, setupHandlerMock.object, testContainerFactoryMock.object, testRunnerMock.object),
+                t(
+                    testScenarioB,
+                    loggerMock.object,
+                    setupHandlerMock.object,
+                    testContainerFactoryMock.object,
+                    testRunnerMock.object,
+                    testScanHandlerMock.object,
+                ),
             )
             .returns(() => testScenarioBDriverMock.object);
     }
