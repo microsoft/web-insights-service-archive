@@ -21,7 +21,7 @@ export class TestScenarioSetupHandler {
         const websiteBlob = await this.readTestWebsiteBlob(testScenario);
         const postedWebsite = await this.postTestWebsite(websiteBlob);
 
-        return { websiteId: postedWebsite.id };
+        return { websiteId: postedWebsite.id, websiteScans: [] };
     }
 
     private async readTestWebsiteBlob(testScenario: TestScenarioDefinition): Promise<ApiContracts.Website> {

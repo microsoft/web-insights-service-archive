@@ -36,12 +36,16 @@ export class TestScenarioDriver {
 
         await this.runTestPhase('beforeScan');
 
-        const submitScanSucceeded = await this.trySubmitScan('a11y');
-        if (!submitScanSucceeded) {
-            return;
+        for (const scanType of this.testScenarioDefinition.scansToRun) {
+            const submitScanSucceeded = await this.trySubmitScan(scanType);
+            if (!submitScanSucceeded) {
+                return;
+            }
         }
 
-        await this.logTestSuccess();
+        await this.runTestPhase('afterScanSubmission');
+
+        this.logTestSuccess();
     }
 
     private async runTestPhase(phaseName: keyof TestPhases): Promise<void> {
@@ -59,13 +63,13 @@ export class TestScenarioDriver {
     private async trySubmitScan(scanType: ScanType): Promise<boolean> {
         const submitScanResponse = await this.testScanHandler.submitTestScan(scanType, this.testContextData.websiteId);
         if (!client.isSuccessStatusCode(submitScanResponse) || submitScanResponse.body === undefined) {
-            this.logTestFailure('Failed to submit a11y scan', {
+            this.logTestFailure(`Failed to submit ${scanType} scan`, {
                 requestResponse: JSON.stringify(getSerializableResponse(submitScanResponse)),
             });
 
             return false;
         }
-        this.testContextData.websiteScanId = submitScanResponse.body.id;
+        this.testContextData.websiteScans.push({ scanId: submitScanResponse.body.id, scanType: scanType });
 
         return true;
     }
@@ -74,7 +78,6 @@ export class TestScenarioDriver {
         return {
             testScenarioName: this.testScenarioDefinition.readableName,
             websiteId: this.testContextData?.websiteId,
-            websiteScanId: this.testContextData?.websiteScanId,
         };
     }
 

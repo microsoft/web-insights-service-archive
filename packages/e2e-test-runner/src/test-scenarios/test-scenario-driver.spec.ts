@@ -18,34 +18,34 @@ import { TestScenarioDriver } from './test-scenario-driver';
 import { TestScenarioSetupHandler } from './test-scenario-setup-handler';
 import { TestScanHandler } from './test-scan-handler';
 
-class TestableTestScenarioDriver extends TestScenarioDriver {
-    public testContextData: TestContextData;
-}
-
 class TestContainerA extends FunctionalTestGroup {}
 
 class TestContainerB extends FunctionalTestGroup {}
+
+class TestContainerC extends FunctionalTestGroup {}
 
 describe(TestScenarioDriver, () => {
     let testScenarioDefinition: TestScenarioDefinition;
     const websiteId = 'website id';
     const websiteScanId = 'website scan id';
-    const initialTestContextData = { websiteId };
+    const initialTestContextData: TestContextData = { websiteId, websiteScans: [] };
     let loggerMock: IMock<Logger>;
     let setupHandlerMock: IMock<TestScenarioSetupHandler>;
     let testContainerFactoryMock: IMock<TestContainerFactory>;
     let testRunnerMock: IMock<TestRunner>;
     let testScanHandlerMock: IMock<TestScanHandler>;
 
-    let testSubject: TestableTestScenarioDriver;
+    let testSubject: TestScenarioDriver;
 
     beforeEach(() => {
         testScenarioDefinition = {
             readableName: 'test scenario name',
             testPhases: {
                 beforeScan: [TestContainerA, TestContainerB],
+                afterScanSubmission: [TestContainerC],
             },
             websiteDataBlobName: 'blob name',
+            scansToRun: ['a11y', 'privacy'],
         };
         loggerMock = Mock.ofType<ContextAwareLogger>();
         setupHandlerMock = Mock.ofType<TestScenarioSetupHandler>();
@@ -53,7 +53,7 @@ describe(TestScenarioDriver, () => {
         testRunnerMock = Mock.ofType<TestRunner>();
         testScanHandlerMock = Mock.ofType<TestScanHandler>();
 
-        testSubject = new TestableTestScenarioDriver(
+        testSubject = new TestScenarioDriver(
             testScenarioDefinition,
             loggerMock.object,
             setupHandlerMock.object,
@@ -110,10 +110,19 @@ describe(TestScenarioDriver, () => {
         },
     );
 
-    it('executes all steps and tracks availability if no failures', async () => {
+    it('executes all steps, runs all tests, and tracks availability if no failures', async () => {
+        const textContextDataWithScans: TestContextData = {
+            ...initialTestContextData,
+            websiteScans: [
+                { scanId: websiteScanId, scanType: 'a11y' },
+                { scanId: websiteScanId, scanType: 'privacy' },
+            ],
+        };
         setupHandlerMock.setup((s) => s.setUpTestScenario(testScenarioDefinition)).returns(async () => initialTestContextData);
         setupRunTestPhase('beforeScan');
         setupSuccessfulScanSubmission('a11y');
+        setupSuccessfulScanSubmission('privacy');
+        setupRunTestPhase('afterScanSubmission', textContextDataWithScans);
         loggerMock.setup((l) => l.trackAvailability('workerAvailabilityTest', It.isObjectWith({ success: true }))).verifiable();
 
         await testSubject.executeTestScenario();
@@ -154,7 +163,10 @@ describe(TestScenarioDriver, () => {
                 id: websiteScanId,
             },
         } as ResponseWithBodyType<ApiContracts.WebsiteScan>;
-        testScanHandlerMock.setup((t) => t.submitTestScan(scanType, websiteId)).returns(async () => response);
+        testScanHandlerMock
+            .setup((t) => t.submitTestScan(scanType, websiteId))
+            .returns(async () => response)
+            .verifiable();
     }
 
     function setupFailedScanSubmission(scanType: ScanType, errorResponse?: ResponseWithBodyType<ApiContracts.WebsiteScan>): void {

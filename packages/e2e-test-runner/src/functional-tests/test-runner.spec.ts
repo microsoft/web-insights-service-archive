@@ -33,7 +33,7 @@ class TestGroupWithContext extends TestGroupStubBase {
     @test(TestEnvironment.all)
     public async testContextData(testContextData: TestContextData): Promise<void> {
         expect(testContextData).toBeDefined();
-        expect(testContextData).toEqual({ websiteId: 'website id' });
+        expect(testContextData).toEqual({ websiteId: 'website id', websiteScans: [] });
     }
 }
 
@@ -69,7 +69,7 @@ describe(TestRunner, () => {
     const runId = 'run id';
     const releaseId = 'release id';
     const scenarioName = 'scenarioName';
-    const testContextData: TestContextData = { websiteId: 'website id' };
+    const testContextData: TestContextData = { websiteId: 'website id', websiteScans: [] };
     let testContainerA: TestGroupAStub;
     let testContainerB: TestGroupBStub;
     let testContainerAName: string;
@@ -156,7 +156,7 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.runAll([testContainerA, testContainerB], { scenarioName }, { websiteId: 'website id' });
+        await testRunner.runAll([testContainerA, testContainerB], { scenarioName }, { websiteId: 'website id', websiteScans: [] });
     });
 
     it('run tests for the given environment only', async () => {
