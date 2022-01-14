@@ -61,6 +61,14 @@ describe(WebsiteProvider, () => {
         });
     });
 
+    describe('deleteWebsite', () => {
+        it('deletes document', async () => {
+            cosmosContainerClientMock.setup((c) => c.deleteDocument(websiteId, PartitionKey.websiteDocuments)).verifiable();
+
+            await testSubject.deleteWebsite(websiteId);
+        });
+    });
+
     describe('updateWebsite', () => {
         it('throws if no id', () => {
             const websiteData: Partial<Website> = {

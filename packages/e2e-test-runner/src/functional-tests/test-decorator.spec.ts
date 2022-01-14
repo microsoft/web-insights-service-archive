@@ -10,7 +10,7 @@ import { definedTestsMetadataKey, test } from './test-decorator';
 
 class TestGroupStub extends FunctionalTestGroup {
     constructor() {
-        super(undefined, undefined);
+        super(undefined, undefined, undefined, undefined);
     }
 
     public testA(): void {

@@ -7,6 +7,7 @@ import { TestContainerFactory } from './functional-tests/test-container-factory'
 import { TestContextData } from './functional-tests/test-context-data';
 import { FinalizerTestGroup } from './functional-tests/test-groups/finalizer-test-group';
 import { TestRunner } from './functional-tests/test-runner';
+import { TestScanHandler } from './test-scenarios/test-scan-handler';
 import {
     allTestScenarioFactories,
     TestScenarioDefinition,
@@ -21,7 +22,8 @@ const testScenarioDriverFactory = (
     setupHandler: TestScenarioSetupHandler,
     testContainerFactory: TestContainerFactory,
     testRunner: TestRunner,
-) => new TestScenarioDriver(scenario, logger, setupHandler, testContainerFactory, testRunner);
+    testScanHandler: TestScanHandler,
+) => new TestScenarioDriver(scenario, logger, setupHandler, testContainerFactory, testRunner, testScanHandler);
 
 export type TestScenarioDriverFactory = typeof testScenarioDriverFactory;
 
@@ -32,6 +34,8 @@ export class E2ETestRunner {
         @inject(TestScenarioSetupHandler) private readonly testScenarioSetupHandler: TestScenarioSetupHandler,
         @inject(TestContainerFactory) private readonly testContainerFactory: TestContainerFactory,
         @inject(TestRunner) private readonly testRunner: TestRunner,
+        @inject(TestScanHandler)
+        private readonly testScanHandler: TestScanHandler,
         private readonly testScenarioFactories: TestScenarioDefinitionFactory[] = allTestScenarioFactories,
         private readonly createTestScenarioDriver: typeof testScenarioDriverFactory = testScenarioDriverFactory,
     ) {}
@@ -39,7 +43,7 @@ export class E2ETestRunner {
     public async run(): Promise<void> {
         this.logger.logInfo('Beginning run of E2E test suite');
 
-        const testScenarioDrivers = this.createAllTestScenarioDrivers();
+        const testScenarioDrivers = await this.createAllTestScenarioDrivers();
 
         await Promise.all(testScenarioDrivers.map((testScenarioDriver) => testScenarioDriver.executeTestScenario()));
 
@@ -52,7 +56,14 @@ export class E2ETestRunner {
         const testScenarios = this.testScenarioFactories.map((testScenarioFactory) => testScenarioFactory());
 
         return testScenarios.map((scenario) =>
-            this.createTestScenarioDriver(scenario, this.logger, this.testScenarioSetupHandler, this.testContainerFactory, this.testRunner),
+            this.createTestScenarioDriver(
+                scenario,
+                this.logger,
+                this.testScenarioSetupHandler,
+                this.testContainerFactory,
+                this.testRunner,
+                this.testScanHandler,
+            ),
         );
     }
 

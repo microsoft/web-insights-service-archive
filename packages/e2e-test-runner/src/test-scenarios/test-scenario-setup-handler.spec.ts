@@ -69,6 +69,6 @@ describe(TestScenarioSetupHandler, () => {
 
         const testContextData = await testSubject.setUpTestScenario(testScenario);
 
-        expect(testContextData).toEqual({ websiteId: website.id });
+        expect(testContextData).toEqual({ websiteId: website.id, websiteScans: [] });
     });
 });

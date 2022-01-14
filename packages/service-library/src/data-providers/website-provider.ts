@@ -21,6 +21,10 @@ export class WebsiteProvider {
         return websiteDoc as Website;
     }
 
+    public async deleteWebsite(websiteId: string): Promise<void> {
+        await this.cosmosContainerClient.deleteDocument(websiteId, PartitionKey.websiteDocuments);
+    }
+
     public async updateWebsite(website: Partial<Website>): Promise<Website> {
         const websiteDoc = this.normalizeDbDocument(website);
 
