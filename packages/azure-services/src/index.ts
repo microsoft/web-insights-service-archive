@@ -19,7 +19,7 @@ export {
     BlobStorageClient,
     BlobSaveCondition,
 } from './azure-blob/blob-storage-client';
-export { iocTypeNames as AzureServicesIocTypes } from './ioc-types';
+export { iocTypeNames as AzureServicesIocTypes, ApplicationInsightsClientProvider } from './ioc-types';
 export { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 export { ApplicationInsightsClient } from './app-insights-api-client/application-insights-client';
 export * from './app-insights-api-client/query-response';

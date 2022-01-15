@@ -23,6 +23,7 @@ export interface RestApiConfig {
 
 export interface AvailabilityTestConfig {
     environmentDefinition: string;
+    logQueryTimeRange: string;
 }
 
 export interface RuntimeConfig {
@@ -129,6 +130,11 @@ export class ServiceConfiguration {
                     format: String,
                     default: 'canary',
                     doc: 'The environment definition used to select tests to run',
+                },
+                logQueryTimeRange: {
+                    format: String,
+                    default: 'P1D',
+                    doc: 'The Application Insights query time range',
                 },
             },
         };

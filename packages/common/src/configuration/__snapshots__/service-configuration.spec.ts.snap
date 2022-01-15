@@ -8,6 +8,11 @@ Object {
       "doc": "The environment definition used to select tests to run",
       "format": [Function],
     },
+    "logQueryTimeRange": Object {
+      "default": "P1D",
+      "doc": "The Application Insights query time range",
+      "format": [Function],
+    },
   },
   "logConfig": Object {
     "logInConsole": Object {
@@ -54,6 +59,11 @@ Object {
     "environmentDefinition": Object {
       "default": "canary",
       "doc": "The environment definition used to select tests to run",
+      "format": [Function],
+    },
+    "logQueryTimeRange": Object {
+      "default": "P1D",
+      "doc": "The Application Insights query time range",
       "format": [Function],
     },
   },

@@ -19,6 +19,7 @@ import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 import { AzureManagedCredential } from './credentials/azure-managed-credential';
 import { AclProvider } from './azure-auth/acl-provider';
+import { ApplicationInsightsClient } from '.';
 
 export function registerAzureServicesToContainer(
     container: Container,
@@ -44,6 +45,8 @@ export function registerAzureServicesToContainer(
     setupBlobServiceClientProvider(container);
     container.bind(StorageContainerSASUrlProvider).toSelf().inSingletonScope();
     container.bind(Queue).toSelf();
+
+    setupApplicationInsightsClientProvider(container);
 }
 
 async function getStorageAccountName(context: interfaces.Context): Promise<string> {
@@ -113,4 +116,13 @@ function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): C
     };
 
     return new CosmosClient(options);
+}
+
+function setupApplicationInsightsClientProvider(container: interfaces.Container): void {
+    IoC.setupSingletonProvider<ApplicationInsightsClient>(iocTypeNames.ApplicationInsightsClientProvider, container, async (context) => {
+        const secretProvider = context.container.get(SecretProvider);
+        const appInsightsApiKey = await secretProvider.getSecret(secretNames.appInsightsApiKey);
+
+        return new ApplicationInsightsClient(process.env.APPINSIGHTS_APPID, appInsightsApiKey);
+    });
 }
