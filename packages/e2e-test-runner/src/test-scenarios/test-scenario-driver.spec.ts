@@ -29,6 +29,7 @@ describe(TestScenarioDriver, () => {
     const websiteId = 'website id';
     const websiteScanId = 'website scan id';
     const initialTestContextData: TestContextData = { websiteId, websiteScans: [] };
+    const runId = 'test run id';
     let loggerMock: IMock<Logger>;
     let setupHandlerMock: IMock<TestScenarioSetupHandler>;
     let testContainerFactoryMock: IMock<TestContainerFactory>;
@@ -60,6 +61,7 @@ describe(TestScenarioDriver, () => {
             testContainerFactoryMock.object,
             testRunnerMock.object,
             testScanHandlerMock.object,
+            runId,
         );
     });
 

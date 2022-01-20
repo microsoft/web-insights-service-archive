@@ -23,6 +23,7 @@ export class TestScenarioDriver {
         private readonly testContainerFactory: TestContainerFactory,
         private readonly testRunner: TestRunner,
         private readonly testScanHandler: TestScanHandler,
+        private readonly testRunId: string,
     ) {}
 
     public async executeTestScenario(): Promise<void> {
@@ -78,6 +79,7 @@ export class TestScenarioDriver {
         return {
             testScenarioName: this.testScenarioDefinition.readableName,
             websiteId: this.testContextData?.websiteId,
+            runId: this.testRunId,
         };
     }
 
