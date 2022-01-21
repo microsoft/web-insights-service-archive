@@ -12,8 +12,8 @@ import { TestContextData } from '../functional-tests/test-context-data';
 import { TestContainerFactory } from '../functional-tests/test-container-factory';
 import { FunctionalTestGroup } from '../functional-tests/functional-test-group';
 import { TestRunner } from '../functional-tests/test-runner';
+import { WebApiConfig } from '../web-api-config';
 import { TestPhases, TestScenarioDefinition } from './test-scenario-definitions';
-
 import { TestScenarioDriver } from './test-scenario-driver';
 import { TestScenarioSetupHandler } from './test-scenario-setup-handler';
 import { TestScanHandler } from './test-scan-handler';
@@ -30,6 +30,7 @@ describe(TestScenarioDriver, () => {
     const websiteScanId = 'website scan id';
     const initialTestContextData: TestContextData = { websiteId, websiteScans: [] };
     const runId = 'test run id';
+    const webApiConfig = { releaseId: 'release id' } as WebApiConfig;
     let loggerMock: IMock<Logger>;
     let setupHandlerMock: IMock<TestScenarioSetupHandler>;
     let testContainerFactoryMock: IMock<TestContainerFactory>;
@@ -61,6 +62,7 @@ describe(TestScenarioDriver, () => {
             testContainerFactoryMock.object,
             testRunnerMock.object,
             testScanHandlerMock.object,
+            webApiConfig,
             runId,
         );
     });

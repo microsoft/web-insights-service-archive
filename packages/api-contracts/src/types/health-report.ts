@@ -14,12 +14,19 @@ export interface TestRun {
     timestamp: Date;
 }
 
+export interface AvailabilityResult {
+    success: boolean;
+    scenarioName: string;
+    timestamp: Date;
+}
+
 export interface HealthReport {
     healthStatus: TestRunResult;
     environment: TestEnvironment;
     releaseId: string;
     runId: string;
     testRuns: TestRun[];
+    availabilityResults: AvailabilityResult[];
     testsPassed: number;
     testsFailed: number;
 }

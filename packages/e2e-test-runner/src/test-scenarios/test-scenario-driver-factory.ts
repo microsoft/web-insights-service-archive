@@ -6,6 +6,7 @@ import { ContextAwareLogger } from 'logger';
 import { TestContainerFactory } from '../functional-tests/test-container-factory';
 import { TestRunner } from '../functional-tests/test-runner';
 import { E2ETestRunnerTypeNames, TestRunIdProvider } from '../type-names';
+import { WebApiConfig } from '../web-api-config';
 import { TestScanHandler } from './test-scan-handler';
 import { TestScenarioDefinition } from './test-scenario-definitions';
 import { TestScenarioDriver } from './test-scenario-driver';
@@ -19,6 +20,7 @@ export class TestScenarioDriverFactory {
         @inject(TestContainerFactory) private readonly testContainerFactory: TestContainerFactory,
         @inject(TestRunner) private readonly testRunner: TestRunner,
         @inject(TestScanHandler) private readonly testScanHandler: TestScanHandler,
+        @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
         @inject(E2ETestRunnerTypeNames.testRunIdProvider) private readonly testRunIdProvider: TestRunIdProvider,
     ) {}
 
@@ -32,6 +34,7 @@ export class TestScenarioDriverFactory {
             this.testContainerFactory,
             this.testRunner,
             this.testScanHandler,
+            this.webApiConfig,
             testRunId,
         );
     }

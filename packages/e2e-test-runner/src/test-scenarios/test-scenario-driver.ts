@@ -9,6 +9,7 @@ import { ScanType } from 'storage-documents';
 import { TestContainerFactory } from '../functional-tests/test-container-factory';
 import { TestContextData } from '../functional-tests/test-context-data';
 import { TestRunner } from '../functional-tests/test-runner';
+import { WebApiConfig } from '../web-api-config';
 import { TestScanHandler } from './test-scan-handler';
 import { TestPhases, TestScenarioDefinition } from './test-scenario-definitions';
 import { TestScenarioSetupHandler } from './test-scenario-setup-handler';
@@ -23,6 +24,7 @@ export class TestScenarioDriver {
         private readonly testContainerFactory: TestContainerFactory,
         private readonly testRunner: TestRunner,
         private readonly testScanHandler: TestScanHandler,
+        private readonly webApiConfig: WebApiConfig,
         private readonly testRunId: string,
     ) {}
 
@@ -80,6 +82,7 @@ export class TestScenarioDriver {
             testScenarioName: this.testScenarioDefinition.readableName,
             websiteId: this.testContextData?.websiteId,
             runId: this.testRunId,
+            releaseId: this.webApiConfig.releaseId,
         };
     }
 

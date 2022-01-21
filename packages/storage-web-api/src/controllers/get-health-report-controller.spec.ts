@@ -12,23 +12,45 @@ import { AvailabilityTestConfig, ResponseWithBodyType, ServiceConfiguration } fr
 import { HttpResponse, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock } from 'typemoq';
 import { ContextAwareLogger } from 'logger';
-import { createHealthCheckQueryForRelease } from '../health-check-query';
 import { WebApiConfig } from '../web-api-config';
 import { GetHealthReportRequestValidator } from '../request-validators/get-health-report-request-validator';
+import { HealthCheckQueryFactories } from '../health-check-queries';
+import { QueryResponseToHealthReportConverter } from '../converters/query-response-to-health-report-converter';
 import { GetHealthReportController, HealthTarget } from './get-health-report-controller';
 
 describe(GetHealthReportController, () => {
     const releaseTarget: HealthTarget = 'release';
     const releaseId = '2419';
-    const queryStringStub = 'query string stub';
+    const testResultsQueryString = 'query for test results';
+    const availabilityResultsQueryString = 'query for availability';
+    const testResultsQueryResult = {
+        tables: [
+            {
+                columns: [{ name: 'testName', type: 'dynamic' }],
+                rows: [['Test']],
+            },
+        ],
+    } as ApplicationInsightsQueryResponse;
+    const availabilityResultsQueryResult = {
+        tables: [
+            {
+                columns: [{ name: 'success', type: 'boolean' }],
+                rows: [[true]],
+            },
+        ],
+    } as ApplicationInsightsQueryResponse;
+    const healthReport = { healthStatus: 'pass' } as ApiContracts.HealthReport;
     let healthCheckController: GetHealthReportController;
     let context: Context;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<ContextAwareLogger>;
     let appInsightsClientMock: IMock<ApplicationInsightsClient>;
     let availabilityTestConfig: AvailabilityTestConfig;
-    let createQueryMock: IMock<typeof createHealthCheckQueryForRelease>;
+    let queryFactoriesStub: HealthCheckQueryFactories;
+    let createTestResultsQueryMock: IMock<(releaseId: string) => string>;
+    let createAvailabilityResultsQueryMock: IMock<(releaseId: string) => string>;
     let requestValidatorMock: IMock<GetHealthReportRequestValidator>;
+    let createHealthReportMock: IMock<QueryResponseToHealthReportConverter>;
 
     beforeEach(() => {
         context = <Context>(<unknown>{
@@ -57,8 +79,21 @@ describe(GetHealthReportController, () => {
 
         loggerMock = Mock.ofType<ContextAwareLogger>();
         appInsightsClientMock = Mock.ofType(ApplicationInsightsClient);
-        createQueryMock = Mock.ofInstance(() => null);
-        createQueryMock.setup((c) => c(releaseId)).returns(() => queryStringStub);
+
+        createTestResultsQueryMock = Mock.ofType<(releaseId: string) => string>();
+        createTestResultsQueryMock.setup((c) => c(releaseId)).returns(() => testResultsQueryString);
+
+        createAvailabilityResultsQueryMock = Mock.ofType<(releaseId: string) => string>();
+        createAvailabilityResultsQueryMock.setup((c) => c(releaseId)).returns(() => availabilityResultsQueryString);
+
+        createHealthReportMock = Mock.ofType<QueryResponseToHealthReportConverter>();
+        createHealthReportMock.setup((c) => c(testResultsQueryResult, availabilityResultsQueryResult)).returns(() => healthReport);
+
+        queryFactoriesStub = {
+            createTestResultsQueryForRelease: createTestResultsQueryMock.object,
+            createAvailabilityResultsQueryForRelease: createAvailabilityResultsQueryMock.object,
+        };
+
         requestValidatorMock = Mock.ofType<GetHealthReportRequestValidator>();
 
         healthCheckController = new GetHealthReportController(
@@ -67,7 +102,8 @@ describe(GetHealthReportController, () => {
             async () => Promise.resolve(appInsightsClientMock.object),
             webApiConfig,
             requestValidatorMock.object,
-            createQueryMock.object,
+            queryFactoriesStub,
+            createHealthReportMock.object,
         );
         healthCheckController.context = context;
     });
@@ -79,13 +115,21 @@ describe(GetHealthReportController, () => {
         loggerMock.verifyAll();
     });
 
-    it('return internal error on app insights failure', async () => {
+    it('return internal error on app insights failure for test results query', async () => {
         context.bindingData.target = releaseTarget;
-        const failureResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
-            statusCode: 404,
-            body: undefined,
-        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-        setupAppInsightsResponse(failureResponse);
+        setupFailedAppInsightsQuery(testResultsQueryString);
+        setupSuccessfulAppInsightsQuery(availabilityResultsQueryResult, availabilityResultsQueryString);
+
+        await healthCheckController.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.internalError));
+        appInsightsClientMock.verifyAll();
+    });
+
+    it('return internal error on app insights failure for availability results query', async () => {
+        context.bindingData.target = releaseTarget;
+        setupFailedAppInsightsQuery(availabilityResultsQueryString);
+        setupSuccessfulAppInsightsQuery(testResultsQueryResult, testResultsQueryString);
 
         await healthCheckController.handleRequest();
 
@@ -96,178 +140,34 @@ describe(GetHealthReportController, () => {
     it('returns correct health report', async () => {
         context.bindingData.target = releaseTarget;
         context.bindingData.targetId = releaseId;
-        const responseBody: ApplicationInsightsQueryResponse = {
-            tables: [
-                {
-                    columns: [
-                        { name: 'timestamp', type: 'datetime' },
-                        { name: 'environment', type: 'dynamic' },
-                        { name: 'releaseId', type: 'dynamic' },
-                        { name: 'runId', type: 'dynamic' },
-                        { name: 'logSource', type: 'dynamic' },
-                        { name: 'testContainer', type: 'dynamic' },
-                        { name: 'testName', type: 'dynamic' },
-                        { name: 'result', type: 'dynamic' },
-                        { name: 'scenarioName', type: 'dynamic' },
-                        { name: 'scanId', type: 'dynamic' },
-                        { name: 'error', type: 'dynamic' },
-                    ],
-                    rows: [
-                        [
-                            '2020-01-13T03:11:00.352Z',
-                            'canary',
-                            '2419',
-                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
-                            'TestRun',
-                            'ValidationATestGroup',
-                            'testA1',
-                            'pass',
-                            'TestScenario1',
-                            'scan-id-1',
-                        ],
-                        [
-                            '2020-01-13T03:11:00.352Z',
-                            'canary',
-                            '2419',
-                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
-                            'TestRun',
-                            'ValidationBTestGroup',
-                            'testB1',
-                            'pass',
-                            'TestScenario1',
-                            'scan-id-1',
-                        ],
-                        [
-                            '2020-01-13T03:11:00.352Z',
-                            'canary',
-                            '2419',
-                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
-                            'TestRun',
-                            'FinalizerTestGroup',
-                            'functionalTestsFinalizer',
-                            'pass',
-                            'FinalizerScenario',
-                        ],
-                        [
-                            '2020-01-13T03:11:00.352Z',
-                            'canary',
-                            '2419',
-                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
-                            'TestRun',
-                            'ValidationATestGroup',
-                            'testA3',
-                            'fail',
-                            'TestScenario2',
-                            'scan-id-2',
-                            'error from test A3',
-                        ],
-                    ],
-                    name: 'PrimaryResult',
-                },
-            ],
-        };
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
-            statusCode: 200,
-            body: responseBody,
-        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-        setupAppInsightsResponse(successResponse);
-
-        const expectedResponseBody: ApiContracts.HealthReport = {
-            healthStatus: 'fail',
-            environment: 'canary',
-            releaseId: '2419',
-            runId: '1ea35b25-3238-68f0-774d-7c98f231af4f',
-            testRuns: [
-                {
-                    testContainer: 'ValidationATestGroup',
-                    testName: 'testA1',
-                    scenarioName: 'TestScenario1',
-                    scanId: 'scan-id-1',
-                    result: 'pass',
-                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
-                },
-                {
-                    testContainer: 'ValidationBTestGroup',
-                    testName: 'testB1',
-                    scenarioName: 'TestScenario1',
-                    scanId: 'scan-id-1',
-                    result: 'pass',
-                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
-                },
-                {
-                    testContainer: 'FinalizerTestGroup',
-                    testName: 'functionalTestsFinalizer',
-                    scenarioName: 'FinalizerScenario',
-                    result: 'pass',
-                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
-                },
-                {
-                    testContainer: 'ValidationATestGroup',
-                    testName: 'testA3',
-                    scenarioName: 'TestScenario2',
-                    scanId: 'scan-id-2',
-                    result: 'fail',
-                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
-                    error: 'error from test A3',
-                },
-            ],
-            testsPassed: 3,
-            testsFailed: 1,
-        };
+        setupSuccessfulAppInsightsQuery(testResultsQueryResult, testResultsQueryString);
+        setupSuccessfulAppInsightsQuery(availabilityResultsQueryResult, availabilityResultsQueryString);
 
         await healthCheckController.handleRequest();
 
         expect(context.res.status).toEqual(200);
-        expect(context.res.body).toEqual(expectedResponseBody);
+        expect(context.res.body).toEqual(healthReport);
         appInsightsClientMock.verifyAll();
     });
 
-    it('returns warn health report result when no test result found', async () => {
-        context.bindingData.target = releaseTarget;
-        context.bindingData.targetId = releaseId;
-        const responseBody: ApplicationInsightsQueryResponse = {
-            tables: [
-                {
-                    columns: [
-                        { name: 'timestamp', type: 'datetime' },
-                        { name: 'environment', type: 'dynamic' },
-                        { name: 'releaseId', type: 'dynamic' },
-                        { name: 'runId', type: 'dynamic' },
-                        { name: 'logSource', type: 'dynamic' },
-                        { name: 'testContainer', type: 'dynamic' },
-                        { name: 'testName', type: 'dynamic' },
-                        { name: 'result', type: 'dynamic' },
-                        { name: 'error', type: 'dynamic' },
-                    ],
-                    rows: [],
-                    name: 'PrimaryResult',
-                },
-            ],
-        };
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = {
-            statusCode: 200,
+    function setupFailedAppInsightsQuery(query: string): void {
+        const response = {
+            body: undefined,
+            statusCode: 400,
+        } as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+
+        appInsightsClientMock
+            .setup(async (a) => a.executeQuery(query, It.isAny()))
+            .returns(async () => response)
+            .verifiable();
+    }
+
+    function setupSuccessfulAppInsightsQuery(responseBody: ApplicationInsightsQueryResponse, query: string): void {
+        const response = {
             body: responseBody,
-        } as any as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-        setupAppInsightsResponse(successResponse, queryStringStub);
+            statusCode: 200,
+        } as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
 
-        const expectedResponseBody: ApiContracts.HealthReport = {
-            healthStatus: 'warn',
-            environment: undefined,
-            releaseId: '2419',
-            runId: undefined,
-            testRuns: [],
-            testsPassed: 0,
-            testsFailed: 0,
-        };
-
-        await healthCheckController.handleRequest();
-
-        expect(context.res.status).toEqual(200);
-        expect(context.res.body).toEqual(expectedResponseBody);
-        appInsightsClientMock.verifyAll();
-    });
-
-    function setupAppInsightsResponse(response: ResponseWithBodyType<ApplicationInsightsQueryResponse>, query = It.isAny()): void {
         appInsightsClientMock
             .setup(async (a) => a.executeQuery(query, It.isAny()))
             .returns(async () => response)
