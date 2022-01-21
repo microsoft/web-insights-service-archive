@@ -27,6 +27,7 @@ steps:
               storage-web-api/dist/**/*
               e2e-test-runner/dist/**/*
               resource-deployment/dist/**/*
+              health-client/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
