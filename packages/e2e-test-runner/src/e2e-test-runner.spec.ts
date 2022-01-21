@@ -5,22 +5,19 @@ import 'reflect-metadata';
 
 import { ContextAwareLogger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
-import { E2ETestRunner, TestScenarioDriverFactory } from './e2e-test-runner';
-import { TestScenarioSetupHandler } from './test-scenarios/test-scenario-setup-handler';
+import { E2ETestRunner } from './e2e-test-runner';
 import { TestScenarioDefinition, TestScenarioDefinitionFactory } from './test-scenarios/test-scenario-definitions';
 import { TestScenarioDriver } from './test-scenarios/test-scenario-driver';
 import { TestContainerFactory } from './functional-tests/test-container-factory';
 import { TestRunner } from './functional-tests/test-runner';
 import { FinalizerTestGroup } from './functional-tests/test-groups/finalizer-test-group';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
-import { TestScanHandler } from './test-scenarios/test-scan-handler';
+import { TestScenarioDriverFactory } from './test-scenarios/test-scenario-driver-factory';
 
 describe(E2ETestRunner, () => {
     let loggerMock: IMock<ContextAwareLogger>;
-    let setupHandlerMock: IMock<TestScenarioSetupHandler>;
     let testContainerFactoryMock: IMock<TestContainerFactory>;
     let testRunnerMock: IMock<TestRunner>;
-    let testScanHandlerMock: IMock<TestScanHandler>;
     let testScenarioADriverMock: IMock<TestScenarioDriver>;
     let testScenarioBDriverMock: IMock<TestScenarioDriver>;
     let testScenarioDriverFactoryMock: IMock<TestScenarioDriverFactory>;
@@ -36,22 +33,20 @@ describe(E2ETestRunner, () => {
 
     beforeEach(() => {
         loggerMock = Mock.ofType<ContextAwareLogger>();
-        setupHandlerMock = Mock.ofType<TestScenarioSetupHandler>();
         testContainerFactoryMock = Mock.ofType<TestContainerFactory>();
         testRunnerMock = Mock.ofType<TestRunner>();
-        testScanHandlerMock = Mock.ofType<TestScanHandler>();
         testScenarioADriverMock = Mock.ofType<TestScenarioDriver>();
+        getPromisableDynamicMock(testScenarioADriverMock);
         testScenarioBDriverMock = Mock.ofType<TestScenarioDriver>();
+        getPromisableDynamicMock(testScenarioBDriverMock);
         testScenarioDriverFactoryMock = Mock.ofType<TestScenarioDriverFactory>();
 
         testSubject = new E2ETestRunner(
             loggerMock.object,
-            setupHandlerMock.object,
             testContainerFactoryMock.object,
             testRunnerMock.object,
-            testScanHandlerMock.object,
-            testScenarioFactoriesStub,
             testScenarioDriverFactoryMock.object,
+            testScenarioFactoriesStub,
         );
     });
 
@@ -73,29 +68,11 @@ describe(E2ETestRunner, () => {
 
     function setupTestScenarioDriverFactory(): void {
         testScenarioDriverFactoryMock
-            .setup((t) =>
-                t(
-                    testScenarioA,
-                    loggerMock.object,
-                    setupHandlerMock.object,
-                    testContainerFactoryMock.object,
-                    testRunnerMock.object,
-                    testScanHandlerMock.object,
-                ),
-            )
-            .returns(() => testScenarioADriverMock.object);
+            .setup((t) => t.createTestScenarioDriver(testScenarioA))
+            .returns(async () => testScenarioADriverMock.object);
         testScenarioDriverFactoryMock
-            .setup((t) =>
-                t(
-                    testScenarioB,
-                    loggerMock.object,
-                    setupHandlerMock.object,
-                    testContainerFactoryMock.object,
-                    testRunnerMock.object,
-                    testScanHandlerMock.object,
-                ),
-            )
-            .returns(() => testScenarioBDriverMock.object);
+            .setup((t) => t.createTestScenarioDriver(testScenarioB))
+            .returns(async () => testScenarioBDriverMock.object);
     }
 
     function setupRunFinalizerTest(): void {

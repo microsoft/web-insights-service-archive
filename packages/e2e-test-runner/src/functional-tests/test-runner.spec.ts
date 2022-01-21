@@ -96,7 +96,7 @@ describe(TestRunner, () => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => runId);
 
-        testRunner = new TestRunner(loggerMock.object, serviceConfigMock.object, webApiConfig, guidGeneratorMock.object);
+        testRunner = new TestRunner(loggerMock.object, serviceConfigMock.object, webApiConfig, async () => runId);
     });
 
     afterEach(() => {

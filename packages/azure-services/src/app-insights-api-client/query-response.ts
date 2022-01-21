@@ -6,7 +6,8 @@ export type Column = {
     type: string;
 };
 
-export type Row = string[];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Row = any[];
 
 export type Table = {
     name: string;

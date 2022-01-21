@@ -7,37 +7,18 @@ import { TestContainerFactory } from './functional-tests/test-container-factory'
 import { TestContextData } from './functional-tests/test-context-data';
 import { FinalizerTestGroup } from './functional-tests/test-groups/finalizer-test-group';
 import { TestRunner } from './functional-tests/test-runner';
-import { TestScanHandler } from './test-scenarios/test-scan-handler';
-import {
-    allTestScenarioFactories,
-    TestScenarioDefinition,
-    TestScenarioDefinitionFactory,
-} from './test-scenarios/test-scenario-definitions';
+import { allTestScenarioFactories, TestScenarioDefinitionFactory } from './test-scenarios/test-scenario-definitions';
 import { TestScenarioDriver } from './test-scenarios/test-scenario-driver';
-import { TestScenarioSetupHandler } from './test-scenarios/test-scenario-setup-handler';
-
-const testScenarioDriverFactory = (
-    scenario: TestScenarioDefinition,
-    logger: Logger,
-    setupHandler: TestScenarioSetupHandler,
-    testContainerFactory: TestContainerFactory,
-    testRunner: TestRunner,
-    testScanHandler: TestScanHandler,
-) => new TestScenarioDriver(scenario, logger, setupHandler, testContainerFactory, testRunner, testScanHandler);
-
-export type TestScenarioDriverFactory = typeof testScenarioDriverFactory;
+import { TestScenarioDriverFactory } from './test-scenarios/test-scenario-driver-factory';
 
 @injectable()
 export class E2ETestRunner {
     constructor(
         @inject(ContextAwareLogger) private readonly logger: Logger,
-        @inject(TestScenarioSetupHandler) private readonly testScenarioSetupHandler: TestScenarioSetupHandler,
         @inject(TestContainerFactory) private readonly testContainerFactory: TestContainerFactory,
         @inject(TestRunner) private readonly testRunner: TestRunner,
-        @inject(TestScanHandler)
-        private readonly testScanHandler: TestScanHandler,
+        @inject(TestScenarioDriverFactory) private readonly testScenarioDriverFactory: TestScenarioDriverFactory,
         private readonly testScenarioFactories: TestScenarioDefinitionFactory[] = allTestScenarioFactories,
-        private readonly createTestScenarioDriver: typeof testScenarioDriverFactory = testScenarioDriverFactory,
     ) {}
 
     public async run(): Promise<void> {
@@ -52,19 +33,10 @@ export class E2ETestRunner {
         this.logger.logInfo('E2E test run completed');
     }
 
-    private createAllTestScenarioDrivers(): TestScenarioDriver[] {
+    private async createAllTestScenarioDrivers(): Promise<TestScenarioDriver[]> {
         const testScenarios = this.testScenarioFactories.map((testScenarioFactory) => testScenarioFactory());
 
-        return testScenarios.map((scenario) =>
-            this.createTestScenarioDriver(
-                scenario,
-                this.logger,
-                this.testScenarioSetupHandler,
-                this.testContainerFactory,
-                this.testRunner,
-                this.testScanHandler,
-            ),
-        );
+        return Promise.all(testScenarios.map((scenario) => this.testScenarioDriverFactory.createTestScenarioDriver(scenario)));
     }
 
     private async finalizeTestRun(): Promise<void> {

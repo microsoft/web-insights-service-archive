@@ -17,6 +17,7 @@ module.exports = (env) => {
         devtool: 'cheap-source-map',
         externals: ['@azure/functions'],
         entry: {
+            ['get-health-report-func']: path.resolve('./get-health-report-func/index.ts'),
             ['get-website-func']: path.resolve('./get-website-func/index.ts'),
             ['post-website-func']: path.resolve('./post-website-func/index.ts'),
             ['post-page-func']: path.resolve('./post-page-func/index.ts'),

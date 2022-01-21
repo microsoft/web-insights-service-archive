@@ -42,6 +42,7 @@ getCosmosDbConnectionString() {
 getAppInsightKey() {
     id="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsights}"
     appInsightInstrumentationKey=$(az resource show --id "${id}" --query properties.InstrumentationKey --out tsv)
+    appInsightsAppId=$(az resource show --id "${id}" --query properties.AppId --out tsv)
 }
 
 # Get the default subscription
@@ -87,6 +88,7 @@ AZURE_CLIENT_SECRET=${password}
 
 KEY_VAULT_URL=https://${keyVault}.vault.azure.net/
 APPINSIGHTS_INSTRUMENTATIONKEY=${appInsightInstrumentationKey}
+APPINSIGHTS_APPID=${appInsightsAppId}
 
 COSMOS_DB_URL=${cosmosDbUrl}
 COSMOS_DB_KEY=${cosmosDbAccessKey}

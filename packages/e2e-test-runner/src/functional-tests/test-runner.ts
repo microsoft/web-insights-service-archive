@@ -5,8 +5,9 @@ import 'reflect-metadata';
 
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { AvailabilityTestConfig, GuidGenerator, ServiceConfiguration } from 'common';
+import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import { WebApiConfig } from '../web-api-config';
+import { E2ETestRunnerTypeNames, TestRunIdProvider } from '../type-names';
 import { TestContainerLogProperties, TestDefinition, TestEnvironment, TestRunLogProperties } from './common-types';
 import { FunctionalTestGroup } from './functional-test-group';
 import { getDefinedTestsMetadata } from './test-decorator';
@@ -21,18 +22,14 @@ export type TestRunMetadata = {
 
 @injectable()
 export class TestRunner {
-    private readonly runId: string;
-
     private availabilityTestConfig: AvailabilityTestConfig;
 
     public constructor(
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
-        @inject(GuidGenerator) guidGenerator: GuidGenerator,
-    ) {
-        this.runId = guidGenerator.createGuid();
-    }
+        @inject(E2ETestRunnerTypeNames.testRunIdProvider) private readonly runIdProvider: TestRunIdProvider,
+    ) {}
 
     public async runAll(testContainers: FunctionalTestGroup[], metadata: TestRunMetadata, testContextData: TestContextData): Promise<void> {
         await this.setAvailabilityTestConfig();
@@ -96,11 +93,11 @@ export class TestRunner {
         }
     }
 
-    private log(properties: TestRunLogProperties | TestContainerLogProperties): void {
+    private async log(properties: TestRunLogProperties | TestContainerLogProperties): Promise<void> {
         this.logger.trackEvent('FunctionalTest', {
             environment: this.availabilityTestConfig.environmentDefinition,
             releaseId: this.webApiConfig.releaseId,
-            runId: this.runId,
+            runId: await this.runIdProvider(),
             ...properties,
         });
     }

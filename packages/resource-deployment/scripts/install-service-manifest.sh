@@ -16,6 +16,7 @@ Usage: ${BASH_SOURCE} -r <resource group> -s <service name> [-c <aks cluster nam
 getAppInsightKey() {
     id="/subscriptions/${subscription}/resourceGroups/${resourceGroupName}/providers/microsoft.insights/components/${appInsights}"
     appInsightInstrumentationKey=$(az resource show --id "${id}" --query properties.InstrumentationKey --out tsv)
+    appInsightsAppId=$(az resource show --id "${id}" --query properties.AppId --out tsv)
 }
 
 getValuesManifest() {
@@ -137,6 +138,7 @@ getInstallAction
 
 # Set common env variables before formatting
 commonEnvVariables="APPINSIGHTS_INSTRUMENTATIONKEY=${appInsightInstrumentationKey}"
+commonEnvVariables+=",APPINSIGHTS_APPID=${appInsightsAppId}"
 commonEnvVariables+=",KEY_VAULT_URL=${keyVaultUrl}"
 commonEnvVariables+=",AZURE_PRINCIPAL_ID=${principalId}"
 commonEnvVariables+=",RELEASE_VERSION=${releaseVersion}"
