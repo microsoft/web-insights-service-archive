@@ -217,6 +217,49 @@ describe(WebInsightsStorageClient, () => {
         expect(actualResponse).toBe(response);
     });
 
+    it('pingHealth sends GET request with expected url', async () => {
+        const requestUrl = `${baseUrl}/health`;
+
+        setupRetryHelperMock();
+        setupSignRequest();
+        getMock
+            .setup((g) => g(requestUrl))
+            .returns(async () => response)
+            .verifiable();
+
+        const actualResponse = await testSubject.pingHealth();
+        expect(actualResponse).toBe(response);
+    });
+
+    it('getHealthReport with releaseId sends GET request with expected url', async () => {
+        const releaseId = 'release id';
+        const requestUrl = `${baseUrl}/health/release/${releaseId}`;
+
+        setupRetryHelperMock();
+        setupSignRequest();
+        getMock
+            .setup((g) => g(requestUrl))
+            .returns(async () => response)
+            .verifiable();
+
+        const actualResponse = await testSubject.getHealthReport(releaseId);
+        expect(actualResponse).toBe(response);
+    });
+
+    it('getHealthReport with releaseId sends GET request with expected url', async () => {
+        const requestUrl = `${baseUrl}/health/release`;
+
+        setupRetryHelperMock();
+        setupSignRequest();
+        getMock
+            .setup((g) => g(requestUrl))
+            .returns(async () => response)
+            .verifiable();
+
+        const actualResponse = await testSubject.getHealthReport();
+        expect(actualResponse).toBe(response);
+    });
+
     function setupRetryHelperMock(): void {
         retryHelperMock
             .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxRetryCount, msecBetweenRetries))

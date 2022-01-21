@@ -115,6 +115,35 @@ export class WebInsightsStorageClient {
         return this.getWebsiteImpl(websiteId, scanType);
     }
 
+    public async pingHealth(): Promise<ResponseWithBodyType> {
+        const requestUrl = `${this.baseUrl}/health`;
+
+        const executeRequest = async () => (await this.signRequest()).get(requestUrl);
+        const onRetry = async (e: Error) =>
+            this.logger.logError('GET health ping REST API request failed. Retrying on error.', {
+                url: requestUrl,
+                error: System.serializeError(e),
+            });
+
+        return this.executeRequestWithRetries(executeRequest, onRetry);
+    }
+
+    public async getHealthReport(releaseId?: string): Promise<ResponseWithBodyType<ApiContracts.HealthReport>> {
+        let requestUrl = `${this.baseUrl}/health/release`;
+        if (releaseId) {
+            requestUrl = `${requestUrl}/${releaseId}`;
+        }
+
+        const executeRequest = async () => (await this.signRequest()).get(requestUrl);
+        const onRetry = async (e: Error) =>
+            this.logger.logError('GET health report REST API request failed. Retrying on error.', {
+                url: requestUrl,
+                error: System.serializeError(e),
+            });
+
+        return this.executeRequestWithRetries<ApiContracts.HealthReport>(executeRequest, onRetry);
+    }
+
     private async getWebsiteImpl(
         websiteId: string,
         scanType: StorageDocuments.ScanType,
