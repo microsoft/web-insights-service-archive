@@ -45,6 +45,10 @@
             "path": "../packages/e2e-test-runner"
         },
         {
+            "health-client",
+            "path": "../packages/health-client"
+        },
+        {
             "name": "root",
             "path": "../"
         }
