@@ -1,0 +1,1193 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dashboardName": {
+            "defaultValue": "[concat('wisdashboard',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "String"
+        },
+        "appInsightsName": {
+            "defaultValue": "[concat('wisappinsights',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "String"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the Azure resources should be deployed."
+            }
+        },
+        "appGatewayName": {
+            "defaultValue": "[concat('wisappgateway',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "String"
+        },
+        "aksClusterName": {
+            "defaultValue": "[concat('wiskube',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "String"
+        },
+        "aksInfraResourceGroupName": {
+            "defaultValue": "[concat('MC_', string(resourceGroup().name), '_wiskube', toLower(uniqueString(resourceGroup().id)), '_', string(resourceGroup().location))]",
+            "type": "String"
+        }
+    },
+    "variables": {
+        "appInsightsResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]",
+        "appGatewayResourceId": "[resourceId(parameters('aksInfraResourceGroupName'), 'Microsoft.Network/applicationGateways/', parameters('appGatewayName'))]",
+        "aksClusterResourceId": "[resourceId('Microsoft.ContainerService/managedClusters/', parameters('aksClusterName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Portal/dashboards",
+            "apiVersion": "2020-09-01-preview",
+            "name": "[parameters('dashboardName')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "hidden-title": "[parameters('dashboardName')]"
+            },
+            "properties": {
+                "lenses": [
+                    {
+                        "order": 0,
+                        "parts": [
+                            {
+                                "position": {
+                                    "x": 0,
+                                    "y": 0,
+                                    "colSpan": 7,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "availabilityResults/availabilityPercentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.insights/components",
+                                                            "metricVisualization": {
+                                                                "displayName": "Availability",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]",
+                                                                "color": "#54A300"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Availability",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "axisVisualization": {
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "min": 0,
+                                                                "max": 100
+                                                            },
+                                                            "x": {
+                                                                "isVisible": true
+                                                            }
+                                                        }
+                                                    },
+                                                    "openBladeOnClick": {
+                                                        "openBlade": true,
+                                                        "destinationBlade": {
+                                                            "bladeName": "ResourceMenuBlade",
+                                                            "parameters": {
+                                                                "id": "[variables('appInsightsResourceId')]",
+                                                                "menuid": "availability"
+                                                            },
+                                                            "extensionName": "HubsExtension",
+                                                            "options": {
+                                                                "parameters": {
+                                                                    "id": "[variables('appInsightsResourceId')]",
+                                                                    "menuid": "availability"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "availabilityResults/availabilityPercentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.insights/components",
+                                                            "metricVisualization": {
+                                                                "displayName": "Availability",
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]",
+                                                                "color": "#54A300"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Availability",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "axisVisualization": {
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "min": 0,
+                                                                "max": 100
+                                                            },
+                                                            "x": {
+                                                                "isVisible": true
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    },
+                                                    "openBladeOnClick": {
+                                                        "openBlade": true,
+                                                        "destinationBlade": {
+                                                            "bladeName": "ResourceMenuBlade",
+                                                            "parameters": {
+                                                                "id": "[variables('appInsightsResourceId')]",
+                                                                "menuid": "availability"
+                                                            },
+                                                            "extensionName": "HubsExtension",
+                                                            "options": {
+                                                                "parameters": {
+                                                                    "id": "[variables('appInsightsResourceId')]",
+                                                                    "menuid": "availability"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "filters": {
+                                        "MsPortalFx_TimeRange": {
+                                            "model": {
+                                                "format": "local",
+                                                "granularity": "auto",
+                                                "relative": "60m"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 7,
+                                    "y": 0,
+                                    "colSpan": 5,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "ComponentId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Scope",
+                                            "value": {
+                                                "resourceIds": ["[variables('appInsightsResourceId')]"]
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "14ea91fa-10db-454e-85c1-03f7c129107c",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "2.0",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "value": "P1D",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DraftRequestParameters",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "requests\n| summarize\n    failedRequests = countif(substring(resultCode, 0, 1) == '5'),\n    totalRequests=count()\n| extend reliability= strcat(toint((totalRequests - failedRequests) / todecimal(totalRequests) * 100 * 1000) / todecimal(1000), \"%\")\n\n",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "Reliability",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "Service reliability",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "LegendOptions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "IsQueryContainTimeRange",
+                                            "value": false,
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+                                    "settings": {}
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 0,
+                                    "y": 5,
+                                    "colSpan": 12,
+                                    "rowSpan": 5
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "ComponentId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Scope",
+                                            "value": {
+                                                "resourceIds": ["[variables('appInsightsResourceId')]"]
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "450c8cd5-79e0-4c6f-b45f-bc41014775ea",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "2.0",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "value": "P1D",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DraftRequestParameters",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "let functionalTestEvents = customEvents\n    | where name == \"FunctionalTest\";\nlet lastCompletedRun = functionalTestEvents\n    | where customDimensions.testContainer == \"FinalizerTestGroup\"\n    | top 1 by timestamp desc nulls last\n    | project runId = customDimensions.runId, releaseId = tostring(customDimensions.releaseId), key=1;\nlet lastStartedRun = functionalTestEvents\n    | top 1 by timestamp desc nulls last\n    | project runId = customDimensions.runId, releaseId = tostring(customDimensions.releaseId), key=1;\nlet runId = toscalar(lastCompletedRun\n    | join kind=fullouter lastStartedRun on key\n    | project value = tostring(iff(isnotnull(releaseId) and releaseId == releaseId1, runId, runId1)));\nlet relevantTestEvents = functionalTestEvents\n    | where customDimensions.runId == runId;\nlet completeTestRuns = relevantTestEvents\n    | where customDimensions.logSource == \"TestRun\"\n    | project scenarioName = tostring (customDimensions.scenarioName), testContainerName = tostring(customDimensions.testContainer), testName = tostring(customDimensions.testName), result = tostring(customDimensions.result), releaseId = customDimensions.releaseId, timestamp;\nlet completeTestContainers = relevantTestEvents\n    | where customDimensions.logSource == \"TestContainer\"\n    | project testContainerName = tostring(customDimensions.testContainer), scenarioName = tostring(customDimensions.scenarioName);\nlet testContainerNames = functionalTestEvents\n    | where customDimensions.source == \"BeginTestSuite\"\n    | top 1 by timestamp\n    | project testInfo = parse_json(tostring(customDimensions.functionalTestGroups))\n    | mv-expand testInfo\n    | project testContainerName = tostring(testInfo.testGroupName), scenarioName = tostring(testInfo.scenarioName);\ntestContainerNames\n| project scenarioName, testContainerName, testName = \"Additional tests\", result = \"incomplete\"\n| join kind=leftanti completeTestContainers on testContainerName, scenarioName\n| union completeTestRuns\n| where testContainerName != \"FinalizerTestGroup\"\n| sort by scenarioName, testContainerName\n\n",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "End-to-end test results",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "Results for most recent run of e2e test suite",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "LegendOptions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "IsQueryContainTimeRange",
+                                            "value": false,
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+                                    "settings": {
+                                        "content": {
+                                            "PartTitle": "End-to-end test results"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 12,
+                                    "y": 5,
+                                    "colSpan": 6,
+                                    "rowSpan": 5
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "customEvents/count",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "metricVisualization": {
+                                                                "displayName": "Events"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "End-to-end test results over time",
+                                                    "titleKind": 1,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "filterCollection": {
+                                                        "filters": [
+                                                            {
+                                                                "key": "customEvent/name",
+                                                                "operator": 0,
+                                                                "values": ["FunctionalTest"]
+                                                            }
+                                                        ]
+                                                    },
+                                                    "grouping": {
+                                                        "dimension": "customDimensions/result",
+                                                        "sort": 2,
+                                                        "top": 10
+                                                    },
+                                                    "timespan": {
+                                                        "relative": {
+                                                            "duration": 86400000
+                                                        },
+                                                        "showUTCTime": false,
+                                                        "grain": 1
+                                                    }
+                                                }
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "customEvents/count",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "metricVisualization": {
+                                                                "displayName": "Events"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "End-to-end test results over time",
+                                                    "titleKind": 1,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    },
+                                                    "grouping": {
+                                                        "dimension": "customDimensions/result",
+                                                        "sort": 2,
+                                                        "top": 10
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "filters": {
+                                        "customEvent/name": {
+                                            "model": {
+                                                "operator": "equals",
+                                                "values": ["FunctionalTest"]
+                                            }
+                                        },
+                                        "MsPortalFx_TimeRange": {
+                                            "model": {
+                                                "format": "local",
+                                                "granularity": "auto",
+                                                "relative": "1440m"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 0,
+                                    "y": 16,
+                                    "colSpan": 6,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appGatewayResourceId')]"
+                                                            },
+                                                            "name": "TotalRequests",
+                                                            "aggregationType": 1,
+                                                            "metricVisualization": {
+                                                                "resourceDisplayName": "[parameters('appGatewayName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Requests to application gateway",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2
+                                                    },
+                                                    "openBladeOnClick": {
+                                                        "openBlade": true
+                                                    }
+                                                }
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appGatewayResourceId')]"
+                                                            },
+                                                            "name": "TotalRequests",
+                                                            "aggregationType": 1,
+                                                            "metricVisualization": {
+                                                                "resourceDisplayName": "[parameters('appGatewayName')]"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "/subscriptions/7bb42229-b02f-47cb-bd95-a115b9c5b775/resourceGroups/MC_kepowneltest2_wiskubemyzbjbtbxnco6_eastus/providers/microsoft.network/applicationgateways/wisappgatewaymyzbjbtbxnco6"
+                                                            },
+                                                            "name": "FailedRequests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.network/applicationgateways",
+                                                            "metricVisualization": {
+                                                                "displayName": "Failed Requests",
+                                                                "resourceDisplayName": "[parameters('appGatewayName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Requests to application gateway",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "disablePinning": true
+                                                    },
+                                                    "openBladeOnClick": {
+                                                        "openBlade": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "filters": {
+                                        "MsPortalFx_TimeRange": {
+                                            "model": {
+                                                "format": "local",
+                                                "granularity": "auto",
+                                                "relative": "60m"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 6,
+                                    "y": 16,
+                                    "colSpan": 6,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appGatewayResourceId')]"
+                                                            },
+                                                            "name": "ResponseStatus",
+                                                            "aggregationType": 1,
+                                                            "metricVisualization": {
+                                                                "displayName": "Response Status",
+                                                                "resourceDisplayName": "[parameters('appGatewayName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Response status codes",
+                                                    "titleKind": 2,
+                                                    "grouping": {
+                                                        "dimension": "HttpStatusGroup"
+                                                    },
+                                                    "visualization": {
+                                                        "chartType": 2
+                                                    },
+                                                    "openBladeOnClick": {
+                                                        "openBlade": true
+                                                    }
+                                                }
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appGatewayResourceId')]"
+                                                            },
+                                                            "name": "ResponseStatus",
+                                                            "aggregationType": 1,
+                                                            "metricVisualization": {
+                                                                "displayName": "Response Status",
+                                                                "resourceDisplayName": "[parameters('appGatewayName')]"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Response status codes",
+                                                    "titleKind": 2,
+                                                    "grouping": {
+                                                        "dimension": "HttpStatusGroup"
+                                                    },
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "disablePinning": true
+                                                    },
+                                                    "openBladeOnClick": {
+                                                        "openBlade": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "filters": {
+                                        "MsPortalFx_TimeRange": {
+                                            "model": {
+                                                "format": "local",
+                                                "granularity": "auto",
+                                                "relative": "60m"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 0,
+                                    "y": 11,
+                                    "colSpan": 6,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "kube_node_status_condition",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Statuses for various node conditions"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Kubernetes node status conditions",
+                                                    "titleKind": 1,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "grouping": {
+                                                        "dimension": "status2",
+                                                        "sort": 2,
+                                                        "top": 10
+                                                    },
+                                                    "timespan": {
+                                                        "relative": {
+                                                            "duration": 86400000
+                                                        },
+                                                        "showUTCTime": false,
+                                                        "grain": 1
+                                                    }
+                                                }
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "kube_node_status_condition",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Statuses for various node conditions"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Kubernetes node status conditions",
+                                                    "titleKind": 1,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    },
+                                                    "grouping": {
+                                                        "dimension": "status2",
+                                                        "sort": 2,
+                                                        "top": 10
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "filters": {
+                                        "MsPortalFx_TimeRange": {
+                                            "model": {
+                                                "format": "local",
+                                                "granularity": "auto",
+                                                "relative": "1440m"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 6,
+                                    "y": 11,
+                                    "colSpan": 6,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_cpu_usage_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "CPU Usage Percentage"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_memory_working_set_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Memory Working Set Percentage"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_memory_rss_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Memory RSS Percentage"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_disk_usage_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Disk Used Percentage"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Cluster resource usage",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "timespan": {
+                                                        "relative": {
+                                                            "duration": 86400000
+                                                        },
+                                                        "showUTCTime": false,
+                                                        "grain": 1
+                                                    }
+                                                }
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_cpu_usage_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "CPU Usage Percentage"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_memory_working_set_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Memory Working Set Percentage"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_memory_rss_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Memory RSS Percentage"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_disk_usage_percentage",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Disk Used Percentage"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Cluster resource usage",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "filters": {
+                                        "MsPortalFx_TimeRange": {
+                                            "model": {
+                                                "format": "local",
+                                                "granularity": "auto",
+                                                "relative": "1440m"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "position": {
+                                    "x": 12,
+                                    "y": 11,
+                                    "colSpan": 6,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_network_in_bytes",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Network In Bytes"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_network_out_bytes",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Network Out Bytes"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Cluster network traffic",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "timespan": {
+                                                        "relative": {
+                                                            "duration": 86400000
+                                                        },
+                                                        "showUTCTime": false,
+                                                        "grain": 1
+                                                    }
+                                                }
+                                            },
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_network_in_bytes",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Network In Bytes"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('aksClusterResourceId')]"
+                                                            },
+                                                            "name": "node_network_out_bytes",
+                                                            "aggregationType": 4,
+                                                            "namespace": "microsoft.containerservice/managedclusters",
+                                                            "metricVisualization": {
+                                                                "displayName": "Network Out Bytes"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "Cluster network traffic",
+                                                    "titleKind": 2,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        },
+                                                        "disablePinning": true
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "filters": {
+                                        "MsPortalFx_TimeRange": {
+                                            "model": {
+                                                "format": "local",
+                                                "granularity": "auto",
+                                                "relative": "1440m"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "metadata": {
+                    "model": {
+                        "timeRange": {
+                            "value": {
+                                "relative": {
+                                    "duration": 24,
+                                    "timeUnit": 1
+                                }
+                            },
+                            "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+                        },
+                        "filterLocale": {
+                            "value": "en-us"
+                        },
+                        "filters": {
+                            "value": {
+                                "MsPortalFx_TimeRange": {
+                                    "model": {
+                                        "format": "utc",
+                                        "granularity": "auto",
+                                        "relative": "24h"
+                                    },
+                                    "displayCache": {
+                                        "name": "UTC Time",
+                                        "value": "Past 24 hours"
+                                    },
+                                    "filteredPartIds": [
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-262337220009",
+                                        "StartboardPart-LogsDashboardPart-9d36a3e1-e31c-402c-b3b5-26233722000b",
+                                        "StartboardPart-LogsDashboardPart-9d36a3e1-e31c-402c-b3b5-26233722000d",
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-26233722000f",
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-262337220011",
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-262337220013",
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-262337220015",
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-262337220017",
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-262337220019",
+                                        "StartboardPart-MonitorChartPart-9d36a3e1-e31c-402c-b3b5-26233722001b"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
