@@ -115,6 +115,7 @@ install() {
     . "${0%/*}/create-key-vault-private-link.sh"
     . "${0%/*}/create-cosmos-db-private-link.sh"
 
+    # shellcheck disable=SC2034
     parallelProcesses=(
         "${0%/*}/restart-kubernetes-services.sh"
         "${0%/*}/create-dashboard.sh"
