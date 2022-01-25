@@ -9,16 +9,16 @@ import * as yargs from 'yargs';
 import _ from 'lodash';
 import { WebInsightsAPICredential, WebInsightsStorageClient } from 'storage-api-client';
 import { DeploymentHealthChecker } from './deployment-health-checker';
-import { getAuthorityUrl, getFrontendDns } from './get-values-for-resource-group';
 
 type Argv = {
     clientId: string;
     clientSecret: string;
     resourceId: string;
+    authorityUrl: string;
     waitTimeBeforeEvaluationInMinutes: string;
     evaluationIntervalInMinutes: string;
     releaseId: string;
-    resourceGroup: string;
+    frontendDns: string;
 };
 
 const testTimeoutInMinutes = 75;
@@ -29,26 +29,8 @@ const argv: Argv = yargs.argv as any;
     const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
     await logger.setup();
 
-    let authorityUrl: string;
-    let frontendDns: string;
-    try {
-        authorityUrl = await getAuthorityUrl();
-    } catch (e) {
-        logger.logError(`Failed to get authority url: ${JSON.stringify(e)}`);
-
-        return;
-    }
-
-    try {
-        frontendDns = await getFrontendDns(argv.resourceGroup);
-    } catch (e) {
-        logger.logError(`Failed to get frontend DNS: ${JSON.stringify(e)}`);
-
-        return;
-    }
-
-    const baseUrl = `https://${frontendDns}/storage/api`;
-    const serviceCredential = new WebInsightsAPICredential(argv.clientId, argv.clientSecret, authorityUrl, argv.resourceId, logger);
+    const baseUrl = `https://${argv.frontendDns}/storage/api`;
+    const serviceCredential = new WebInsightsAPICredential(argv.clientId, argv.clientSecret, argv.authorityUrl, argv.resourceId, logger);
     const client = new WebInsightsStorageClient(baseUrl, serviceCredential, logger);
 
     const waitTimeBeforeEvaluationInMinutes = parseInt(argv.waitTimeBeforeEvaluationInMinutes, 10);
