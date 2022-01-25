@@ -11,7 +11,6 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs'],
         entry: {
             ['health-checker']: path.resolve('./src/health-checker.ts'),
         },
