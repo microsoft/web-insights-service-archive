@@ -22,7 +22,7 @@
         "@types/jest": "^27.0.3",
         "@types/lodash": "^4.14.177",
         "@types/node": "^12.20.37",
-        "fork-ts-checker-webpack-plugin": "^6.5.0",
+        "fork-ts-checker-webpack-plugin": "^7.0.0",
         "jest": "^27.4.5",
         "jest-junit": "^13.0.0",
         "node-loader": "^2.0.0",
