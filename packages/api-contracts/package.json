@@ -31,7 +31,7 @@
         "ts-transformer-keys": "^0.4.3",
         "ttypescript": "^1.5.13",
         "typemoq": "^2.1.0",
-        "typescript": "^4.5.4"
+        "typescript": "^4.5.5"
     },
     "dependencies": {
         "common": "1.0.0",
