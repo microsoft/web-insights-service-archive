@@ -12,6 +12,7 @@
         "cbuild": "npx syncpack fix-mismatches format --indent \"    \" && yarn install && npx lerna run cbuild --stream",
         "build": "npx lerna run build --stream",
         "test": "npx jest",
+        "test:nc": "npx jest --collectCoverage=false",
         "publish-code-coverage": "npx codecov",
         "lint:check": "npx lerna run lint --stream && npx shellcheck --source-path=./packages/resource-deployment/scripts/ ./packages/resource-deployment/scripts/*.sh",
         "lint:fix": "npx lerna run lint:fix --stream",
@@ -70,7 +71,7 @@
     "resolutions": {
         "axe-core": "4.2.1",
         "normalize-url": "6.1.0",
-        "@sindresorhus/fnv1a": "2.0.1",
+        "@sindresorhus/fnv1a": "^2.0.1",
         "ansi-regex": "^5.0.1",
         "apify-shared": ">=0.5.0",
         "axios": ">=0.21.2",

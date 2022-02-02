@@ -24,16 +24,16 @@
     "devDependencies": {
         "@types/convict": "^6.0.2",
         "@types/jest": "^27.4.0",
-        "@types/node": "^12.20.41",
+        "@types/node": "^12.20.43",
         "@types/normalize-path": "^3.0.0",
         "@types/sha.js": "^2.4.0",
         "@types/wtfnode": "^0.7.0",
-        "jest": "^27.4.5",
+        "jest": "^27.4.7",
         "jest-junit": "^13.0.0",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.1.2",
         "typemoq": "^2.1.0",
-        "typescript": "^4.5.4"
+        "typescript": "^4.5.5"
     },
     "dependencies": {
         "@sindresorhus/fnv1a": "^2.0.1",
