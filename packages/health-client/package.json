@@ -3,10 +3,10 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js",
+        "build": "webpack --config ./webpack.config.js && cpy \"./scripts/**\" \"./dist\" --parents",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
-        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
+        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./ && npx shellcheck --source-path=./scripts/ ./scripts/*.sh",
         "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors"
     },
@@ -41,8 +41,8 @@
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "logger": "1.0.0",
-        "storage-api-client": "1.0.0",
         "reflect-metadata": "^0.1.13",
+        "storage-api-client": "1.0.0",
         "yargs": "^17.3.0"
     }
 }
