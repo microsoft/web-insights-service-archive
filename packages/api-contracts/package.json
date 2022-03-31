@@ -23,7 +23,7 @@
     "homepage": "https://github.com/Microsoft/web-insights-service#readme",
     "devDependencies": {
         "@types/jest": "^27.4.1",
-        "@types/node": "^12.20.43",
+        "@types/node": "^12.20.46",
         "jest": "^27.4.7",
         "jest-junit": "^13.0.0",
         "rimraf": "^3.0.2",
