@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js && cpy \"./scripts/**\" \"./dist\" --parents",
+        "build": "webpack --config ./webpack.config.js && cpy \"./scripts\" \"./dist\"",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./ && npx shellcheck --source-path=./scripts/ ./scripts/*.sh",
@@ -22,6 +22,7 @@
         "@types/jest": "^27.4.0",
         "@types/lodash": "^4.14.177",
         "@types/node": "^12.20.43",
+        "cpy-cli": "^4.0.0",
         "fork-ts-checker-webpack-plugin": "^7.0.0",
         "jest": "^27.4.7",
         "jest-junit": "^13.0.0",
