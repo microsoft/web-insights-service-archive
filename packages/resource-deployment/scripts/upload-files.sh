@@ -33,7 +33,7 @@ uploadFolderContents() {
     storageAccountName=$3
     local includePattern="*[!*.map]"
 
-    az storage blob upload-batch --account-name "${storageAccountName}" --destination "${destinationContainer}" --source "${pathToSource}" --pattern "${includePattern}" 1>/dev/null
+    az storage blob upload-batch --account-name "${storageAccountName}" --destination "${destinationContainer}" --source "${pathToSource}" --pattern "${includePattern}" --overwrite=true 1>/dev/null
 }
 
 exitWithUsageInfo() {
