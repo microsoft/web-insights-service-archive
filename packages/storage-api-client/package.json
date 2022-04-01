@@ -35,7 +35,7 @@
     },
     "dependencies": {
         "@azure/msal-common": "^6.0.0",
-        "@azure/msal-node": "^1.4.0",
+        "@azure/msal-node": "^1.7.0",
         "api-contracts": "1.0.0",
         "azure-services": "1.0.0",
         "common": "1.0.0",
