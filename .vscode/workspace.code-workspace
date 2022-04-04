@@ -1,52 +1,52 @@
 {
     "folders": [
         {
-            "name": "service-library",
-            "path": "../packages/service-library"
+            "name": "api-contracts",
+            "path": "../packages/api-contracts",
         },
         {
             "name": "azure-services",
-            "path": "../packages/azure-services"
-        },
-        {
-            "name": "storage-documents",
-            "path": "../packages/storage-documents"
-        },
-        {
-            "name": "storage-web-api",
-            "path": "../packages/storage-web-api"
-        },
-        {
-            "name": "resource-deployment",
-            "path": "../packages/resource-deployment"
-        },
-        {
-            "name": "api-contracts",
-            "path": "../packages/api-contracts"
-        },
-        {
-            "name": "logger",
-            "path": "../packages/logger"
+            "path": "../packages/azure-services",
         },
         {
             "name": "common",
-            "path": "../packages/common"
+            "path": "../packages/common",
         },
         {
-            "integration-tests",
-            "path": "../packages/integration-tests"
+            "name": "e2e-test-runner",
+            "path": "../packages/e2e-test-runner",
         },
         {
-            "storage-api-client",
-            "path": "../packages/storage-api-client"
+            "name": "health-client",
+            "path": "../packages/health-client",
         },
         {
-            "e2e-test-runner",
-            "path": "../packages/e2e-test-runner"
+            "name": "integration-tests",
+            "path": "../packages/integration-tests",
         },
         {
-            "health-client",
-            "path": "../packages/health-client"
+            "name": "logger",
+            "path": "../packages/logger",
+        },
+        {
+            "name": "resource-deployment",
+            "path": "../packages/resource-deployment",
+        },
+        {
+            "name": "service-library",
+            "path": "../packages/service-library",
+        },
+        {
+            "name": "storage-documents",
+            "path": "../packages/storage-documents",
+        },
+        {
+            "name": "storage-api-client",
+            "path": "../packages/storage-api-client",
+        },
+        {
+            "name": "storage-web-api",
+            "path": "../packages/storage-web-api",
         },
         {
             "name": "root",
@@ -55,6 +55,18 @@
     ],
     "settings": {
         "editor.formatOnSave": true,
+        "[javascript]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },        
+        "[typescript]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },        
+        "[json]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },        
+        "[jsonc]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,

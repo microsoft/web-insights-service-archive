@@ -37,12 +37,12 @@
         "@azure/msal-common": "^6.0.0",
         "@azure/msal-node": "^1.4.0",
         "api-contracts": "1.0.0",
-        "azure-services": "1.0.0",
-        "common": "1.0.0",
+        "azure-services": "workspace:*",
+        "common": "workspace:*",
         "got": "^11.8.3",
         "inversify": "^6.0.1",
-        "logger": "1.0.0",
+        "logger": "workspace:*",
         "reflect-metadata": "^0.1.13",
-        "storage-documents": "1.0.0"
+        "storage-documents": "workspace:*"
     }
 }

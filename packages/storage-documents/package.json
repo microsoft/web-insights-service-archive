@@ -27,13 +27,13 @@
         "jest": "^27.4.7",
         "jest-junit": "^13.0.0",
         "rimraf": "^3.0.2",
-        "ts-transformer-keys": "^0.4.3",
         "ts-jest": "^27.1.2",
+        "ts-transformer-keys": "^0.4.3",
         "typemoq": "^2.1.0",
         "typescript": "^4.5.5"
     },
     "dependencies": {
-        "common": "1.0.0",
+        "common": "workspace:*",
         "inversify": "^6.0.1",
         "reflect-metadata": "^0.1.13"
     }

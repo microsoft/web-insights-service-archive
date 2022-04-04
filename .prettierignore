@@ -33,3 +33,4 @@ dist/
 **/*.ps1
 **/*.tpl
 **/*.yaml
+.yarn/
