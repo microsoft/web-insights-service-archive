@@ -7,5 +7,5 @@ steps:
       displayName: Use node 12.x
 
     - script: |
-          yarn install --frozen-lockfile
+          yarn install --immutable
       displayName: Install dependencies
