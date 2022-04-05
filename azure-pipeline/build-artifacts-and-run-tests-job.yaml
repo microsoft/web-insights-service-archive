@@ -12,6 +12,10 @@ steps:
       displayName: Check copyright headers
 
     - script: |
+          yarn syncpack:check
+      displayName: Check for package versions
+
+    - script: |
           yarn lint:check
       displayName: Run linter
 

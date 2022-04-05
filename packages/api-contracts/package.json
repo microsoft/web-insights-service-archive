@@ -26,6 +26,7 @@
         "@types/node": "^12.20.43",
         "jest": "^27.4.7",
         "jest-junit": "^13.0.0",
+        "npm-run-all": "^4.1.5",
         "rimraf": "^3.0.2",
         "ts-jest": "^27.1.2",
         "ts-transformer-keys": "^0.4.3",
@@ -34,9 +35,9 @@
         "typescript": "^4.5.5"
     },
     "dependencies": {
-        "common": "1.0.0",
+        "common": "workspace:*",
         "reflect-metadata": "^0.1.13",
-        "storage-documents": "1.0.0",
+        "storage-documents": "workspace:*",
         "ttypescript": "^1.5.13",
         "typescript-is": "^0.19.0"
     }

@@ -5,10 +5,7 @@ const path = require('path');
 const webpack = require('webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
-module.exports = (env) => {
-    const version = env ? env.version : 'dev';
-    console.log(`Building for version : ${version}`);
-
+module.exports = () => {
     return {
         devtool: 'cheap-source-map',
         entry: {
@@ -61,13 +58,7 @@ module.exports = (env) => {
             filename: '[name].js',
             libraryTarget: 'commonjs2',
         },
-        plugins: [
-            new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true }),
-            new webpack.DefinePlugin({
-                __IMAGE_VERSION__: JSON.stringify(version),
-            }),
-            new ForkTsCheckerWebpackPlugin(),
-        ],
+        plugins: [new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true }), new ForkTsCheckerWebpackPlugin()],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
             mainFields: ['main'], //This is fix for this issue https://www.gitmemory.com/issue/bitinn/node-fetch/450/494475397
