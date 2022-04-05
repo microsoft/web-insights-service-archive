@@ -35,7 +35,7 @@
     },
     "dependencies": {
         "@azure/msal-common": "^6.0.0",
-        "@azure/msal-node": "^1.4.0",
+        "@azure/msal-node": "^1.8.0",
         "api-contracts": "1.0.0",
         "azure-services": "workspace:*",
         "common": "workspace:*",
