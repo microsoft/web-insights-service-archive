@@ -3796,6 +3796,7 @@ __metadata:
     common: "workspace:*"
     jest: ^27.4.7
     jest-junit: ^13.0.0
+    npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     storage-documents: "workspace:*"
@@ -4929,6 +4930,7 @@ __metadata:
     jest-junit: ^13.0.0
     lodash: ^4.17.21
     normalize-path: ^3.0.0
+    npm-run-all: ^4.1.5
     raw-body: ^2.4.2
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
@@ -6941,6 +6943,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     node-loader: ^2.0.0
+    npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     shebang-loader: ^0.0.1
@@ -7232,6 +7235,7 @@ __metadata:
     api-contracts: 1.0.0
     jest: ^27.4.7
     jest-junit: ^13.0.0
+    npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     storage-documents: "workspace:*"
@@ -8873,6 +8877,7 @@ __metadata:
     jest-junit: ^13.0.0
     lodash: ^4.17.21
     moment: ^2.29.1
+    npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     ts-jest: ^27.1.2
@@ -10709,6 +10714,7 @@ __metadata:
   resolution: "resource-deployment@workspace:packages/resource-deployment"
   dependencies:
     cpy-cli: ^4.1.0
+    npm-run-all: ^4.1.5
     rimraf: ^3.0.2
   languageName: unknown
   linkType: soft
@@ -10996,6 +11002,7 @@ __metadata:
     jest-junit: ^13.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
+    npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     storage-documents: "workspace:*"
@@ -11385,6 +11392,7 @@ __metadata:
     inversify: ^6.0.1
     jest: ^27.4.7
     jest-junit: ^13.0.0
+    npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
     ts-jest: ^27.1.2
