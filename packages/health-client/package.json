@@ -3,10 +3,10 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js && cpy \"./scripts/**\" \"./dist\" --parents",
+        "build": "webpack --config ./webpack.config.js \"$@\" && cpy \"./scripts/\" \"./dist\"",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
-        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./ && npx shellcheck --source-path=./scripts/ ./scripts/*.sh",
+        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
         "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors"
     },
@@ -22,27 +22,29 @@
         "@types/jest": "^27.4.0",
         "@types/lodash": "^4.14.177",
         "@types/node": "^12.20.43",
+        "cpy-cli": "^4.1.0",
         "fork-ts-checker-webpack-plugin": "^7.0.0",
         "jest": "^27.4.7",
         "jest-junit": "^13.0.0",
         "node-loader": "^2.0.0",
+        "npm-run-all": "^4.1.5",
         "rimraf": "^3.0.2",
+        "shebang-loader": "^0.0.1",
         "ts-jest": "^27.1.2",
         "ts-loader": "^9.2.6",
         "typemoq": "^2.1.0",
         "typescript": "^4.5.5",
-        "shebang-loader": "^0.0.1",
         "webpack": "^5.68.0",
         "webpack-cli": "^4.9.2"
     },
     "dependencies": {
         "api-contracts": "1.0.0",
-        "common": "1.0.0",
+        "common": "workspace:*",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
-        "logger": "1.0.0",
+        "logger": "workspace:*",
         "reflect-metadata": "^0.1.13",
-        "storage-api-client": "1.0.0",
-        "yargs": "^17.3.0"
+        "storage-api-client": "workspace:*",
+        "yargs": "^17.4.0"
     }
 }
