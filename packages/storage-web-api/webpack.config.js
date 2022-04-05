@@ -2,17 +2,10 @@
 // Licensed under the MIT License.
 
 const path = require('path');
-const webpack = require('webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = (env) => {
-    let version = 'dev';
-    if (env && env.version) {
-        version = env.version;
-    }
-    console.log(`Building for version : ${version}`);
-
+module.exports = () => {
     return {
         devtool: 'cheap-source-map',
         externals: ['@azure/functions'],
@@ -60,9 +53,6 @@ module.exports = (env) => {
             libraryTarget: 'commonjs2',
         },
         plugins: [
-            new webpack.DefinePlugin({
-                __IMAGE_VERSION__: JSON.stringify(version),
-            }),
             new ForkTsCheckerWebpackPlugin(),
             new copyWebpackPlugin({
                 patterns: [
@@ -77,11 +67,6 @@ module.exports = (env) => {
                         from: 'host.json',
                         to: '',
                         globOptions: { ignore: ['dist/**'] },
-                    },
-                    {
-                        context: '../resource-deployment/runtime-config',
-                        from: `runtime-config.${version}.json`, // production config is copied by external deployment script
-                        to: 'runtime-config.json',
                     },
                     {
                         context: './docker-image-config',
