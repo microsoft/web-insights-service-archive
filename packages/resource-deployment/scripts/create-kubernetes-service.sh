@@ -105,7 +105,7 @@ az aks create --resource-group "${resourceGroupName}" --name "${kubernetesServic
     --zones 1 2 3 \
     --enable-addons monitoring,ingress-appgw \
     --workspace-resource-id "/subscriptions/${subscription}/resourcegroups/${resourceGroupName}/providers/microsoft.operationalinsights/workspaces/${monitorWorkspace}" \
-    --kubernetes-version 1.19.11 \
+    --kubernetes-version 1.23.3 \
     1>/dev/null
 echo ""
 
