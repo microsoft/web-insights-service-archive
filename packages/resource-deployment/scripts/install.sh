@@ -111,14 +111,14 @@ install() {
 
     . "${0%/*}/create-public-network.sh"
     . "${0%/*}/install-storage-web-api.sh"
-    . "${0%/*}/install-e2e-test-job.sh"
-    . "${0%/*}/create-key-vault-private-link.sh"
-    . "${0%/*}/create-cosmos-db-private-link.sh"
+    # . "${0%/*}/install-e2e-test-job.sh"
+    # . "${0%/*}/create-key-vault-private-link.sh"
+    # . "${0%/*}/create-cosmos-db-private-link.sh"
 
     # shellcheck disable=SC2034
     parallelProcesses=(
         "${0%/*}/restart-kubernetes-services.sh"
-        "${0%/*}/create-dashboard.sh"
+        # "${0%/*}/create-dashboard.sh"
     )
     waitForCommandsInParallel parallelProcesses
 
