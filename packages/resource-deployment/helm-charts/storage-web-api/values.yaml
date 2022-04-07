@@ -41,7 +41,7 @@ ingress:
   hosts:
     - paths:
         - path: /storage/*
-          pathType: Exact
+          pathType: Prefix
   tls:
     - hosts:
         - ''
