@@ -158,6 +158,8 @@ pushSecretsToKeyVault() (
     pushSecretToKeyVault "restApiClientId" "${webApiAdClientId}"
     pushSecretToKeyVault "restApiClientSecret" "${webApiAdClientSecret}"
     pushSecretToKeyVault "restApiResourceId" "${webApiAdResourceId}"
+    pushSecretToKeyVault "aclApiReadAll" "{\"audience\": \"api://${webApiAdResourceId}\", \"appIds\": [\"${webApiAdClientId}\"]}"
+    pushSecretToKeyVault "aclApiWriteAll" "{\"audience\": \"api://${webApiAdResourceId}\", \"appIds\": [\"${webApiAdClientId}\"]}"
 )
 
 # Read script arguments
