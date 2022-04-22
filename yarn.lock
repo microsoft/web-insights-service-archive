@@ -2716,12 +2716,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/convict@npm:^6.0.2":
-  version: 6.0.2
-  resolution: "@types/convict@npm:6.0.2"
+"@types/convict@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "@types/convict@npm:6.1.1"
   dependencies:
     "@types/node": "*"
-  checksum: 5441f683fc6ee39c8e7be6712db832215094a5be35cf637d2e527ce6208a0d9d2a50b13c2973ebe8dd561e000d1ec9c624dbda44dd4b69b97bbbef3861bb09f1
+  checksum: 0150048098eec1ff0df5d04e77fd44ff0fa8e732cc5d5e43a2fe603b2d3f05c9f1e369977a109844b8b449b096818c017737b166ccb52b569161642d884e17d2
   languageName: node
   linkType: hard
 
@@ -4070,7 +4070,7 @@ __metadata:
     lodash: ^4.17.21
     logger: "workspace:*"
     mockdate: ^3.0.5
-    moment: ^2.29.1
+    moment: ^2.29.3
     node-cache: ^5.1.2
     npm-run-all: ^4.1.5
     p-limit: ^3.1.0
@@ -4917,13 +4917,13 @@ __metadata:
   resolution: "common@workspace:packages/common"
   dependencies:
     "@sindresorhus/fnv1a": ^2.0.1
-    "@types/convict": ^6.0.2
+    "@types/convict": ^6.1.1
     "@types/jest": ^27.4.0
     "@types/node": ^12.20.43
     "@types/normalize-path": ^3.0.0
     "@types/sha.js": ^2.4.0
     "@types/wtfnode": ^0.7.0
-    convict: ^6.2.1
+    convict: ^6.2.2
     got: ^11.8.3
     inversify: ^6.0.1
     jest: ^27.4.7
@@ -4984,13 +4984,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"convict@npm:^6.2.1":
-  version: 6.2.1
-  resolution: "convict@npm:6.2.1"
+"convict@npm:^6.2.2":
+  version: 6.2.2
+  resolution: "convict@npm:6.2.2"
   dependencies:
     lodash.clonedeep: ^4.5.0
     yargs-parser: ^20.2.7
-  checksum: b363d5844cc044041e95ac01fa245444919c8e9a3114ee6cf61e2c6c5d8318891d2b4b7ecc9d9153829ddba35f4da12274da23ae4ca72623cba741ffb7d099ac
+  checksum: 8f965caa1e90f4ecd35ecf8861d8acb78c6a4a63ef81e79da633e757fde6f2ce0167b72c4864dd4c8e718881f72c1461bdfe1687b3fb9299590b0f10e3e62bc4
   languageName: node
   linkType: hard
 
@@ -8876,7 +8876,7 @@ __metadata:
     jest: ^27.4.7
     jest-junit: ^13.0.0
     lodash: ^4.17.21
-    moment: ^2.29.1
+    moment: ^2.29.3
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
     rimraf: ^3.0.2
@@ -9321,10 +9321,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:^2.29.1":
-  version: 2.29.1
-  resolution: "moment@npm:2.29.1"
-  checksum: 1e14d5f422a2687996be11dd2d50c8de3bd577c4a4ca79ba5d02c397242a933e5b941655de6c8cb90ac18f01cc4127e55b4a12ae3c527a6c0a274e455979345e
+"moment@npm:^2.29.3":
+  version: 2.29.3
+  resolution: "moment@npm:2.29.3"
+  checksum: 2e780e36d9a1823c08a1b6313cbb08bd01ecbb2a9062095820a34f42c878991ccba53abaa6abb103fd5c01e763724f295162a8c50b7e95b4f1c992ef0772d3f0
   languageName: node
   linkType: hard
 
@@ -11136,14 +11136,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-git@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "simple-git@npm:3.1.1"
+"simple-git@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "simple-git@npm:3.7.0"
   dependencies:
     "@kwsites/file-exists": ^1.1.1
     "@kwsites/promise-deferred": ^1.1.1
     debug: ^4.3.3
-  checksum: 5dca144a04a6242029ef05db1f1afd2f9a8fb41371eb1205f3e3c462a20f17a12376f9197dabec19703f395e99e5342fdd97d067f3224106a58389dbe18c7dac
+  checksum: 413050fa1c6e98533d450de508ba62d38701e788d4818da15df153172a441a5f429f36862f3a679185d022a702eb4d893d92fca6e4ada56b0c36b43e4e74c157
   languageName: node
   linkType: hard
 
@@ -11426,7 +11426,7 @@ __metadata:
     jest-junit: ^13.0.0
     lodash: ^4.17.21
     logger: "workspace:*"
-    moment: ^2.29.1
+    moment: ^2.29.3
     node-loader: ^2.0.0
     npm-run-all: ^4.1.5
     reflect-metadata: ^0.1.13
@@ -12548,7 +12548,7 @@ __metadata:
     prettier: 2.5.1
     rimraf: ^3.0.2
     shellcheck: ^1.1.0
-    simple-git: ^3.1.1
+    simple-git: ^3.7.0
     syncpack: ^6.0.0
     ts-jest: ^27.1.2
     tslint: ^6.1.3
