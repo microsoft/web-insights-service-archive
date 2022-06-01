@@ -23,7 +23,7 @@
         "@types/lodash": "^4.14.177",
         "@types/node": "^12.20.43",
         "cpy-cli": "^4.1.0",
-        "fork-ts-checker-webpack-plugin": "^7.0.0",
+        "fork-ts-checker-webpack-plugin": "^7.2.11",
         "jest": "^27.4.7",
         "jest-junit": "^13.0.0",
         "node-loader": "^2.0.0",
