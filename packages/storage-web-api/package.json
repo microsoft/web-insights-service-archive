@@ -51,7 +51,7 @@
         "applicationinsights-native-metrics": "^0.0.6",
         "azure-services": "workspace:*",
         "common": "workspace:*",
-        "cron-parser": "^4.2.1",
+        "cron-parser": "^4.4.0",
         "inversify": "^6.0.1",
         "lodash": "^4.17.21",
         "logger": "workspace:*",
