@@ -45,7 +45,7 @@
         "webpack-cli": "^4.9.2"
     },
     "dependencies": {
-        "@azure/functions": "^3.0.0",
+        "@azure/functions": "^3.2.0",
         "@opentelemetry/tracing": "^0.21.0",
         "api-contracts": "1.0.0",
         "applicationinsights-native-metrics": "^0.0.6",
