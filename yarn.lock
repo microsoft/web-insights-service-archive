@@ -4923,7 +4923,7 @@ __metadata:
     "@types/normalize-path": ^3.0.0
     "@types/sha.js": ^2.4.0
     "@types/wtfnode": ^0.7.0
-    convict: ^6.2.2
+    convict: ^6.2.3
     got: ^11.8.3
     inversify: ^6.0.1
     jest: ^27.4.7
@@ -4984,13 +4984,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"convict@npm:^6.2.2":
-  version: 6.2.2
-  resolution: "convict@npm:6.2.2"
+"convict@npm:^6.2.3":
+  version: 6.2.3
+  resolution: "convict@npm:6.2.3"
   dependencies:
     lodash.clonedeep: ^4.5.0
     yargs-parser: ^20.2.7
-  checksum: 8f965caa1e90f4ecd35ecf8861d8acb78c6a4a63ef81e79da633e757fde6f2ce0167b72c4864dd4c8e718881f72c1461bdfe1687b3fb9299590b0f10e3e62bc4
+  checksum: 69e44ac26405bf4abcc452a95cf5b9f0ef55786cdf19526a83165e2746a93d86187e3705ebf7e7efc8f06e904143acb228ba21604202ec5a937aed0958d49ac7
   languageName: node
   linkType: hard
 
