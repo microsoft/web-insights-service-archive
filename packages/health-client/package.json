@@ -45,6 +45,6 @@
         "logger": "workspace:*",
         "reflect-metadata": "^0.1.13",
         "storage-api-client": "workspace:*",
-        "yargs": "^17.3.0"
+        "yargs": "^17.5.1"
     }
 }
