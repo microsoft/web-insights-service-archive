@@ -3,9 +3,9 @@ Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 -->
 
-# The repository is archived and is nor longe maintained
+# The repository is archived and is no longer maintained
 
-# Web Insights Service
+## Web Insights Service
 
 Web Insights Service is a service that can be used to scan websites for various compliance issues on a periodic basis. It is Node.js/TypeScript project with shell scripts for install and update scenarios.
 

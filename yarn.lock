@@ -4063,7 +4063,7 @@ __metadata:
     common: "workspace:*"
     dotenv: ^15.0.0
     fork-ts-checker-webpack-plugin: ^7.0.0
-    got: ^11.8.3
+    got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.4.7
     jest-junit: ^13.0.0
@@ -4924,7 +4924,7 @@ __metadata:
     "@types/sha.js": ^2.4.0
     "@types/wtfnode": ^0.7.0
     convict: ^6.2.3
-    got: ^11.8.3
+    got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.4.7
     jest-junit: ^13.0.0
@@ -6824,9 +6824,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"got@npm:^11.8.3":
-  version: 11.8.3
-  resolution: "got@npm:11.8.3"
+"got@npm:^11.8.5":
+  version: 11.8.5
+  resolution: "got@npm:11.8.5"
   dependencies:
     "@sindresorhus/is": ^4.0.0
     "@szmarczak/http-timer": ^4.0.5
@@ -6839,7 +6839,7 @@ __metadata:
     lowercase-keys: ^2.0.0
     p-cancelable: ^2.0.0
     responselike: ^2.0.0
-  checksum: 3b6db107d9765470b18e4cb22f7c7400381be7425b9be5823f0168d6c21b5d6b28b023c0b3ee208f73f6638c3ce251948ca9b54a1e8f936d3691139ac202d01b
+  checksum: 2de8a1bbda4e9b6b2b72b2d2100bc055a59adc1740529e631f61feb44a8b9a1f9f8590941ed9da9df0090b6d6d0ed8ffee94cd9ac086ec3409b392b33440f7d2
   languageName: node
   linkType: hard
 
@@ -11086,10 +11086,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shell-quote@npm:^1.6.1":
-  version: 1.7.2
-  resolution: "shell-quote@npm:1.7.2"
-  checksum: efad426fb25d8a54d06363f1f45774aa9e195f62f14fa696d542b44bfe418ab41206448b63af18d726c62e099e66d9a3f4f44858b9ea2ce4b794b41b802672d1
+"shell-quote@npm:>=1.7.3":
+  version: 1.7.3
+  resolution: "shell-quote@npm:1.7.3"
+  checksum: aca58e73a3a5d933d02e0bdddedc53ee14f7c2ec264f97ac915b9d4482d077a38e422aa664631d60a672cd3cdb4054eb2e6c0303f54882453dacb6483e482d34
   languageName: node
   linkType: hard
 
@@ -11367,7 +11367,7 @@ __metadata:
     api-contracts: 1.0.0
     azure-services: "workspace:*"
     common: "workspace:*"
-    got: ^11.8.3
+    got: ^11.8.5
     inversify: ^6.0.1
     jest: ^27.4.7
     jest-junit: ^13.0.0
